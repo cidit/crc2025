@@ -1,0 +1,11 @@
+strap: # les valeurs sont un diametres des gears
+    moteur: 77
+    out: 144
+    # ratio: about 1.87:1
+roue:
+    moteur: 40
+    grande_roue: 40
+    bevel: # les suivants sont des nombres de dents
+        petit: 15
+        grand: 45
+        # ratio: 3:1
