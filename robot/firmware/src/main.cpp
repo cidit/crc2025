@@ -24,6 +24,13 @@ void setup()
      */
 }
 
+/**
+ * 
+*/
+typedef struct gear_ratio_set {
+  int small, big;  
+};
+
 int8_t pwm = 0;
 bool clockwise = false;
 Encoder wheel(CRC_ENCO_A, CRC_ENCO_B);
@@ -51,35 +58,7 @@ void loop()
 
   if (millis() % 5000 == 0)
   {
-    // CrcLib::PlayTune(CrcUtility::TUNE_METRO, false);
+    // CrcLib::PlayTune(CrcUtility::TUNE_TEST, false);
   }
 
-  //   uint8_t joy1_Y = map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y), -128,127,-63,63);
-  //   uint8_t joy1_X = map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X), -128,127,-63,63);
-
-  // y = map(x, 1, 50, 50, 1);
-  // map(value, fromLow, fromHigh, toLow, toHigh)
-  // JOYSTICK1_Y = map(ANALOG::JOYSTICK1_Y,-127,126,-63,63);
-  // JOYSTICK1_X = map(ANALOG::JOYSTICK1_X,-127,126,-63,63);
-
-  //   if (!CrcLib::IsCommValid())
-  //   {
-  //     CrcLib::MoveTank(0, 0, CRC_PWM_1, CRC_PWM_2);
-
-  //   }
-  //   else
-  //   {
-  //     CrcLib::MoveTank(joy1_X, joy1_Y, CRC_PWM_1, CRC_PWM_2);
-  //   }
-  // CrcLib::SetPwmOutput(CRC_PWM_1, joyL);
-
-  // btnValue = CrcLib::ReadDigitalChannel(BUTTON::COLORS_LEFT);
-  //  Serial.print(" JOYSTICKLX : " + String(joyL) + "   ");
-  //  Serial.print("BOUTONX : " + String(btnValue));
-  //  Serial.println();
-
-  /*
-    The rest of your looping code
-    ...
-    */
 }
