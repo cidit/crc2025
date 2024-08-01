@@ -1,29 +1,29 @@
 #pragma once
-#include "util_defs.hpp"
+#include "util.hpp"
 
-enum MotorDirection {
-  CLOCKWISE, COUNTER_CLOCKWISE, NONE
-};
-
-typedef struct MotorPins_s {
+typedef struct MotorPins_s
+{
     pin_t clockwise_pin, counter_clockwise_pin, speed_pin;
 } MotorPins_t;
 
-class Motor {
+class Motor
+{
     MotorPins_t _pins;
     bool _is_inverted;
+
 public:
     Motor(
-        MotorPins_t
-    );
-    Motor(
-        MotorPins_t,
-        bool inverted
-    );
+        MotorPins_t pins,
+        bool inverted = false)
+        : _pins(pins), _is_inverted(inverted)
+    {
+    }
+
+    void begin();
 
     /**
      * sets the speed.
-     * @param speed an unsigned integer between `std::numeric_limits<uint16_t>::min()` and `std::numeric_limits<uint16_t>::max()`. will immediatly modify the speed of the motor.
-    */
-    virtual void set_speed(uint16_t);
+     * @param speed an unsigned integer between -1 and 1. will immediatly modify the speed of the motor.
+     */
+    void set_speed(double);
 };

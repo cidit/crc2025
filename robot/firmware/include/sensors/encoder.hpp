@@ -1,27 +1,29 @@
 #pragma once
 #include "sensor.hpp"
 #include <Arduino.h>
-#include "util_defs.hpp"
+#include "util.hpp"
 #include <Encoder.h>
 
-enum Direction
-{
-    CLOCKWISE,
-    COUNTER_CLOCKWISE
-};
-
-struct EncoderData
+struct RotaryEncoderData
 {
     Direction direction;
-    uint32_t rpm;
+    uint32_t speed; // rpm
+    float angle;    // radians
 };
 
-class EncoderSensor : Sensor<EncoderData>
+class RotaryEncoder : Sensor<RotaryEncoderData>
 {
-    Encoder _internal_encoder;
-
 public:
-    EncoderSensor(pin_t clock, pin_t clock_offset);
+    Encoder _internal_encoder;
+    float _ticks_per_rotation;
+
+    RotaryEncoder(pin_t clock, pin_t clock_offset, float ticks_per_rotation)
+        : _internal_encoder(Encoder(clock, clock_offset)),
+          _ticks_per_rotation(ticks_per_rotation) {}
+    RotaryEncoder(Encoder internal_encoder, float ticks_per_rotations)
+        : _internal_encoder(internal_encoder),
+          _ticks_per_rotation(ticks_per_rotations) {}
+
     void begin() override;
-    bool sample(EncoderData &out) override;
+    bool sample(RotaryEncoderData &out) override;
 };
