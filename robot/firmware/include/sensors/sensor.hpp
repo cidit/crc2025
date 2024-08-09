@@ -1,26 +1,35 @@
 #pragma once
 
-template <typename Measure>
-class Sensor
+namespace sensors
 {
 
-protected:
-    Measure last;
-    virtual void begin() = 0;
-    virtual bool sample(Measure &out) = 0;
+    template <typename Measure>
+    class Sensor
+    {
 
-public:
-    void poll()
-    {
-        Measure measure;
-        auto success = sample(measure);
-        if (success)
+    protected:
+        Measure _last;
+        Sensor(Measure last_default_val): _last(last_default_val) {}
+
+    public:
+        virtual void begin() = 0;
+        virtual bool sample(Measure &out) = 0;
+        virtual ~Sensor() = default;
+
+        void poll()
         {
-            last = measure;
+            Measure measure;
+            auto success = sample(measure);
+            if (success)
+            {
+                _last = measure;
+            }
         }
-    }
-    Measure getLast()
-    {
-        return last;
-    }
-};
+        
+        Measure getLast()
+        {
+            return _last;
+        }
+    };
+
+} // namespace sensors

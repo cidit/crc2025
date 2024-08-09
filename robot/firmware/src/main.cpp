@@ -17,13 +17,13 @@ int ticks_per_turn = 4700 / 5;
 
 Encoder wheel_angle_e(CRC_ENCO_A, CRC_ENCO_B),
         wheel_speed_e(CRC_I2C_SDA, CRC_I2C_SCL);
-RotaryEncoder wheel_angle_re(wheel_angle_e, ticks_per_turn),
+sensors::RotaryEncoder wheel_angle_re(wheel_angle_e, ticks_per_turn),
               wheel_speed_re(wheel_speed_e, 0); // tpt UNKNOWN
-Motor wheel_angle_m({CRC_PWM_1, 0, 0}), 
+drives::Motor wheel_angle_m({CRC_PWM_1, 0, 0}), 
       wheel_speed_m({CRC_PWM_2, 0, 0}); // 0s mean its irrelevent in this impl
-PrecisionMotor wheel_angle_pm(wheel_angle_m, wheel_angle_re), 
+drives::PrecisionMotor wheel_angle_pm(wheel_angle_m, wheel_angle_re), 
                wheel_speed_pm(wheel_speed_m, wheel_speed_re);
-Swerve swerve(wheel_angle_pm, wheel_speed_pm);
+drives::Swerve swerve(wheel_angle_pm, wheel_speed_pm);
 
 void print_telemetry()
 {
@@ -65,11 +65,13 @@ void loop()
 {
   CrcLib::Update();
   decoder.refresh();
+  swerve.loop();
 
   switch (cmd_from_string(decoder.getCommandString()))
   {
   case AIM:
-    swerve.aim_towards(Angle::from_deg(decoder.getArg(0)));
+    wheel_angle_pm.set_target_angle(math::Angle::from_deg(decoder.getArg(0)));
+    // swerve.aim_towards(math::Angle::from_deg(decoder.getArg(0)));
     break;
 
   case UNKNOWN:
@@ -78,8 +80,14 @@ void loop()
     break;
   }
 
-  if (millis() % 5000 == 0)
+  if (millis() % 200 == 0)
   {
+    Serial.print("wheel angle: ");
+    Serial.println(wheel_angle_pm._encoder.getLast()._radians);
+    Serial.print("wheel angle pid output: ");
+    Serial.println(wheel_angle_pm._output);
+    Serial.println();
+
     // CrcLib::PlayTune(CrcUtility::TUNE_TEST, false);
   }
 }
