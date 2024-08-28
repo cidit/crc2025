@@ -74,7 +74,7 @@ void setup()
 
 void loop()
 {
-
+  int mort;
   CrcLib::Update();
   decoder.refresh();
   swerve.loop();
