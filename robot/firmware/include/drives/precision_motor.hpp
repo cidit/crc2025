@@ -38,6 +38,10 @@ namespace drives
         sensors::RotaryEncoder _encoder;
         PID _pid;
         double _setpoint, _input, _output, _ticks_per_rotation;
+        void pid_set_agressive(PID &pid)
+        {
+            pid.SetTunings(aggKp, aggKi, aggKd);
+        }
 
         PrecisionMotor(Motor m, sensors::RotaryEncoder e, PID pid)
             : _mode(PMMode::MATCH_ANGLE),
@@ -57,7 +61,7 @@ namespace drives
         virtual void loop() override
         {
             const int INPUT_LIM = 1024, OUPUT_LIM = 255;
-            
+
             _encoder.poll();
             // TODO: input should not be position, but distance from target angle
             _input = _encoder.getLast().ratio() * INPUT_LIM;
@@ -69,7 +73,7 @@ namespace drives
         {
             const int INPUT_LIM = 1024, OUPUT_LIM = 255;
             _mode = PMMode::MATCH_ANGLE;
-            _setpoint = angle.ratio()*INPUT_LIM;
+            _setpoint = angle.ratio() * INPUT_LIM;
             // TODO: unimplemented
         }
 
@@ -89,10 +93,6 @@ namespace drives
         }
     };
 
-    void pid_set_agressive(PID &pid)
-    {
-        pid.SetTunings(aggKp, aggKi, aggKd);
-    }
     void pid_set_conservative(PID &pid)
     {
         pid.SetTunings(consKp, consKi, consKd);

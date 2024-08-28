@@ -16,13 +16,13 @@ Decodeur decoder(&Serial);
 int ticks_per_turn = 4700 / 5;
 
 Encoder wheel_angle_e(CRC_ENCO_A, CRC_ENCO_B),
-        wheel_speed_e(CRC_I2C_SDA, CRC_I2C_SCL);
+    wheel_speed_e(CRC_I2C_SDA, CRC_I2C_SCL);
 sensors::RotaryEncoder wheel_angle_re(wheel_angle_e, ticks_per_turn),
-              wheel_speed_re(wheel_speed_e, 0); // tpt UNKNOWN
-drives::Motor wheel_angle_m({CRC_PWM_1, 0, 0}), 
-      wheel_speed_m({CRC_PWM_2, 0, 0}); // 0s mean its irrelevent in this impl
-drives::PrecisionMotor wheel_angle_pm(wheel_angle_m, wheel_angle_re), 
-               wheel_speed_pm(wheel_speed_m, wheel_speed_re);
+    wheel_speed_re(wheel_speed_e, 0); // tpt UNKNOWN
+drives::Motor wheel_angle_m({CRC_PWM_1, 0, 0}),
+    wheel_speed_m({CRC_PWM_2, 0, 0}); // 0s mean its irrelevent in this impl
+drives::PrecisionMotor wheel_angle_pm(wheel_angle_m, wheel_angle_re),
+    wheel_speed_pm(wheel_speed_m, wheel_speed_re);
 drives::Swerve swerve(wheel_angle_pm, wheel_speed_pm);
 
 void print_telemetry()
@@ -51,8 +51,19 @@ int cmd_from_string(String c)
   return Command::UNKNOWN;
 }
 
+math::Angle x_y_to_angle(float x, float y)
+{
+  if (x == 0 || y == 0)
+  {
+    return math::Angle::zero();
+  }
+  auto rads = 1 / (tan(y / x));
+  return math::Angle::from_rad(rads);
+}
+
 void setup()
 {
+
   CrcLib::Initialize();
 
   CrcLib::InitializePwmOutput(CRC_PWM_1);
@@ -63,9 +74,17 @@ void setup()
 
 void loop()
 {
+
   CrcLib::Update();
   decoder.refresh();
   swerve.loop();
+  float yaw_x = map(float(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X)), 0.0, 255.0, -1.0, 1.0);
+  float yaw_y = map(float(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)), 0.0, 255.0, -1.0, 1.0);
+  x_y_to_angle(yaw_x, yaw_y);
+  Serial.println(x_y_to_angle(yaw_x, yaw_y)._radians);
+  /**
+   * manette
+   */
 
   switch (cmd_from_string(decoder.getCommandString()))
   {

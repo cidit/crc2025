@@ -58,6 +58,8 @@ namespace math
             return _radians / MAX_RAD;
         }
 
+        Angle(): _radians(0) {}
+
     private:
         Angle(double radians) : _radians(radians) {}
     };
