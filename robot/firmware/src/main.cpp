@@ -51,14 +51,47 @@ int cmd_from_string(String c)
   return Command::UNKNOWN;
 }
 
+// TODO: SCRATCH
+struct angle_or_not {
+  math::Angle angle;
+  bool present;
+};
+
 math::Angle x_y_to_angle(float x, float y)
 {
-  if (x == 0 || y == 0)
-  {
-    return math::Angle::zero();
+  double rads;
+  rads = atan2(y, x);
+
+  if (y == 1 && x == 0) {
+    rads = 0;  // make other thing to repr no angle
+    return  math::Angle::from_rad(rads);
   }
-  auto rads = 1 / (tan(y / x));
-  return math::Angle::from_rad(rads);
+  if (x == 0 && y > 0) {
+    rads = PI / 2;
+    return math::Angle::from_rad(rads);
+  } else if (x == 0 && y < 1) {
+    rads = 3 * PI / 2;
+    return math::Angle::from_rad(rads);
+  } else if (x > 0 && y == 1) {
+    rads = 0;
+    return math::Angle::from_rad(rads);
+  } else if (x < 0 && y == 1) {
+    rads = PI;
+    return math::Angle::from_rad(rads);
+  }
+
+  //return rads;
+
+  if (x<0 && y<1){
+    rads = atan2(y, x)+(2*PI);
+    return math::Angle::from_rad(rads);
+  }else if(x>0 && y<1){
+    rads = (atan2(y, x))+2*PI;
+    return math::Angle::from_rad(rads);
+  }else{
+    return math::Angle::from_rad(rads);
+
+  }
 }
 
 void setup()
@@ -74,13 +107,16 @@ void setup()
 
 void loop()
 {
-  int mort;
+  //int mort;
   CrcLib::Update();
   decoder.refresh();
   swerve.loop();
-  float yaw_x = map(float(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X)), 0.0, 255.0, -1.0, 1.0);
-  float yaw_y = map(float(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)), 0.0, 255.0, -1.0, 1.0);
-  x_y_to_angle(yaw_x, yaw_y);
+  float yaw_x = map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X), -128, 127, -100, 100);
+  float yaw_y = -map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y), -128, 127, -100, 100);
+  x_y_to_angle(yaw_x/100, yaw_y/100);
+  //Serial.println(String(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X))+"    "+String(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)));
+  
+  // Serial.print("x" + String(yaw_x) + " y" + String(yaw_y) + " ");
   Serial.println(x_y_to_angle(yaw_x, yaw_y)._radians);
   /**
    * manette
