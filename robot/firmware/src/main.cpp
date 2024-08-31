@@ -52,43 +52,39 @@ int cmd_from_string(String c)
 }
 
 // TODO: SCRATCH
-struct angle_or_not {
+struct angle_or_not
+{
   math::Angle angle;
   bool present;
 };
 
 math::Angle x_y_to_angle(float x, float y)
 {
-  double rads;
-  rads = atan2(y, x);
-
-  if (y == 1 && x == 0) {
-    rads = 0;  // make other thing to repr no angle
-    return  math::Angle::from_rad(rads);
+  if (y == 1 && x == 0)
+  {
+    return math::Angle::zero();
   }
-  if (x == 0 && y > 0) {
-    rads = PI / 2;
-    return math::Angle::from_rad(rads);
-  } else if (x == 0 && y < 1) {
-    rads = 3 * PI / 2;
-    return math::Angle::from_rad(rads);
-  } else if (x > 0 && y == 1) {
-    rads = 0;
-    return math::Angle::from_rad(rads);
-  } else if (x < 0 && y == 1) {
-    rads = PI;
-    return math::Angle::from_rad(rads);
+  if (x == 0 && y > 0)
+  {
+    return math::Angle::from_rad(PI / 2);
   }
-
-  //return rads;
-
-  if ((x!=0) && y<1){
-    rads = atan2(y, x)+(2*PI);
-    return math::Angle::from_rad(rads);
-  }else{
-    return math::Angle::from_rad(rads);
-
+  if (x == 0 && y < 1)
+  {
+    return math::Angle::from_rad(3 * PI / 2);
   }
+  if (x > 0 && y == 1)
+  {
+    return math::Angle::zero();
+  }
+  if (x < 0 && y == 1)
+  {
+    return math::Angle::from_rad(PI);
+  }
+  if ((x != 0) && y < 1)
+  {
+    return math::Angle::from_rad(atan2(y, x) + (2 * PI));
+  }
+  return math::Angle::from_rad(atan2(y, x));
 }
 
 void setup()
@@ -104,15 +100,15 @@ void setup()
 
 void loop()
 {
-  //int mort;
+  // int mort;
   CrcLib::Update();
   decoder.refresh();
   swerve.loop();
   float yaw_x = map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X), -128, 127, -100, 100);
   float yaw_y = -map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y), -128, 127, -100, 100);
-  x_y_to_angle(yaw_x/100, yaw_y/100);
-  //Serial.println(String(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X))+"    "+String(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)));
-  
+  x_y_to_angle(yaw_x / 100, yaw_y / 100);
+  // Serial.println(String(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X))+"    "+String(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)));
+
   // Serial.print("x" + String(yaw_x) + " y" + String(yaw_y) + " ");
   Serial.println(x_y_to_angle(yaw_x, yaw_y)._radians);
   /**
