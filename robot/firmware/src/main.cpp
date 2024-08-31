@@ -82,11 +82,8 @@ math::Angle x_y_to_angle(float x, float y)
 
   //return rads;
 
-  if (x<0 && y<1){
+  if ((x!=0) && y<1){
     rads = atan2(y, x)+(2*PI);
-    return math::Angle::from_rad(rads);
-  }else if(x>0 && y<1){
-    rads = (atan2(y, x))+2*PI;
     return math::Angle::from_rad(rads);
   }else{
     return math::Angle::from_rad(rads);
