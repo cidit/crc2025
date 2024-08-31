@@ -58,6 +58,9 @@ struct angle_or_not
   bool present;
 };
 
+/**
+ * this function treats y=1 as y=0 because of how the controller works. probably soething that needs changing eventually, but not very consequential for now.
+ */
 math::Angle x_y_to_angle(float x, float y)
 {
   if (y == 1 && x == 0)
