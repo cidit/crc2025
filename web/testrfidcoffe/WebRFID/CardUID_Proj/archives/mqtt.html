@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RFID Tag Database</title>
+    <style>
+        table {
+            width: 50%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.2.6/mqtt.min.js"></script>
+</head>
+<body>
+
+<h1>RFID Tag Database</h1>
+
+<table id="data-table">
+    <tr>
+        <th>CardUID</th>
+        <th>Name</th>
+    </tr>
+</table>
+
+<script>
+const client = mqtt.connect('ws://test.mosquitto.org:8080'); // WebSocket URL of the broker
+
+client.on('connect', function () {
+    client.subscribe('rfid/tag', function (err) {
+        if (!err) {
+            console.log('Subscribed to topic');
+        }
+    });
+});
+
+client.on('message', function (topic, message) {
+    // message is Buffer
+    const data = message.toString();
+    const [CardUID, Name] = data.split('&').map(param => param.split('=')[1]);
+
+    const table = document.getElementById('data-table');
+    const row = table.insertRow();
+    const cell1 = row.insertCell(0);
+    const cell2 = row.insertCell(1);
+
+    cell1.innerHTML = CardUID;
+    cell2.innerHTML = Name;
+});
+</script>
+
+</body>
+</html>

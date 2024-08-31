@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>RFID Coffee cup</title>
+    <script src="https://cdn.jsdelivr.net/npm/mqtt/dist/mqtt.min.js"></script>
+    <script>
+        let client;
+
+        function startConnect() {
+            const host = document.getElementById("host").value || "broker.hivemq.com";
+            const port = Number(document.getElementById("port").value) || 8000;
+            const clientID = "mqttx_" + Math.random().toString(36).substring(2, 15);
+
+            const url = `ws://${host}:${port}/mqtt`;
+            client = mqtt.connect(url);
+
+            client.on('connect', () => {
+                document.getElementById("messages").innerHTML += `<span>Connected to ${host} on port ${port}</span><br>`;
+                
+                const topic = document.getElementById("topic_s").value;
+                client.subscribe(topic, (err) => {
+                    if (!err) {
+                        document.getElementById("messages").innerHTML += `<span>Subscribed to topic ${topic}</span><br>`;
+                    } else {
+                        document.getElementById("messages").innerHTML += `<span>Failed to subscribe: ${err.message}</span><br>`;
+                    }
+                });
+            });
+
+            client.on('message', (topic, message) => {
+                document.getElementById("messages").innerHTML += `<span>Message received on ${topic}: ${message.toString()}</span><br>`;
+            });
+
+            client.on('error', (error) => {
+                document.getElementById("messages").innerHTML += `<span>Connection error: ${error.message}</span><br>`;
+            });
+        }
+
+        function startDisconnect() {
+            if (client) {
+                client.end();
+                document.getElementById("messages").innerHTML += `<span>Disconnected.</span><br>`;
+            } else {
+                document.getElementById("messages").innerHTML += `<span>No active connection to disconnect.</span><br>`;
+            }
+        }
+
+        function publishMessage() {
+            if (client) {
+                const topic = document.getElementById("topic_p").value;
+                const message = document.getElementById("message").value;
+
+                if (topic && message) {
+                    client.publish(topic, message);
+                    document.getElementById("messages").innerHTML += `<span>Message sent to ${topic}: ${message}</span><br>`;
+                } else {
+                    document.getElementById("messages").innerHTML += `<span>Provide both topic and message to publish.</span><br>`;
+                }
+            } else {
+                document.getElementById("messages").innerHTML += `<span>No active connection. Connect first.</span><br>`;
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .wrapper {
+            max-width: 600px;
+            margin: auto;
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h1>RFID Coffee cup</h1>
+        
+        <form id="mqttForm">
+            <label for="host">Broker Address:</label>
+            <input id="host" type="text" value="broker.hivemq.com" placeholder="Broker address"><br>
+            
+            <label for="port">Port:</label>
+            <input id="port" type="text" value="8000" placeholder="Port number"><br>
+
+            <label for="topic_s">Subscription Topic:</label>
+            <input id="topic_s" type="text" value="rfid" placeholder="Topic to subscribe"><br>
+
+            <label for="topic_p">Publish Topic:</label>
+            <input id="topic_p" type="text" value="rfidondro" placeholder="Topic for publishing"><br>
+            
+            <label for="message">Message:</label>
+            <input id="message" type="text" placeholder="Message to publish"><br>
+            
+            <button type="button" onclick="startConnect()">Connect</button>
+            <button type="button" onclick="startDisconnect()">Disconnect</button>
+            <button type="button" onclick="publishMessage()">Publish Message</button>
+        </form>
+
+        <div id="messages"></div>
+    </div>
+</body>
+</html>
