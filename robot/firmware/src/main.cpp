@@ -107,9 +107,9 @@ void loop()
   CrcLib::Update();
   decoder.refresh();
   swerve.loop();
-  float yaw_x = map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X), -128, 127, -100, 100);
-  float yaw_y = -map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y), -128, 127, -100, 100);
-  x_y_to_angle(yaw_x / 100, yaw_y / 100);
+  float yaw_x = map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X), -128, 127, -127, 127);
+  float yaw_y = -map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y), -128, 127, -127, 127);
+  x_y_to_angle(yaw_x / 100, yaw_y / 100); // WHY /BY 100?
   // Serial.println(String(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X))+"    "+String(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)));
 
   // Serial.print("x" + String(yaw_x) + " y" + String(yaw_y) + " ");
