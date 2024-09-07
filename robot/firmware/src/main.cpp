@@ -99,11 +99,12 @@ void setup()
   CrcLib::InitializePwmOutput(CRC_PWM_2);
 
   Serial.begin(115200); // Open the serial Monitor at a 2000000 baud rate
+  wheel_angle_m.begin();
+  wheel_angle_m.set_speed(1);
 }
 
 void loop()
 {
-  // int mort;
   CrcLib::Update();
   decoder.refresh();
   swerve.loop();
@@ -114,9 +115,9 @@ void loop()
 
   // Serial.print("x" + String(yaw_x) + " y" + String(yaw_y) + " ");
   Serial.println(x_y_to_angle(yaw_x, yaw_y)._radians);
-  /**
-   * manette
-   */
+
+  auto current_wheel_angle = math::Angle::zero();
+  wheel_angle_re.sample(current_wheel_angle);
 
   switch (cmd_from_string(decoder.getCommandString()))
   {
