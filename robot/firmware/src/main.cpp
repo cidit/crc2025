@@ -7,88 +7,23 @@
 #include "drives/swerve.hpp"
 #include <Decodeur.h>
 #include "math/angles.hpp"
-
-// bool btnValue;
-// byte joyL = 0;
-// uint8_t JOYSTICK1_X;
+#include "util/misc.hpp"
+#include "util/cmd.hpp"
+#include "util/needs_serial.hpp"
+// #include <PID_RT.h>
 
 Decodeur decoder(&Serial);
 int ticks_per_turn = 4700 / 5;
 
-Encoder wheel_angle_e(CRC_ENCO_A, CRC_ENCO_B),
-    wheel_speed_e(CRC_I2C_SDA, CRC_I2C_SCL);
-sensors::RotaryEncoder wheel_angle_re(wheel_angle_e, ticks_per_turn),
-    wheel_speed_re(wheel_speed_e, 0); // tpt UNKNOWN
-drives::Motor wheel_angle_m({CRC_PWM_1, 0, 0}),
-    wheel_speed_m({CRC_PWM_2, 0, 0}); // 0s mean its irrelevent in this impl
-drives::PrecisionMotor wheel_angle_pm(wheel_angle_m, wheel_angle_re),
-    wheel_speed_pm(wheel_speed_m, wheel_speed_re);
-drives::Swerve swerve(wheel_angle_pm, wheel_speed_pm);
-
-void print_telemetry()
-{
-
-  // CrcLib::SetPwmOutput(CRC_PWM_1, pwm / 2);
-  // CrcLib::SetPwmOutput(CRC_PWM_2, pwm / 2);
-  // Serial.println(pwm / 2);
-  {
-    Serial.print("angle of roll: " + String(wheel_speed_e.read()));
-    Serial.print("\tangle of wheel: " + String(wheel_angle_e.read()));
-    Serial.println();
-  }
-}
-
-enum Command : int
-{
-  AIM,
-  UNKNOWN
-};
-
-int cmd_from_string(String c)
-{
-  if (c.equalsIgnoreCase("AIM"))
-    return Command::AIM;
-  return Command::UNKNOWN;
-}
-
-// TODO: SCRATCH
-struct angle_or_not
-{
-  math::Angle angle;
-  bool present;
-};
-
-/**
- * this function treats y=1 as y=0 because of how the controller works. probably soething that needs changing eventually, but not very consequential for now.
- */
-math::Angle x_y_to_angle(float x, float y)
-{
-  if (y == 1 && x == 0)
-  {
-    return math::Angle::zero();
-  }
-  if (x == 0 && y > 0)
-  {
-    return math::Angle::from_rad(PI / 2);
-  }
-  if (x == 0 && y < 1)
-  {
-    return math::Angle::from_rad(3 * PI / 2);
-  }
-  if (x > 0 && y == 1)
-  {
-    return math::Angle::zero();
-  }
-  if (x < 0 && y == 1)
-  {
-    return math::Angle::from_rad(PI);
-  }
-  if ((x != 0) && y < 1)
-  {
-    return math::Angle::from_rad(atan2(y, x) + (2 * PI));
-  }
-  return math::Angle::from_rad(atan2(y, x));
-}
+Encoder a_e(CRC_ENCO_A, CRC_ENCO_B),
+    b_e(CRC_I2C_SDA, CRC_I2C_SCL);
+sensors::RotaryEncoder a_re(a_e, ticks_per_turn),
+    b_re(b_e, 0); // tpt UNKNOWN
+drives::Motor a_m({CRC_PWM_1, 0, 0}),
+    b_m({CRC_PWM_2, 0, 0}); // 0s mean its irrelevent in this impl
+drives::PrecisionMotor a_pm(a_m, a_re),
+    b_pm(b_m, b_re);
+drives::Swerve swerve(a_pm, b_pm);
 
 void setup()
 {
@@ -98,9 +33,9 @@ void setup()
   CrcLib::InitializePwmOutput(CRC_PWM_1);
   CrcLib::InitializePwmOutput(CRC_PWM_2);
 
-  Serial.begin(115200); // Open the serial Monitor at a 2000000 baud rate
-  wheel_angle_m.begin();
-  wheel_angle_m.set_speed(1);
+  Serial.begin(115200); 
+  a_m.begin();
+  a_m.set_speed(1);
 }
 
 void loop()
@@ -117,15 +52,14 @@ void loop()
   Serial.println(x_y_to_angle(yaw_x, yaw_y)._radians);
 
   auto current_wheel_angle = math::Angle::zero();
-  wheel_angle_re.sample(current_wheel_angle);
+  a_re.sample(current_wheel_angle);
 
   switch (cmd_from_string(decoder.getCommandString()))
   {
   case AIM:
-    wheel_angle_pm.set_target_angle(math::Angle::from_deg(decoder.getArg(0)));
+    a_pm.set_target_angle(math::Angle::from_deg(decoder.getArg(0)));
     // swerve.aim_towards(math::Angle::from_deg(decoder.getArg(0)));
     break;
-
   case UNKNOWN:
     break;
   default:
@@ -135,9 +69,9 @@ void loop()
   if (millis() % 200 == 0)
   {
     Serial.print("wheel angle: ");
-    Serial.println(wheel_angle_pm._encoder.getLast()._radians);
+    Serial.println(a_pm._encoder.getLast()._radians);
     Serial.print("wheel angle pid output: ");
-    Serial.println(wheel_angle_pm._output);
+    Serial.println(a_pm._output);
     Serial.println();
 
     // CrcLib::PlayTune(CrcUtility::TUNE_TEST, false);
