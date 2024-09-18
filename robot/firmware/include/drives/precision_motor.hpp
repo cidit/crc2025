@@ -26,7 +26,7 @@ namespace drives
     /**
      * depending on which mode the precision motor is on, it will use the encoder differently.
      */
-    enum PMMode : int
+    enum class PMMode : int
     {
         /**
          * when matching rpm, the motor will output as much power as needed to maintain a certain speed.
