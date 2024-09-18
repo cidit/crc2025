@@ -55,11 +55,11 @@ void loop()
 
   switch (cmd_from_string(decoder.getCommandString()))
   {
-  case AIM:
+  case Command::AIM:
     a_pm.set_target_angle(math::Angle::from_deg(decoder.getArg(0)));
     // swerve.aim_towards(math::Angle::from_deg(decoder.getArg(0)));
     break;
-  case UNKNOWN:
+  case Command::UNKNOWN:
     break;
   default:
     break;
