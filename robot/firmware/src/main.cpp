@@ -10,7 +10,6 @@
 #include "util/misc.hpp"
 #include "util/cmd.hpp"
 #include "util/needs_serial.hpp"
-// #include <PID_RT.h>
 
 Decodeur decoder(&Serial);
 int ticks_per_turn = 4700 / 5;
