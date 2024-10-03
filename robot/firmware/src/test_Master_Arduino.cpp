@@ -1,5 +1,8 @@
 #include <SPI.h>
 #include <Servo.h>
+#include "PID_RT.h"
+
+
 #define CS_SPI_PIN 10
 
 int pins[] = {9, 6};
@@ -29,6 +32,9 @@ typedef union patate
 };
 
 patate msg;
+
+PID_RT PID_distanceController;
+PID_RT PID_angleController;
 
 double targetrad = 0;
 volatile bool received = false;
@@ -110,19 +116,12 @@ doube cartToPolNorm(float x, float y)
     return sqrt(sq(x) + sq(y));
 }
 
-ISR(SPI_STC_vect)
-{
-    static byte index = 0;
-    byte receivedByte = SPDR;
-    msg.table[index++] = receivedByte;
-    if (index == sizeof(mystruct))
-    {
-        index = 0;
-        received = true;
-    }
-}
 
-void moveSwerve(double angle, double norm){ // angle from angleOptimisation
+void moveSwerve(double targetX, double targetY,){ // angle from angleOptimisation
+    
+    
+    
+    
     //TODO:: angle to RPM for PID
     /*PID.setPoint(angle); angle from controller
 
@@ -135,6 +134,17 @@ void moveSwerve(double angle, double norm){ // angle from angleOptimisation
     myservo[0].writeMicroseconds(PWMvalueX);
     myservo[1].writeMicroseconds(PWMvalueY);
     } */
+}
+ISR(SPI_STC_vect)
+{
+    static byte index = 0;
+    byte receivedByte = SPDR;
+    msg.table[index++] = receivedByte;
+    if (index == sizeof(mystruct))
+    {
+        index = 0;
+        received = true;
+    }
 }
 
 
