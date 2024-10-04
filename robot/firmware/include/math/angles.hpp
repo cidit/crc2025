@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include "util/misc.hpp"
 
 namespace math
 {
@@ -74,7 +75,8 @@ namespace math
     Direction shortest_direction(const Angle& from, const Angle& to)
     {
         auto zeroed = Angle::from_rad(Angle::travel(from, to));
-        return zeroed._radians < PI ? CLOCKWISE : COUNTER_CLOCKWISE;
+        return zeroed._radians < PI ? Direction::CLOCKWISE 
+                                    : Direction::COUNTER_CLOCKWISE;
     }
 
 }
