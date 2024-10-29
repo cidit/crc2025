@@ -1,19 +1,20 @@
-
 #include "util/misc.hpp"
 #include "util/needs_serial.hpp"
-#include <CrcLib.h>
-#include "CrcRemoteState.h"
+// #include <CrcLib.h>
+// #include "CrcRemoteState.h"
 #include <Encoder.h>
-#include <CrcLib/CrcBuzz.h>
+// #include <CrcLib/CrcBuzz.h>
 #include "drives/swerve.hpp"
 #include <Decodeur.h>
-#include <XboxSeriesXControllerESP32_asukiaaa.hpp>
+// #include <XboxSeriesXControllerESP32_asukiaaa.hpp>
 #include "math/angles.hpp"
 #include "util/cmd.hpp"
 #include "util/angles.hpp"
 
+// #define ENCODER_DO_NOT_USE_INTERRUPTS
+
 Decodeur decoder(&Serial);
-int ticks_per_turn = 4700 / 5;
+float ticks_per_turn = 537.7; // 4700 / 5;
 
 // Encoder a_e(CRC_ENCO_A, CRC_ENCO_B),
 //     b_e(CRC_I2C_SDA, CRC_I2C_SCL);
@@ -25,54 +26,78 @@ int ticks_per_turn = 4700 / 5;
 //     b_pm(b_m, b_re);
 // drives::Swerve swerve(a_pm, b_pm);
 
-Encoder a_e(33, 32);
-sensors::RotaryEncoder a_re(a_e, ticks_per_turn);
-drives::Motor a_m({2, 0, 0});
-drives::PrecisionMotor a_pm(a_m, a_re);
+// Encoder a_e(33, 32);
+
+// sensors::RotaryEncoder a_re(a_e, ticks_per_turn);
+// drives::Motor a_m({2, 0, 0});
+// drives::PrecisionMotor a_pm(a_m, a_re);
 // drives::Swerve swerve(a_pm, b_pm);
 
+#include <ESP32Encoder.h> // https://github.com/madhephaestus/ESP32Encoder.git
+#include "sensors/rotary_encoder.hpp"
 
-
+sensors::RotaryEncoder re{34, 35, ticks_per_turn};
+drives::Motor a_m({0, 0, 33});
 
 void setup()
 {
+  Serial.begin(115200);
+  NeedsSerial::wait_for_serial(500);
 
+#if defined(USING_CRCLIB)
   CrcLib::Initialize();
 
   CrcLib::InitializePwmOutput(CRC_PWM_1);
   CrcLib::InitializePwmOutput(CRC_PWM_2);
+#endif
 
-  Serial.begin(115200); 
   a_m.begin();
-  a_m.set_speed(1);
+  a_m.set_speed(0.1);
 }
 
 void loop()
 {
-  CrcLib::Update();
   decoder.refresh();
+  re.poll();
+
+#if defined(USING_CRCLIB)
+  CrcLib::Update();
   // swerve.loop();
-  float yaw_x = map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X), -128, 127, -127, 127);
-  float yaw_y = -map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y), -128, 127, -127, 127);
-  x_y_to_angle(yaw_x / 100, yaw_y / 100); // WHY /BY 100?
-  // Serial.println(String(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X))+"    "+String(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)));
+  float x = map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X), -128, 127, -127, 127);
+  float y = -map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y), -128, 127, -127, 127);
+  // Serial.println(x_y_to_angle(x, y)._radians);
+#endif
 
-  // Serial.print("x" + String(yaw_x) + " y" + String(yaw_y) + " ");
-  Serial.println(x_y_to_angle(yaw_x, yaw_y)._radians);
+  NS({
+    Serial.println(
+        " re: " + String(re.getLast()._radians));
+  })
 
-  auto current_wheel_angle = math::Angle::zero();
-  a_re.sample(current_wheel_angle);
+  // auto current_wheel_angle = math::Angle::zero();
+  // a_re.sample(current_wheel_angle);
 
+  if (!decoder.isAvailable())
+    return;
+  auto ack = true;
   switch (cmd_from_string(decoder.getCommandString()))
   {
-  case Command::AIM:
-    a_pm.set_target_angle(math::Angle::from_deg(decoder.getArg(0)));
-    // swerve.aim_towards(math::Angle::from_deg(decoder.getArg(0)));
-    break;
-  case Command::UNKNOWN:
-    break;
-  default:
+  case Command::SPD:
+  {
+
+    /**
+     * sets the speed of the motor, value from 0-255, passes the value directly
+     */
+    auto a1 = decoder.getArg(0);
+    // a_m.set_speed(a1);
+    analogWrite(33, a1);
+    Serial.println("NEW SPEED: " + String(a1));
     break;
   }
-
+  default:
+  {
+    ack = false;
+    break;
+  }
+  }
+  Serial.println(ack ? "ACK" : "NAK");
 }

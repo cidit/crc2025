@@ -24,7 +24,7 @@ namespace drives
 
         /**
          * sets the speed.
-         * @param speed an unsigned integer between -1 and 1. will immediatly modify the speed of the motor.
+         * @param speed a double between -1 and 1. will immediatly modify the speed of the motor.
          */
         void set_speed(double);
     };
