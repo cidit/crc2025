@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include "util/misc.hpp"
 
 namespace math
 {
@@ -30,7 +31,8 @@ namespace math
             return Angle::from_rad(ratio * MAX_RAD);
         }
 
-        static Angle zero() {
+        static Angle zero()
+        {
             return Angle(0);
         }
 
@@ -54,20 +56,27 @@ namespace math
             return from_rad(-_radians);
         }
 
-        double ratio() {
+        double ratio()
+        {
             return _radians / MAX_RAD;
         }
 
-        Angle(): _radians(0) {}
+        static double travel(const Angle& source, const Angle& destination)
+        {
+            return source._radians - destination._radians;
+        }
+
+        Angle() : _radians(0) {}
 
     private:
         Angle(double radians) : _radians(radians) {}
     };
 
-    Direction shortest_direction(Angle from, Angle to)
+    Direction shortest_direction(const Angle& from, const Angle& to)
     {
-        auto zeroed = Angle::from_rad(from._radians - to._radians);
-        return zeroed._radians < PI ? CLOCKWISE : COUNTER_CLOCKWISE;
+        auto zeroed = Angle::from_rad(Angle::travel(from, to));
+        return zeroed._radians < PI ? Direction::CLOCKWISE 
+                                    : Direction::COUNTER_CLOCKWISE;
     }
 
 }
