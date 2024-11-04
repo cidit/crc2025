@@ -16,10 +16,19 @@ def part_1(sentences: str):
         [str]: A list a the lowest letter in each sentence
     """
     lowest_letters = []
-    ### You code goes here ###
-    ### Votre code va ici ###
 
-    
+    for i in len(sentences):
+        current_lowest:str = None
+
+        # Append letter si on a fini la phrase
+        if sentences[i] in ['.', '!', '?'] and not current_lowest==None:
+            lowest_letters.append(current_lowest)
+            current_lowest = None
+            continue #Skip reste de la loop
+        
+        # Change Letter if none or new lowest
+        if current_lowest==None or sentences[i] < current_lowest:
+            current_lowest = sentences[i]    
 
     return lowest_letters
 
