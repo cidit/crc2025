@@ -4,31 +4,36 @@
 This is the template file for the part 1 of the Prelim 1.
 Ceci est le fichier template pour la partie 1 du Prelim 1.
 """
-
 def part_1(sentences: str):
     """
     Take the lowest letter for each sentence in a string
-
     Parameters:
         sentences str: A string containing the sentences to analyse
-
     Returns:
         [str]: A list a the lowest letter in each sentence
     """
     lowest_letters = []
 
-    for i in len(sentences):
-        current_lowest:str = None
-
-        # Append letter si on a fini la phrase
-        if sentences[i] in ['.', '!', '?'] and not current_lowest==None:
-            lowest_letters.append(current_lowest)
-            current_lowest = None
-            continue #Skip reste de la loop
-        
-        # Change Letter if none or new lowest
-        if current_lowest==None or sentences[i] < current_lowest:
-            current_lowest = sentences[i]    
+    sentences = split_sentences(sentences)
+    lowest_letters = list(map(find_lowest, sentences))
 
     return lowest_letters
 
+
+def split_sentences(sentences: str) -> list[str]:
+    """Split in invidual sentence"""
+
+    replaced = "".join([c if c not in ".!?" else "\n" for c in sentences])
+    return replaced.splitlines()
+
+
+def find_lowest(sentence: str) -> str | None:
+    """Return the lowest letter"""
+
+    valid = [chara for chara in sentence if chara >= 'A' and chara <= 'z'] 
+    
+    if len(valid)==0:
+        return None
+    
+    valid.sort()
+    return valid[0]
