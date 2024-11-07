@@ -30,6 +30,10 @@ def part_4(letters):
                     "4   5 6   7"]
     ### You code goes here ###
     ### Votre code va ici ###
+    
+    
+    #Les relations sont h = 3*2^(n-2)
+    #                   l = h*2-1
     print_tree(tree_strings)
 
 
