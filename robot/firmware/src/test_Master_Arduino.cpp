@@ -1,196 +1,92 @@
-#include <SPI.h>
-#include <Servo.h>
-#include "PID_RT.h"
+#include <PID_RT.h>
+#include <CrcLib.h>
+#include <Encoder.h>
 
+#define encoAbs 45
+// Define the pins for the motors
 
-#define CS_SPI_PIN 10
+// PID parameters for angle control
+double setpoint = 70;  // Target angle in degrees
+double input = 0;
+double output = 0;
+double oppAngleWrap;
+double currentAngleWrap;
+double angleFromTarget;
+double oppAngleFromTarget;
+bool rPower;
 
-int pins[] = {9, 6};
-const int arraySize = sizeof(pins) / sizeof(int);
-Servo myservo[arraySize];
+// Initialize PID controller
+PID_RT pid;
 
-typedef struct mystruct
-{
-    uint8_t JoyLeft_X;
-    uint8_t JoyLeft_Y;
-    // uint8_t JoyRight_X;
-    // uint8_t JoyRight_Y;
-    // bool boutton_A;
-    // bool boutton_B;
-    // bool boutton_X;
-    // bool boutton_Y;
-    // bool boutton_UP;
-    // bool boutton_DOWN;
-    // bool boutton_RIGHT;
-    // bool boutton_LEFT;
-};
+// Variables for motor control
+double motorSpeedA = 0;
+double motorSpeedB = 0;
+double currentAngle = 0;
+unsigned long lastTime = 0;
+const double timeInterval = 100;  // Time interval in milliseconds
+Encoder Enco_MotorA(CRC_ENCO_A, CRC_ENCO_B);
+Encoder Enco_MotorB(CRC_I2C_SDA, CRC_I2C_SCL);
 
-typedef union patate
-{
-    mystruct spiMsg;
-    byte table[sizeof(mystruct)];
-};
+// Gear ratios for the differential swerve module
+const double gearRatioA = 5.0;  // Replace with your actual gear ratio
+const double gearRatioB = 5.0;  // Replace with your actual gear ratio
 
-patate msg;
-
-PID_RT PID_distanceController;
-PID_RT PID_angleController;
-
-double targetrad = 0;
-volatile bool received = false;
-
-double angleOptimisation(double radians)
-{
-    if (radians > PI())
-    {
-        radians -= 2 * PI();
-        if (radians > -PI())
-        {
-            radians += PI();
-        }
-    }
-    if (radians < -PI())
-    {
-
-        radians += 2 * PI();
-        if (radians > -PI())
-        {
-            radians += PI();
-        }
-    }
-    return radians;
+double angleWrap(double x) {
+  x = fmod(x + 180, 360);
+  if (x < 0)
+    x += 360;
+  return x - 180;
 }
 
-double cartToPolAngle(int x, int y)
-{
+void setup() {
+  CrcLib::Initialize();
+  CrcLib::InitializePwmOutput(CRC_PWM_1);
+  CrcLib::InitializePwmOutput(CRC_PWM_2);
+  pinMode(CRC_PWM_8, INPUT);
+  //CrcLib::InitializePwmOutput(CRC_PWM_12);
+  Serial.begin(9600);
 
-    double polVectorAngle;
-    polVectorAngle = atan2(y, x);
-
-    if (y == 1 && x == 0)
-    {
-        polVectorAngle = 0; // make other thing to repr no angle
-        return polVectorAngle;
-    }
-    if (x == 0 && y > 0)
-    {
-        polVectorAngle = PI / 2;
-        return polVectorAngle;
-    }
-    else if (x == 0 && y < 1)
-    {
-        polVectorAngle = 3 * PI / 2;
-        return polVectorAngle;
-    }
-    else if (x > 0 && y == 1)
-    {
-        polVectorAngle = 0;
-        return polVectorAngle;
-    }
-    else if (x < 0 && y == 1)
-    {
-        polVectorAngle = PI;
-        return polVectorAngle;
-    }
-
-    // return polVectorAngle;
-
-    if (x < 0 && y < 1)
-    {
-        polVectorAngle = atan2(y, x) + (2 * PI);
-        return polVectorAngle;
-    }
-    else if (x > 0 && y < 1)
-    {
-        polVectorAngle = (atan2(y, x)) + 2 * PI;
-        return polVectorAngle;
-    }
-    else
-    {
-        return polVectorAngle;
-    }
-}
-
-doube cartToPolNorm(float x, float y)
-{
-    return sqrt(sq(x) + sq(y));
+  // Initialize PID controller
+  pid.setPoint(setpoint);
+  pid.setOutputRange(-50, 50);  // PWM range
+  pid.setK(0.75, 0.7, 0.002);   // a modifier overshoot un peu beaucoup
 }
 
 
-void moveSwerve(double targetX, double targetY,){ // angle from angleOptimisation
-    
-    
-    
-    
-    //TODO:: angle to RPM for PID
-    /*PID.setPoint(angle); angle from controller
+void loop() {
+  CrcLib::Update();
+  pid.start();
+  pid.setPoint(setpoint);
+  // unsigned long now = millis();
+  // double timeChange = (double)(now - lastTime);
+  currentAngle = pulseIn(CRC_PWM_8, HIGH) / 4195.0 * 360;
 
-    if(PID.compute(measAngle)){ meas from encoder
+  oppAngleWrap = angleWrap(currentAngle - 180);
+  angleFromTarget = angleWrap(setpoint - currentAngle);
+  oppAngleFromTarget = angleWrap(setpoint - oppAngleWrap);
 
+  if (abs(angleFromTarget) > abs(oppAngleFromTarget)) {
+    rPower = pid.compute(oppAngleFromTarget);
+  } else {
+    rPower = pid.compute(angleFromTarget);
+  }
 
-    int PWMvalueY = PID.getOutput() * 5 + 1500;  // negative ? 
-    int PWMvalueX = PID.getOutput() * 5 + 1500;
+  if (rPower) {
+    output = pid.getOutput();
+    // // Set the motor speeds
+    setMotorSpeeds(output, -output);
+  }
 
-    myservo[0].writeMicroseconds(PWMvalueX);
-    myservo[1].writeMicroseconds(PWMvalueY);
-    } */
-}
-ISR(SPI_STC_vect)
-{
-    static byte index = 0;
-    byte receivedByte = SPDR;
-    msg.table[index++] = receivedByte;
-    if (index == sizeof(mystruct))
-    {
-        index = 0;
-        received = true;
-    }
-}
-
-
-
-void setup()
-{
-
-    Serial.begin(115200);
-    pinMode(CS_SPI_PIN, OUTPUT);
-    pinMode(MISO, OUTPUT); // Configure MISO en sortie (pour envoyer des données au contrôleur)
-    digitalWrite(CS_SPI_PIN, HIGH);
-    SPCR |= _BV(SPE);      // Configure l'interface SPI comme étant un périphérique
-    SPI.attachInterrupt(); // Permet les interruptions sur la réception de données SPI
-    for (int i = 0; i < 2; i++)
-        myservo[i].attach(pins[i]);
-    pinMode(pins, OUTPUT);
+  // Print current angle and motor speeds for debugging
+  Serial.print("Current Angle: ");
+  Serial.println(output);
 }
 
-void loop()
-{
-    if (received)
-    {
-        Serial.print("JoyLeft_X: ");
-        Serial.println(msg.spiMsg.JoyLeft_X);
-        Serial.print("JoyLeft_Y: ");
-        Serial.println(msg.spiMsg.JoyLeft_Y);
-        received = false;
-    }
-    int joyL_X = map(msg.spiMsg.JoyLeft_X, 0, 255, -100, 100);
-    int joyL_Y = map(msg.spiMsg.JoyLeft_Y, 0, 255, -100, 100);
-    int PWMvalueY = joyL_Y * 5 + 1500;
-    int PWMvalueX = joyL_X * 5 + 1500;
-    myservo[0].writeMicroseconds(PWMvalueX);
-    myservo[1].writeMicroseconds(PWMvalueY);
+void setMotorSpeeds(double speedA, double speedB) {
+  // Convert speeds to PWM values (assuming a linear relationship)
+  int pwmValueA = speedA;
+  int pwmValueB = speedB;
 
-    // float cartToPolJoyL_X = map(msg.spiMsg.JoyLeft_X, 0, 255, -1, 1);
-    // float cartToPolJoyL_Y = map(msg.spiMsg.JoyLeft_Y, 0, 255, -1, 1);
-
-    double calcPolAngle = cartToPolangle(joyL_X, joyL_Y);
-    double calcPolNorm = cartToPolNorm(joyL_X, joyL_Y);
-
-    int PWMvalueY = joyL_Y * 5 + 1500;
-    int PWMvalueX = joyL_X * 5 + 1500;
-
-    myservo[0].writeMicroseconds(PWMvalueX);
-    myservo[1].writeMicroseconds(PWMvalueY);
-    // myservo[2].writeMicroseconds(0);
-    // myservo[1].writeMicroseconds(0);
+  CrcLib::SetPwmOutput(CRC_PWM_1, pwmValueA);
+  CrcLib::SetPwmOutput(CRC_PWM_2, pwmValueB);
 }
