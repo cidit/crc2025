@@ -36,7 +36,7 @@ def part_3(values, letters):
     ### Votre code va ici ### HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA!
 
     tree_letters = []
-    dick = dict(zip(values, letters))
+    dik = dict(zip(values, letters))
 
     values.sort()
 
@@ -44,7 +44,7 @@ def part_3(values, letters):
     answ = BFS(root)
 
 
-    return [dick[num] for num in answ]
+    return [dik[num] for num in answ]
 
 
 def make_tree(values:list[int])->Node:

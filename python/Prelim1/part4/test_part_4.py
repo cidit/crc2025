@@ -9,24 +9,24 @@ from part4.part_4 import part_4
 
 def test_from_problem_description():
     assert part_4(['u', 's', 'o', 'n', 'i', 'c', 'e']) == [
-"     u      ",
-"    ↙ ↘     ",
+"     u     ",
+"    ↙ ↘    ",
 "   ↙   ↘   ",
 "  s     o  ",
 " ↙ ↘   ↙ ↘ ",
 "n   i c   e"
 ]
     assert part_4(['x', 'u', 'p', 'l', 'e', 'f', 't']) == [
-"     x      ",
-"    ↙ ↘     ",
+"     x     ",
+"    ↙ ↘    ",
 "   ↙   ↘   ",
 "  u     p  ",
 " ↙ ↘   ↙ ↘ ",
 "l   e f   t"
 ]
     assert part_4(['o', 'e', 'n', 'h', 'a', 'u', 't']) == [
-"     o      ",
-"    ↙ ↘     ",
+"     o     ",
+"    ↙ ↘    ",
 "   ↙   ↘   ",
 "  e     n  ",
 " ↙ ↘   ↙ ↘ ",
@@ -36,8 +36,8 @@ def test_from_problem_description():
 
 def test_abc():
     assert part_4(['a', 'b', 'c', 'd', 'e', 'f', 'g']) == [
-"     a      ",
-"    ↙ ↘     ",
+"     a     ",
+"    ↙ ↘    ",
 "   ↙   ↘   ",
 "  b     c  ",
 " ↙ ↘   ↙ ↘ ",

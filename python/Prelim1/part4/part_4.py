@@ -22,18 +22,19 @@ def part_4(letters):
         [str]: The strings that represents the layers of the tree to display
     """
     ### YOU CAN USE THAT EXAMPLE TO YOUR ADVANTAGE ###
-    tree_strings = ["     1      ",
-                    "    ↙ ↘     ",
+    tree_strings = ["     1     ",
+                    "    ↙ ↘    ",
                     "   ↙   ↘   ",
                     "  2     3  ",
                     " ↙ ↘   ↙ ↘ ",
                     "4   5 6   7"]
-    ### You code goes here ###
-    ### Votre code va ici ###
     
-    
-    #Les relations sont h = 3*2^(n-2)
-    #                   l = h*2-1
+
+    for i in range(len(letters)):
+        for j in range(len(tree_strings)):
+            tree_strings[j] = tree_strings[j].replace(str(i+1), letters[i])
+
+
     print_tree(tree_strings)
 
 
