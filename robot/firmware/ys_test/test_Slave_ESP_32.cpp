@@ -5,6 +5,18 @@ XboxSeriesXControllerESP32_asukiaaa::Core xboxController;
 
 const uint16_t CS_SPI_PIN = 5;
 
+typedef struct joystick_t {
+  uint8_t x, y;
+}
+
+typedef struct controller_t
+{
+  joystick_t a, b;
+};
+typedef union ctl_bytes_u {
+  controller_t ctl;
+  
+}
 
 typedef struct mystruct {
   uint8_t JoyLeft_X;

@@ -1,6 +1,9 @@
 #pragma once
 #include <math/angles.hpp>
 
+
+// TODO: x and y dont need to be constrained to 0, its all just a ratio anyways
+
 /**
  * this function treats y=1 as y=0 because of how the controller works. probably soething that needs changing eventually, but not very consequential for now.
  */

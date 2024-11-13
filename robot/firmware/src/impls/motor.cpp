@@ -1,4 +1,6 @@
+#if defined(USING_CRCLIB)
 #include "CrcLib.h"
+#endif
 #include "drives/motor.hpp"
 
 void drives::Motor::begin()
@@ -11,8 +13,9 @@ void drives::Motor::begin()
 
 void drives::Motor::set_speed(double speed)
 {
-#ifdef USING_CRCLIB
-    double real_speed = constrain(_is_inverted ? -speed : speed, -1.0, 1.0);
-    CrcLib::SetPwmOutput(_pins.clockwise_pin, real_speed * 255);
+    auto direction_adjusted_speed = _is_inverted ? -speed : speed;
+    auto constrained_speed = constrain(direction_adjusted_speed, -1.0, 1.0);
+#if defined(USING_CRCLIB)
+    CrcLib::SetPwmOutput(_pins.speed_pin, constrained_speed * HALF_PWM_OUTPUT);
 #endif
 }
