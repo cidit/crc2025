@@ -1,103 +1,86 @@
-#include "util/misc.hpp"
-#include "util/needs_serial.hpp"
-// #include <CrcLib.h>
-// #include "CrcRemoteState.h"
+#include <CrcLib.h>
 #include <Encoder.h>
-// #include <CrcLib/CrcBuzz.h>
-#include "drives/swerve.hpp"
+#include <PID_RT.h>
 #include <Decodeur.h>
-// #include <XboxSeriesXControllerESP32_asukiaaa.hpp>
-#include "math/angles.hpp"
-#include "util/cmd.hpp"
-#include "util/angles.hpp"
 
-// #define ENCODER_DO_NOT_USE_INTERRUPTS
+const double SETPOINT = 0;
+int target_angle = 0;
+float speed = 0, max_pulse = 0, min_pulse = 0;
+bool checking_1 = true;
 
-Decodeur decoder(&Serial);
-float ticks_per_turn = 537.7; // 4700 / 5;
+Decodeur decodeur(&Serial);
+// PID_RT pid;
 
-// Encoder a_e(CRC_ENCO_A, CRC_ENCO_B),
-//     b_e(CRC_I2C_SDA, CRC_I2C_SCL);
-// sensors::RotaryEncoder a_re(a_e, ticks_per_turn),
-//     b_re(b_e, 0); // tpt UNKNOWN
-// drives::Motor a_m({CRC_PWM_1, 0, 0}),
-//     b_m({CRC_PWM_2, 0, 0}); // 0s mean its irrelevent in this impl
-// drives::PrecisionMotor a_pm(a_m, a_re),
-//     b_pm(b_m, b_re);
-// drives::Swerve swerve(a_pm, b_pm);
-
-// Encoder a_e(33, 32);
-
-// sensors::RotaryEncoder a_re(a_e, ticks_per_turn);
-// drives::Motor a_m({2, 0, 0});
-// drives::PrecisionMotor a_pm(a_m, a_re);
-// drives::Swerve swerve(a_pm, b_pm);
-
-#include <ESP32Encoder.h> // https://github.com/madhephaestus/ESP32Encoder.git
-#include "sensors/rotary_encoder.hpp"
-
-sensors::RotaryEncoder re{34, 35, ticks_per_turn};
-drives::Motor a_m({0, 0, 33});
+void apply_cmds()
+{
+  if (!decodeur.isAvailable())
+  {
+    return;
+  }
+  bool ack = true;
+  switch (decodeur.getCommand())
+  {
+  case 'A':
+  {
+    // change the angle
+    auto newA = decodeur.getArg(0);
+    if (newA > 180)
+      newA -= 180;
+    target_angle = newA;
+    break;
+  }
+  case 'I': {
+    // increment
+    // TODO: temporary
+    speed = decodeur.getArg(0);
+    break;
+  }
+  case 'T' : {
+    // TODO: 
+    checking_1 = !checking_1;
+    break;
+  }
+  default:
+    ack = false;
+  }
+  Serial.println(ack? '!': '?');
+}
 
 void setup()
 {
   Serial.begin(115200);
-  NeedsSerial::wait_for_serial(500);
-
-#if defined(USING_CRCLIB)
+  // Initialisation des Moteurs
   CrcLib::Initialize();
-
-  CrcLib::InitializePwmOutput(CRC_PWM_1);
   CrcLib::InitializePwmOutput(CRC_PWM_2);
-#endif
+  CrcLib::InitializePwmOutput(CRC_PWM_1);
 
-  a_m.begin();
-  a_m.set_speed(0.1);
+  // Pinmode pour le PWM
+  pinMode(CRC_PWM_12, INPUT);
 }
 
 void loop()
 {
-  decoder.refresh();
-  re.poll();
-
-#if defined(USING_CRCLIB)
+  decodeur.refresh();
   CrcLib::Update();
-  // swerve.loop();
-  float x = map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X), -128, 127, -127, 127);
-  float y = -map(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y), -128, 127, -127, 127);
-  // Serial.println(x_y_to_angle(x, y)._radians);
-#endif
+  apply_cmds();
 
-  NS({
-    Serial.println(
-        " re: " + String(re.getLast()._radians));
-  })
-
-  // auto current_wheel_angle = math::Angle::zero();
-  // a_re.sample(current_wheel_angle);
-
-  if (!decoder.isAvailable())
-    return;
-  auto ack = true;
-  switch (cmd_from_string(decoder.getCommandString()))
-  {
-  case Command::SPD:
-  {
-
-    /**
-     * sets the speed of the motor, value from 0-255, passes the value directly
-     */
-    auto a1 = decoder.getArg(0);
-    // a_m.set_speed(a1);
-    analogWrite(33, a1);
-    Serial.println("NEW SPEED: " + String(a1));
-    break;
+  if (checking_1) {
+    CrcLib::SetPwmOutput(CRC_PWM_1, speed);
+    CrcLib::SetPwmOutput(CRC_PWM_2, 0);
+  } else {
+    CrcLib::SetPwmOutput(CRC_PWM_1, 0);
+    CrcLib::SetPwmOutput(CRC_PWM_2, speed);
   }
-  default:
-  {
-    ack = false;
-    break;
-  }
-  }
-  Serial.println(ack ? "ACK" : "NAK");
+
+  auto pulse = pulseIn(CRC_PWM_12, HIGH);
+  if (pulse > max_pulse)
+    max_pulse = pulse;
+  if (pulse < min_pulse)
+    min_pulse = pulse;
+
+  Serial.println(
+      "pulse: " + String(pulse) +
+      "\tmin pulse: " + String(min_pulse) +
+      "\tmax pulse: " + String(max_pulse) +
+      "\ttarg: " + String(target_angle));
 }
