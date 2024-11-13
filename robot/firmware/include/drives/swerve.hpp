@@ -12,19 +12,19 @@ namespace drives
 
     class Swerve: public Looped
     {
-        PrecisionMotor _direction_motor, _speed_motor;
+        PrecisionMotor a_motor, b_motor;
         math::cartesian::Vec3D _target_movement;
 
     public:
-        Swerve(PrecisionMotor direction_motor,
-               PrecisionMotor speed_motor)
-            : _direction_motor(direction_motor),
-              _speed_motor(speed_motor),
+        Swerve(PrecisionMotor a_motor,
+               PrecisionMotor b_motor)
+            : a_motor(a_motor),
+              b_motor(b_motor),
               _target_movement(math::cartesian::Vec3D::zero()) {};
         
         virtual void loop() override {
-            _direction_motor.loop();
-            _speed_motor.loop();
+            a_motor.loop();
+            b_motor.loop();
         }
 
         void aim_towards(math::Angle angle)
