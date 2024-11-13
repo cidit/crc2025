@@ -84,6 +84,8 @@ void rotateModule(double directionX, double directionY, bool fieldCentric) {
   Serial.println(getCurrentOrientation());
 }
 
+
+//replace with scratch3
 double getPivotComponent(double targetVecX, double targetVecY, double currentAngle) {
   double targetAngle = atan2(targetVecY, targetVecX) * 180 / PI;
   double angleDiff = abs(targetAngle - currentAngle);
