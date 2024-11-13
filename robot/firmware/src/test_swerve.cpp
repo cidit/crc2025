@@ -124,6 +124,8 @@ void resetEncoders() {
   encoder2.write(0);
 }
 
+
+//read ABS_encoder
 double getCurrentOrientation() {
   double rawAngle = (encoder2.read() + encoder1.read()) * DEGREES_PER_TICK;
   return rawAngle;
