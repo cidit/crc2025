@@ -3,14 +3,24 @@
 #include <PID_RT.h>
 #include <Decodeur.h>
 
+const int MAX_MOTEUR_POWER = 127;
+const int MAX_ANGLE_ERROR = 5; //Allow 5 deg dif from target angle
 const double SETPOINT = 0;
-int target_angle = 0;
+
+struct Vector2D{
+  float x = 0;
+  float y = 0;
+};
+
 float speed = 0, max_pulse = 0, min_pulse = 0;
 bool checking_1 = true;
 double joyAngle = 0;
 double joySpeed = 1;
 
+int vecPowX = 1;
+int vecPowY = 1;
 
+Vector2D vecPower; //x=translationPower   y=rotationPower
 
 Decodeur decodeur(&Serial);
 // PID_RT pid;
@@ -50,15 +60,69 @@ void apply_cmds()
   Serial.println(ack? '!': '?');
 }
 
+/**
+ * Returns the current wheel angle between 0 and 180 deg
+ */
 double getCurrentAngle(){
-  return pulseIn(CRC_PWM_12,HIGH)/4160.0*360;
+  double angleAct = pulseIn(CRC_PWM_12,HIGH)/4160.0*360;
+  if (angleAct > 180)
+  {
+    angleAct = angleAct - 180;
+  }
+  return angleAct;
 }
 
-void setMotorSpeed(int speedA, int speedB){
-  CrcLib::SetPwmOutput(CRC_PWM_1, speedA);
-  CrcLib::SetPwmOutput(CRC_PWM_2, speedB);
+/**
+ * Determine and set the power of the motors
+ */
+void setMotorPowers(Vector2D powerVector){
+  //TODO Verify this
+  double powerA = constrain(powerVector.x + powerVector.y, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+  double powerB = constrain(powerVector.x - powerVector.y, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+
+  CrcLib::SetPwmOutput(CRC_PWM_1, powerA);
+  CrcLib::SetPwmOutput(CRC_PWM_2, powerB);
 }
 
+void rotateTranslateModule(double targetAngle, double targetSpeed){
+
+  vecPower.x = 0;
+
+}
+
+/**
+ * Get the X component of the power vector, so the translation power
+ * the return value must be between 0 and 1
+ */
+double getTransComponent(double targetSpeed){
+  //TODO
+}
+
+/**
+ * Get the Y component of the power vector, so the rotation power
+ * the return value must be between 0 and 1
+ */
+double getPivotComponent(double targetAngle, double currentAngle){
+  //Calculate the difference between curent and target, corresponds to rotation angle
+  auto travelAngle = SETPOINT - currentAngle + targetAngle;
+
+  //Change for shortest if to big
+  if(travelAngle < -90){
+    travelAngle = 180 + travelAngle;
+  }
+
+  //Determine the power ratio of the motor, 1=fullPower 0=notMoving
+  if(travelAngle < MAX_ANGLE_ERROR){
+    return 0; //We are close enough
+  }
+  else
+  {
+    return 1; //TODO
+  }
+  
+}
+
+//---------------------------------------------------------------------------
 void setup()
 {
   Serial.begin(115200);
@@ -77,7 +141,7 @@ void loop()
   CrcLib::Update();
   apply_cmds();
 
-
+  rotateTranslateModule(joyAngle, joySpeed);
 
   // if (checking_1) {
   //   CrcLib::SetPwmOutput(CRC_PWM_1, speed);
