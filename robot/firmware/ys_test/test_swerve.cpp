@@ -99,6 +99,7 @@ double getPivotComponent(double targetVecX, double targetVecY, double currentAng
     takingShortestPath = false;
   }
 
+  //Replace with PID
   if (angleDiff < ALLOWED_MODULE_ORIENTATION_ERROR) {
     return 0;
   } else if (angleDiff > ANGLE_OF_MAX_MODULE_ROTATION_POWER) {
@@ -106,6 +107,7 @@ double getPivotComponent(double targetVecX, double targetVecY, double currentAng
   } else {
     return (targetAngle > currentAngle) ? angleDiff / ANGLE_OF_MAX_MODULE_ROTATION_POWER * ROT_ADVANTAGE : -angleDiff / ANGLE_OF_MAX_MODULE_ROTATION_POWER * ROT_ADVANTAGE;
   }
+  //------------------
 }
 
 void setMotorPowers(double powerVecX, double powerVecY) {

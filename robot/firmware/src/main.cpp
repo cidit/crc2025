@@ -54,8 +54,9 @@ double getCurrentAngle(){
   return pulseIn(CRC_PWM_12,HIGH)/4160.0*360;
 }
 
-void setMotorSpeed(double){
-
+void setMotorSpeed(int speedA, int speedB){
+  CrcLib::SetPwmOutput(CRC_PWM_1, speedA);
+  CrcLib::SetPwmOutput(CRC_PWM_2, speedB);
 }
 
 void setup()
