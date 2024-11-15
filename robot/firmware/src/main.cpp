@@ -64,7 +64,13 @@ void apply_cmds()
  * Returns the current wheel angle between 0 and 180 deg
  */
 double getCurrentAngle(){
-  double angleAct = pulseIn(CRC_PWM_12,HIGH)/4160.0*360;
+  //Get encoder value, make sure the value is between 0 and 4160 (Observation de Félix: L'encodeur retour des fois 8000)
+  double enco = constrain((CRC_PWM_12, HIGH), 0.0, 4160.0);
+
+  //Calculate angle
+  double angleAct = enco/4160.0*360;
+  
+  //set angle between 0 and 180
   if (angleAct > 180)
   {
     angleAct = angleAct - 180;
@@ -84,7 +90,11 @@ void setMotorPowers(Vector2D powerVector){
   CrcLib::SetPwmOutput(CRC_PWM_2, powerB);
 }
 
-void rotateTranslateModule(double targetAngle, double targetSpeed){
+/**
+ * Get and apply the translation and rotation components
+ * based on the move joystick(left) angle and scale
+ */
+void moveModule(double targetAngle, double targetSpeedFactor){
 
   vecPower.x = 0;
 
@@ -141,7 +151,7 @@ void loop()
   CrcLib::Update();
   apply_cmds();
 
-  rotateTranslateModule(joyAngle, joySpeed);
+  moveModule(joyAngle, joySpeed);
 
   // if (checking_1) {
   //   CrcLib::SetPwmOutput(CRC_PWM_1, speed);
