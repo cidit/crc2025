@@ -25,6 +25,10 @@ Vector2D vecPower; //x=translationPower   y=rotationPower
 Decodeur decodeur(&Serial);
 // PID_RT pid;
 
+/**
+ * DONE
+ * Check and applu inputs from serial monitor
+ */
 void apply_cmds()
 {
   if (!decodeur.isAvailable())
@@ -61,6 +65,14 @@ void apply_cmds()
 }
 
 /**
+ * Get Controller inputs
+ */
+void getController(){
+
+}
+
+/**
+ * DONE
  * Returns the current wheel angle between 0 and 180 deg
  */
 double getCurrentAngle(){
@@ -79,6 +91,23 @@ double getCurrentAngle(){
 }
 
 /**
+ * DONE
+ * Get the difference between currentAngle and targetAngle
+ * Sign indicate the rotation direction
+ */
+double getDiffAngle(double targetAngle, double currentAngle){
+  auto travelAngle = currentAngle + targetAngle;
+
+  //Change for shortest if to big
+  if(travelAngle < -90){
+    travelAngle = 180 + travelAngle;
+  }
+
+  return travelAngle;
+}
+
+/**
+ * DONE
  * Determine and set the power of the motors
  */
 void setMotorPowers(Vector2D powerVector){
@@ -96,41 +125,45 @@ void setMotorPowers(Vector2D powerVector){
  */
 void moveModule(double targetAngle, double targetSpeedFactor){
 
+  auto angleDiff = getDiffAngle(targetAngle, getCurrentAngle());
+  
   vecPower.x = 0;
 
 }
+
+
 
 /**
  * Get the X component of the power vector, so the translation power
  * the return value must be between 0 and 1
  */
-double getTransComponent(double targetSpeed){
-  //TODO
-}
+// double getTransComponent(double targetSpeed){
+//   //TODO
+// }
 
 /**
  * Get the Y component of the power vector, so the rotation power
  * the return value must be between 0 and 1
  */
-double getPivotComponent(double targetAngle, double currentAngle){
-  //Calculate the difference between curent and target, corresponds to rotation angle
-  auto travelAngle = SETPOINT - currentAngle + targetAngle;
+// double getPivotComponent(double targetAngle, double currentAngle){
+//   //Calculate the difference between curent and target, corresponds to rotation angle
+//   auto travelAngle = SETPOINT - currentAngle + targetAngle;
 
-  //Change for shortest if to big
-  if(travelAngle < -90){
-    travelAngle = 180 + travelAngle;
-  }
+//   //Change for shortest if to big
+//   if(travelAngle < -90){
+//     travelAngle = 180 + travelAngle;
+//   }
 
-  //Determine the power ratio of the motor, 1=fullPower 0=notMoving
-  if(travelAngle < MAX_ANGLE_ERROR){
-    return 0; //We are close enough
-  }
-  else
-  {
-    return 1; //TODO
-  }
+//   //Determine the power ratio of the motor, 1=fullPower 0=notMoving
+//   if(travelAngle < MAX_ANGLE_ERROR){
+//     return 0; //We are close enough
+//   }
+//   else
+//   {
+//     return 1; //TODO, PID? L.L: Pense pas que PID soit nécessaire
+//   }
   
-}
+// }
 
 //---------------------------------------------------------------------------
 void setup()
@@ -151,6 +184,7 @@ void loop()
   CrcLib::Update();
   apply_cmds();
 
+  getController();
   moveModule(joyAngle, joySpeed);
 
   // if (checking_1) {
