@@ -22,6 +22,11 @@ namespace math
             return sqrt(total);
         }
 
+        Vector<T, D> normalize() {
+            auto norm = this->norm();
+            
+        }
+
         // static Vector rotate(const Angle &angle)
         // {
         //     auto len = norm();
