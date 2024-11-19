@@ -2,27 +2,25 @@
 #include <Encoder.h>
 #include <PID_RT.h>
 #include <Decodeur.h>
+#include <speedCalculation.hpp>
+#include <controller.hpp>
+#include "math/vectors.hpp"
+using math::cartesian::Vec2D;
 
 const int MAX_MOTEUR_POWER = 127;
 const int MAX_ANGLE_ERROR = 5; //Allow 5 deg dif from target angle
 const double SETPOINT = 0;
 
-struct Vector2D{
-  float x = 0;
-  float y = 0;
-};
-
 float speed = 0, max_pulse = 0, min_pulse = 0;
 bool checking_1 = true;
 double joyAngle = 0;
-double joySpeed = 1;
-
-int vecPowX = 1;
-int vecPowY = 1;
-
-Vector2D vecPower; //x=translationPower   y=rotationPower
+double joySpeed = 0;
 
 Decodeur decodeur(&Serial);
+Controller ctrl;
+
+int printDelai = 250;
+int printTimer = millis();
 // PID_RT pid;
 
 /**
@@ -44,7 +42,7 @@ void apply_cmds()
     // change the angle
     auto newA = decodeur.getArg(0);
     if (newA > 180) newA -= 180;
-    target_angle = newA;
+    //target_angle = newA;
     break;
   }
   case 'I': {
@@ -68,102 +66,28 @@ void apply_cmds()
  * Get Controller inputs
  */
 void getController(){
-
+  joyAngle = ctrl.get_translation_vec().angle();
+  joySpeed = ctrl.get_translation_vec().norm();
 }
 
-/**
- * DONE
- * Returns the current wheel angle between 0 and 180 deg
- */
-double getCurrentAngle(){
-  //Get encoder value, make sure the value is between 0 and 4160 (Observation de Félix: L'encodeur retour des fois 8000)
-  double enco = constrain((CRC_PWM_12, HIGH), 0.0, 4160.0);
 
-  //Calculate angle
-  double angleAct = enco/4160.0*360;
-  
-  //set angle between 0 and 180
-  if (angleAct > 180)
-  {
-    angleAct = angleAct - 180;
-  }
-  return angleAct;
-}
-
-/**
- * DONE
- * Get the difference between currentAngle and targetAngle
- * Sign indicate the rotation direction
- */
-double getDiffAngle(double targetAngle, double currentAngle){
-  auto travelAngle = currentAngle + targetAngle;
-
-  //Change for shortest if to big
-  if(travelAngle < -90){
-    travelAngle = 180 + travelAngle;
-  }
-
-  return travelAngle;
-}
 
 /**
  * DONE
  * Determine and set the power of the motors
  */
-void setMotorPowers(Vector2D powerVector){
-  //TODO Verify this
-  double powerA = constrain(powerVector.x + powerVector.y, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
-  double powerB = constrain(powerVector.x - powerVector.y, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+void setMotorPowers(Vec2D powerVector){
+  //Set power according to ratio
+  powerVector.set_y(powerVector.y() * MAX_MOTEUR_POWER);
+  powerVector.set_x(powerVector.x() * MAX_MOTEUR_POWER);
+
+  //TODO Verify this, Si on reduit un on devrait réduire l'autre de la même proportion non?
+  double powerA = constrain(powerVector.x() + powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+  double powerB = constrain(powerVector.x() - powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
 
   CrcLib::SetPwmOutput(CRC_PWM_1, powerA);
   CrcLib::SetPwmOutput(CRC_PWM_2, powerB);
 }
-
-/**
- * Get and apply the translation and rotation components
- * based on the move joystick(left) angle and scale
- */
-void moveModule(double targetAngle, double targetSpeedFactor){
-
-  auto angleDiff = getDiffAngle(targetAngle, getCurrentAngle());
-  
-  vecPower.x = 0;
-
-}
-
-
-
-/**
- * Get the X component of the power vector, so the translation power
- * the return value must be between 0 and 1
- */
-// double getTransComponent(double targetSpeed){
-//   //TODO
-// }
-
-/**
- * Get the Y component of the power vector, so the rotation power
- * the return value must be between 0 and 1
- */
-// double getPivotComponent(double targetAngle, double currentAngle){
-//   //Calculate the difference between curent and target, corresponds to rotation angle
-//   auto travelAngle = SETPOINT - currentAngle + targetAngle;
-
-//   //Change for shortest if to big
-//   if(travelAngle < -90){
-//     travelAngle = 180 + travelAngle;
-//   }
-
-//   //Determine the power ratio of the motor, 1=fullPower 0=notMoving
-//   if(travelAngle < MAX_ANGLE_ERROR){
-//     return 0; //We are close enough
-//   }
-//   else
-//   {
-//     return 1; //TODO, PID? L.L: Pense pas que PID soit nécessaire
-//   }
-  
-// }
 
 //---------------------------------------------------------------------------
 void setup()
@@ -176,6 +100,8 @@ void setup()
 
   // Pinmode pour le PWM
   pinMode(CRC_PWM_12, INPUT);
+
+  Serial.println("Setup Done");
 }
 
 void loop()
@@ -185,25 +111,19 @@ void loop()
   apply_cmds();
 
   getController();
-  moveModule(joyAngle, joySpeed);
+  Vec2D vector = SC::calculate(SC::getCurrentAngle(), joyAngle, joySpeed);
 
-  // if (checking_1) {
-  //   CrcLib::SetPwmOutput(CRC_PWM_1, speed);
-  //   CrcLib::SetPwmOutput(CRC_PWM_2, 0);
-  // } else {
-  //   CrcLib::SetPwmOutput(CRC_PWM_1, 0);
-  //   CrcLib::SetPwmOutput(CRC_PWM_2, speed);
-  // }
+  if(millis() - printTimer >= printDelai){
+    printTimer = millis();
 
-  // auto pulse = pulseIn(CRC_PWM_12, HIGH);
-  // if (pulse > max_pulse)
-  //   max_pulse = pulse;
-  // if (pulse < min_pulse)
-  //   min_pulse = pulse;
+    Serial.println(joyAngle);
+    Serial.println(joySpeed);
 
-  // Serial.println(
-  //     "pulse: " + String(pulse) +
-  //     "\tmin pulse: " + String(min_pulse) +
-  //     "\tmax pulse: " + String(max_pulse) +
-  //     "\ttarg: " + String(target_angle));
+    // Serial.println("trans: " + String(vector.x()));
+    // Serial.println("ang  : " + String(vector.y()));
+    // Serial.println("test sin(90)" + String(sin(90*M_PI/180)));
+    // Serial.println();
+  }
+
+  //setMotorPowers(vector);
 }
