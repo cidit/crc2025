@@ -2,29 +2,64 @@
 #include "speedCalculation.hpp"
 #include "math.h"
 #include "math/vectors.hpp"
+#include <PID_RT.h>
 using math::cartesian::Vec2D;
+
+PID_RT pid;
+double rPower;
+Vec2D vecPower;
+
+/**
+ * Initialise the default values for the calculations
+ * Must be call in Setup()
+ */
+void SC::init(){
+  pid.setPoint(0);
+  pid.setReverse(false);
+  pid.setOutputRange(-1,1);
+  pid.setK(0.005, 0.00, 0.0); //Proportionnal, Integral, Derivative
+  pid.start();
+}
 
 /**
  * Calculate the speed vector (translation,angular) of a Swerve module
- * @param currentAngle : absolute angle of wheel between 0 and 360
  * @param targetAngle : desired angle of wheel between 0 and 360
- * @param speedFactor : Multiplication factor for speed between -1 and 1
- * @return speedVector {angularComponent, translationComponent}
+ * @param tPower : Multiplication factor for speed between -1 and 1 for trnaslation
+ * @return vecPower {angularComponent, translationComponent}
  */
-Vec2D SC::calculate(double currentAngle, double targetAngle, double speedFactor){
-    Vec2D vecSpeed;
+Vec2D SC::calculate(double targetAngle, double tPower){
+    vecPower.set_x(tPower);
 
-    double diffAngle = getDiffAngle(currentAngle, targetAngle);
+    double diffAngle = getDiffAngle(getCurrentAngle(), targetAngle);
+
+    if(pid.compute(diffAngle)){
+      vecPower.set_y(pid.getOutput());
+    }
+  //     if(angleAct > 180){
+  //   angleAct = angleAct-180;
+  // }
+  // norAngle = setpoint-angleAct+offset;
+  // oppAngle = 180 + norAngle;
+
+  //   if (abs(norAngle) > abs(oppAngle)) {
+  //     if (pid.compute(oppAngle)) {
+  //       rPower = pid.getOutput();
+  //     } 
+  //   } else {
+  //     if (pid.compute(norAngle)) {
+  //       rPower = pid.getOutput();
+  //     } 
+  //   }
 
     //Find the absolute components of the speed vector
-    vecSpeed.set_y(getAngularComponent(fabs(diffAngle), fabs(speedFactor)));
-    vecSpeed.set_x(getTranslationComponent(fabs(diffAngle), fabs(speedFactor)));
+    // vecSpeed.set_y(getAngularComponent(fabs(diffAngle), fabs(speedFactor)));
+    // vecSpeed.set_x(getTranslationComponent(fabs(diffAngle), fabs(speedFactor)));
 
     //Apply the good sign
-    vecSpeed.set_y(diffAngle < 0   ? vecSpeed.y()  : -vecSpeed.y());
-    vecSpeed.set_x(speedFactor < 0 ? -vecSpeed.x() : vecSpeed.x());
+    // vecSpeed.set_y(diffAngle < 0   ? vecSpeed.y()  : -vecSpeed.y());
+    // vecSpeed.set_x(speedFactor < 0 ? -vecSpeed.x() : vecSpeed.x());
 
-    return vecSpeed;
+    return vecPower;
 }
 
 
@@ -38,6 +73,7 @@ double degToRad(double deg){
 /**
  * Get the difference between currentAngle and targetAngle
  * Sign indicate the rotation direction
+ * @return Return an angle value between -90 and 90 deg
  */
 double SC::getDiffAngle(double currentAngle, double targetAngle){
   auto travelAngle = targetAngle - currentAngle;

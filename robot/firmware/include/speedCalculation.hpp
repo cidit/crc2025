@@ -11,7 +11,8 @@ namespace SC
         double translationComponent;
     };
 
-    Vec2D calculate(double currentAngle, double targetAngle, double speedFactor);
+    void init();
+    Vec2D calculate(double targetAngle, double speedFactor);
     double getDiffAngle(double targetAngle, double currentAngle);
     double getAngularComponent(double diffAngle, double speedFactor);
     double getTranslationComponent(double diffAngle, double speedFactor);

@@ -1,6 +1,5 @@
 #include <CrcLib.h>
 #include <Encoder.h>
-#include <PID_RT.h>
 #include <Decodeur.h>
 #include <speedCalculation.hpp>
 #include <controller.hpp>
@@ -14,7 +13,7 @@ const double SETPOINT = 0;
 float speed = 0, max_pulse = 0, min_pulse = 0;
 bool checking_1 = true;
 double joyAngle = 0;
-double joySpeed = 0;
+double joySpeed = 1;
 
 Decodeur decodeur(&Serial);
 Controller ctrl;
@@ -62,18 +61,8 @@ void apply_cmds()
   Serial.println(ack? '!': '?');
 }
 
-/**
- * Get Controller inputs
- */
-void getController(){
-  joyAngle = ctrl.get_translation_vec().angle();
-  joySpeed = ctrl.get_translation_vec().norm();
-}
-
-
 
 /**
- * DONE
  * Determine and set the power of the motors
  */
 void setMotorPowers(Vec2D powerVector){
@@ -102,22 +91,30 @@ void setup()
   pinMode(CRC_PWM_12, INPUT);
 
   Serial.println("Setup Done");
+
+  SC::init();
 }
 
 void loop()
 {
   decodeur.refresh();
   CrcLib::Update();
+  ctrl.update();
   apply_cmds();
 
-  getController();
-  Vec2D vector = SC::calculate(SC::getCurrentAngle(), joyAngle, joySpeed);
+  
 
-  if(millis() - printTimer >= printDelai){
+  // Vec2D vector = SC::calculate(ctrl.get_left_joy_vec().angle(), ctrl.get_left_joy_vec().norm());
+  // setMotorPowers(vector);
+
+  if (millis() - printTimer >= printDelai) {
     printTimer = millis();
 
-    Serial.println(joyAngle);
-    Serial.println(joySpeed);
+    Serial.println("Angle: " + String(ctrl.get_left_joy_angle()));
+    Serial.println("Norm : " + String(ctrl.get_left_joy_norm()));
+
+    // Serial.println(joyAngle);
+    // Serial.println(joySpeed);
 
     // Serial.println("trans: " + String(vector.x()));
     // Serial.println("ang  : " + String(vector.y()));
@@ -125,5 +122,7 @@ void loop()
     // Serial.println();
   }
 
-  //setMotorPowers(vector);
 }
+
+
+//TODO : powerA = velocity+rPower

@@ -25,6 +25,10 @@ namespace math
         Vector<T, D> normalize() {
             auto norm = this->norm();
             
+            for (auto i = 0; i < D; i++)
+            {
+                components[i] = components[i] / norm;   
+            }
         }
 
         // static Vector rotate(const Angle &angle)
