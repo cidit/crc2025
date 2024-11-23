@@ -6,31 +6,29 @@ using math::cartesian::Vec2D;
 class Controller{
 
     public:
+        struct Joy{
+            double x;
+            double y;
+            double norm;
+            double angleDeg;
+            double angleRad;
+        };
         Controller();
         void update();
 
         //Getter Functions
-        Vec2D get_left_joy_vec() {return _vectorJoyLeft;}
-        double get_left_joy_angle() {return _angleJoyLeft;}
-        double get_left_joy_norm() {return _normJoyLeft;}
+        Joy get_left_joy() {return _joyLeft;}
+        Joy get_right_joy_vec() {return _joyRight;}
 
-        Vec2D get_right_joy_vec() {return _vectorJoyRight;}
-        double get_right_joy_angle() {return _angleJoyRight;}
-        double get_right_joy_norm() {return _normJoyRight;}
-    
     private:
         //Functions
-        double rads(Vec2D vector);
+        double rads(Joy j);
         double radToDeg(double radian);
         double cartToPolNorm(Vec2D vector);
+        void calculateLeftJoy();
+        void calculateRightJoy();
 
-        // Joystick Gauche
-        Vec2D _vectorJoyLeft;
-        double _angleJoyLeft;
-        double _normJoyLeft;
-
-        // Joystick Droit
-        Vec2D _vectorJoyRight;
-        double _angleJoyRight;
-        double _normJoyRight;
+        // Values for Joystick
+        Joy _joyLeft;
+        Joy _joyRight;
 };

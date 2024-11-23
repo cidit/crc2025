@@ -18,7 +18,7 @@ double joySpeed = 1;
 Decodeur decodeur(&Serial);
 Controller ctrl;
 
-int printDelai = 250;
+int printDelai = 500;
 int printTimer = millis();
 // PID_RT pid;
 
@@ -110,8 +110,11 @@ void loop()
   if (millis() - printTimer >= printDelai) {
     printTimer = millis();
 
-    Serial.println("Angle: " + String(ctrl.get_left_joy_angle()));
-    Serial.println("Norm : " + String(ctrl.get_left_joy_norm()));
+    Serial.println("Angle: " + String(ctrl.get_left_joy().angleRad));
+    Serial.println("Norm : " + String(ctrl.get_left_joy().norm));
+    Serial.println("X    : " + String(ctrl.get_left_joy().x));
+    Serial.println("Y    : " + String(ctrl.get_left_joy().y));
+    Serial.println();
 
     // Serial.println(joyAngle);
     // Serial.println(joySpeed);
