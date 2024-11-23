@@ -104,8 +104,8 @@ void loop()
 
   
 
-  // Vec2D vector = SC::calculate(ctrl.get_left_joy_vec().angle(), ctrl.get_left_joy_vec().norm());
-  // setMotorPowers(vector);
+  //Vec2D vector = SC::calculate(ctrl.get_left_joy_vec().angle(), ctrl.get_left_joy_vec().norm());
+  //setMotorPowers(vector);
 
   if (millis() - printTimer >= printDelai) {
     printTimer = millis();

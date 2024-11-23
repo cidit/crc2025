@@ -27,37 +27,19 @@ void SC::init(){
  * @param tPower : Multiplication factor for speed between -1 and 1 for trnaslation
  * @return vecPower {angularComponent, translationComponent}
  */
-Vec2D SC::calculate(double targetAngle, double tPower){
-    vecPower.set_x(tPower);
+Vec2D SC::calculate(double targetAngle, double speedFactor){
+    Vec2D vecSpeed;
 
     double diffAngle = getDiffAngle(getCurrentAngle(), targetAngle);
 
-    if(pid.compute(diffAngle)){
-      vecPower.set_y(pid.getOutput());
-    }
-  //     if(angleAct > 180){
-  //   angleAct = angleAct-180;
-  // }
-  // norAngle = setpoint-angleAct+offset;
-  // oppAngle = 180 + norAngle;
-
-  //   if (abs(norAngle) > abs(oppAngle)) {
-  //     if (pid.compute(oppAngle)) {
-  //       rPower = pid.getOutput();
-  //     } 
-  //   } else {
-  //     if (pid.compute(norAngle)) {
-  //       rPower = pid.getOutput();
-  //     } 
-  //   }
 
     //Find the absolute components of the speed vector
-    // vecSpeed.set_y(getAngularComponent(fabs(diffAngle), fabs(speedFactor)));
-    // vecSpeed.set_x(getTranslationComponent(fabs(diffAngle), fabs(speedFactor)));
+    vecSpeed.set_y(getAngularComponent(fabs(diffAngle), fabs(speedFactor)));
+    vecSpeed.set_x(getTranslationComponent(fabs(diffAngle), fabs(speedFactor)));
 
     //Apply the good sign
-    // vecSpeed.set_y(diffAngle < 0   ? vecSpeed.y()  : -vecSpeed.y());
-    // vecSpeed.set_x(speedFactor < 0 ? -vecSpeed.x() : vecSpeed.x());
+    vecSpeed.set_y(diffAngle < 0   ? vecSpeed.y()  : -vecSpeed.y());
+    vecSpeed.set_x(speedFactor < 0 ? -vecSpeed.x() : vecSpeed.x());
 
     return vecPower;
 }
