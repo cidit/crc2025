@@ -20,18 +20,24 @@ def part_3(words):
     ### You code goes here ###
     ### Votre code va ici ###
 
-    levTable = []
-    for i in range(len(words[0])+1):
-        for j in range(len(words[1])+1):
-            pass
-
-    levDist = lev(words[0], words[1])
-
+    lev_values = build_lev_array(words)
+    print(lev_values)
 
 
     return CAPTCHA
 
-# Find de distance of Levenshtein
+# Build the levenstein array for two words
+def build_lev_array(words:list[str]):
+    lev_table:list[list[int]] = (len(words[0])+1)*[(len(words[1])+1) * [None]]
+
+    for i in range(len(words[0])+1): #Rows
+        for j in range(len(words[1])+1): #Columns
+            lev_table[i][j] = lev(words[0][j:i], words[1][i:j])
+    
+    return lev_table
+
+
+# Find de distance of Levenshtein between a and b
 def lev(a, b):
     #Find lenght of words
     _a = len(a)
@@ -40,6 +46,6 @@ def lev(a, b):
     if min(_a, _b)==0:
         return max(_a, _b)
     elif a[0] == b[0]:
-        lev(a[1:], b[1:])
+        return lev(a[1:], b[1:])
     else:
-        return 1+min(lev(a[1:,b]), lev(a,b[1:]), lev(a[1:], b[1:]))
+        return 1+min(lev(a[1:], b), lev(a, b[1:]), lev(a[1:], b[1:]))
