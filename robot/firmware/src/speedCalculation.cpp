@@ -31,7 +31,7 @@ Vec2D SC::calculate(double targetAngle, double speedFactor){
     Vec2D vecSpeed;
 
     double diffAngle = getDiffAngle(getCurrentAngle(), targetAngle);
-    Serial.println(getCurrentAngle());
+    //Serial.println(getCurrentAngle());
 
     //Find the absolute components of the speed vector
     vecSpeed.set_y(getAngularComponent(fabs(diffAngle), fabs(speedFactor)));
