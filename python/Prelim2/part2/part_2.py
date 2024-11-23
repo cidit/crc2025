@@ -4,6 +4,7 @@
 This is the template file for the part 2 of the Prelim 2.
 Ceci est le fichier template pour la partie 2 du Prelim 2.
 """
+import math
 
 def part_2(d: int, h: int, b: int, m_cost: float, margin: float) -> float:
     """
@@ -22,6 +23,22 @@ def part_2(d: int, h: int, b: int, m_cost: float, margin: float) -> float:
     price = 0
     ### You code goes here ###
     ### Votre code va ici ###
-    
-
+    _top = top(d)
+    _side = side(d, h)
+    _brim = brim(_top, d, b)
+    price = _price(_top+_side+_brim, m_cost, margin)
+    print(price)
     return price
+
+def top(d:int)->float:
+    return math.pi * pow(d/2.0, 2)
+
+def side(d:int, h:int)->float:
+    return 2 * math.pi * (d/2.0) * h
+
+def brim(top:float, d:int, b:int)->float:
+    return math.pi * pow(b + d/2.0, 2) - top
+
+def _price(materials:float, cost:float, profit:float):
+    print(materials)
+    return round(materials * cost * profit * 100)/100

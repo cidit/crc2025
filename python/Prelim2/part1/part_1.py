@@ -19,7 +19,13 @@ def part_1(equation: str) -> int:
     ### You code goes here ###
     ### Votre code va ici ###
 
-    
+    if equation.find("+") == -1:
+        #On multiply
+        values = equation.split("*", 1)
+        result = int(int(values[0]) * values[1])
+    else:
+        values = equation.split("+", 1)
+        result = int(values[0] + values[1])
 
     return result
 

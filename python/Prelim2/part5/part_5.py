@@ -4,6 +4,9 @@
 This is the template file for the part 5 of the Prelim 2.
 Ceci est le fichier template pour la partie 5 du Prelim 2.
 """
+from math import cos, tan, sqrt, pi
+
+GRAVITY = 9.81
 
 def part_5(h: int, d: int, angle: int):
     """
@@ -18,9 +21,15 @@ def part_5(h: int, d: int, angle: int):
         float: the speed at which the projectile needs to be thrown
     """
     initial_speed = 0
-    ### You code goes here ###
-    ### Votre code va ici ###
-
-
+    angle = rad(angle)
+    
+    initial_speed = sqrt(
+        (GRAVITY * d**2)/
+        (2 * cos(angle)**2 * (h + d * tan(angle)))
+    )
+    initial_speed = round(initial_speed, 2)
 
     return initial_speed
+
+def rad(deg: int) -> float:
+    return deg * pi/ 180.0

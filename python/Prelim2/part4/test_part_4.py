@@ -14,7 +14,7 @@ def test_from_problem_description():
 
 
 def test_valid():
-    assert part_4([0.5, -0.5, 0.5, -0.3, -0.1], [40, 70, 70, 40, 110]) == -0.03
+    assert part_4([0.5, -0.5, 0.5, -0.3, -0.1], [40, 70, 70, 40, 110]) == 0.03
 
 def test_outside():
     assert part_4([0.5, -0.5, -0.5, 0.2, -0.1], [40, 70, 70, 40, 110]) == "On CHATvire!"

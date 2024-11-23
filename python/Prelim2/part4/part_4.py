@@ -21,7 +21,19 @@ def part_4(weights, positions):
     ### You code goes here ###
     ### Votre code va ici ###
 
+    gauche:float = 0
+    droite:float = 0
 
+    for i in range(len(weights)):
+        if positions[i] < 0:
+            gauche += weights[i] * positions[i]
+        else:
+            droite += weights[i] * positions[i]
 
+    diff = gauche + droite
+    position = round(-diff)/100.0
+
+    if position < -0.5 or position > 0.5:
+        return error_message
 
     return position
