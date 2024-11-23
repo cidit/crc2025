@@ -5,30 +5,52 @@
 using math::cartesian::Vec2D;
 
 /**
- * 
+ * Constructeur
  */
 Controller::Controller(){}
 
-
+/**
+ * Update internal variables
+ * Must called in loop
+ */
 void Controller::update(){
-    _vectorJoyLeft.set_x(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
-    _vectorJoyLeft.set_y(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y));
-    _angleJoyLeft = radToDeg(rads(_vectorJoyLeft));
-    _normJoyLeft = cartToPolNorm(_vectorJoyLeft);
+    calculateLeftJoy();
+}
 
-    _vectorJoyRight.set_x(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X));
-    _vectorJoyRight.set_y(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y));
-    _angleJoyRight = radToDeg(rads(_vectorJoyRight));
-    _normJoyRight = cartToPolNorm(_vectorJoyRight);
+//-------- Getter Functions ----------------
+/**
+ * @return A struct containing information on the joystick
+ */
+void Controller::calculateLeftJoy(){
+    //Get joystick position entre -1.0 et 1.0, rounded tom 0.0
+    _joyLeft.x = -roundf(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X)/12.80)/10.0;
+    _joyLeft.y = roundf(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)/12.80)/10.0;
+
+    //On enleve le dead zone au centre du joy
+    if(_joyLeft.x < 0.1 && _joyLeft.x > 0.1){
+        _joyLeft.x = 0;
+    }
+    if(_joyLeft.y < 0.1 && _joyLeft.y > 0.1){
+        _joyLeft.y = 0;
+    }
+
+    //Calcul de l'angle, ne calcule pas si le joy est au centre
+    if(_joyLeft.x != 0 || _joyLeft.y != 0){
+        _joyLeft.angleRad = atan2(_joyLeft.y, _joyLeft.x) + M_PI;
+        _joyLeft.angleDeg = _joyLeft.angleRad * 180.0 / M_PI;
+    }
+
+    //Calcul de la norm (Using minskovski's distances)
+    _joyLeft.norm = constrain(sqrt(pow(_joyLeft.x,2)+pow(_joyLeft.y,2)), 0.0, 1.0);
 }
 
 //-------- Utility Functions ---------------
 /**
  * Finds the angle of a vector in radians
  */
-double Controller::rads(Vec2D vector) {
-    int x = vector.x();
-    int y = vector.y();
+double Controller::rads(Joy j) {
+    int x = j.x;
+    int y = j.y;
 
     double rads;
     rads = atan2(y, x);
