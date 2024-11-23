@@ -17,7 +17,7 @@ void SC::init(){
   pid.setPoint(0);
   pid.setReverse(false);
   pid.setOutputRange(-1,1);
-  pid.setK(0.005, 0.00, 0.0); //Proportionnal, Integral, Derivative
+  pid.setK(0.002, 0.00, 0.0); //Proportionnal, Integral, Derivative
   pid.start();
 }
 

@@ -71,8 +71,8 @@ void setMotorPowers(Vec2D powerVector){
   powerVector.set_x(powerVector.x() * MAX_MOTEUR_POWER);
 
   //TODO Verify this, Si on reduit un on devrait réduire l'autre de la même proportion non?
-  double powerA = constrain(powerVector.x() + powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
-  double powerB = constrain(powerVector.x() - powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+  double powerA = constrain(powerVector.x() + powerVector.y(), -MAX_MOTEUR_POWER/2, MAX_MOTEUR_POWER/2);
+  double powerB = constrain(powerVector.x() - powerVector.y(), -MAX_MOTEUR_POWER/2, MAX_MOTEUR_POWER/2);
 
   CrcLib::SetPwmOutput(CRC_PWM_1, powerA);
   CrcLib::SetPwmOutput(CRC_PWM_2, powerB);
@@ -104,8 +104,8 @@ void loop()
 
   
 
-  // Vec2D vector = SC::calculate(ctrl.get_left_joy_vec().angle(), ctrl.get_left_joy_vec().norm());
-  // setMotorPowers(vector);
+  Vec2D vector = SC::calculate(ctrl.get_left_joy().angleDeg, ctrl.get_left_joy().norm);
+  setMotorPowers(vector);
 
   if (millis() - printTimer >= printDelai) {
     printTimer = millis();
