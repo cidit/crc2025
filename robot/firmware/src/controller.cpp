@@ -45,44 +45,45 @@ void Controller::calculateLeftJoy(){
 }
 
 //-------- Utility Functions ---------------
-/**
- * Finds the angle of a vector in radians
- */
-double Controller::rads(Joy j) {
-    int x = j.x;
-    int y = j.y;
+// /**
+//  * Finds the angle of a vector in radians
+//  */
+// double Controller::rads(Joy j) {
+//     int x = -mapf(j.x, -1.0, 1.0, -100.0, 100.0);
+//     int y = -mapf(j.y, -1.0, 1.0, -100.0, 100.0);
 
-    double rads;
-    rads = atan2(y, x);
+//     double rads;
+//     rads = atan2(y, x) + PI;
 
-    if (y == 1 && x == 0) {
-        rads = 0;  // make other thing to repr no angle
-        return rads;
-    }
-    if (x == 0 && y > 0) {
-        rads = PI / 2;
-        return rads;
-    } else if (x == 0 && y < 1) {
-        rads = 3 * PI / 2;
-        return rads;
-    } else if (x > 0 && y == 1) {
-        rads = 0;
-        return rads;
-    } else if (x < 0 && y == 1) {
-        rads = PI;
-        return rads;
-    }
+//     if (y == 0 && x == 0) {
+//         rads = 0;  // make other thing to repr no angle
+//         return rads;
+//     }
+//     if (x == 0 && y > 0) {
+//         rads = PI / 2;
+//         return rads;
+//     } else if (x == 0 && y < 0) {
+//         rads = 3 * PI / 2;
+//         return rads;
+//     } else if (x > 0 && y == 0) {
+//         rads = 0;
+//         return rads;
+//     } else if (x < 0 && y == 0) {
+//         rads = PI;
+//         return rads;
+//     }
 
-    if (x < 0 && y < 1) {
-        rads = atan2(y, x) + (2 * PI);
-        return rads;
-    } else if (x > 0 && y < 1) {
-        rads = (atan2(y, x)) + 2 * PI;
-        return rads;
-    } else {
-        return rads;
-    }
-}
+//     // if (x < 0 && y < 0) {
+//     //     rads = atan2(y, x) + (2 * PI);
+//     //     return rads;
+//     // } else if (x > 0 && y < 0) {
+//     //     rads = (atan2(y, x)) + 2 * PI;
+//     //     return rads;
+//     // } 
+//     else {
+//         return rads;
+//     }
+// }
 
 /**
  * Convert Degrees to Radian
@@ -97,4 +98,11 @@ double Controller::radToDeg(double radian){
 double Controller::cartToPolNorm(Vec2D vector)
 {
     return sqrt(sq(vector.x()) + sq(vector.y()));
+}
+
+/**
+ * Map but returns a float
+ */
+float Controller::mapf(float x, float in_min, float in_max, float out_min, float out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

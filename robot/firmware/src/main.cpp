@@ -74,6 +74,9 @@ void setMotorPowers(Vec2D powerVector){
   double powerA = constrain(powerVector.x() + powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
   double powerB = constrain(powerVector.x() - powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
 
+  // Serial.println(powerA);
+  // Serial.println(powerB);
+
   CrcLib::SetPwmOutput(CRC_PWM_1, powerA);
   CrcLib::SetPwmOutput(CRC_PWM_2, powerB);
 }
@@ -103,17 +106,17 @@ void loop()
   apply_cmds();
 
   
-
-  //Vec2D vector = SC::calculate(ctrl.get_left_joy_vec().angle(), ctrl.get_left_joy_vec().norm());
-  //setMotorPowers(vector);
+  
+  Vec2D vector = SC::calculate(ctrl.get_left_joy().angleDeg, ctrl.get_left_joy().norm);
+  //Serial.println(vector.x());
+  setMotorPowers(vector);
 
   if (millis() - printTimer >= printDelai) {
     printTimer = millis();
 
+    
     Serial.println("Angle: " + String(ctrl.get_left_joy().angleRad));
     Serial.println("Norm : " + String(ctrl.get_left_joy().norm));
-    Serial.println("X    : " + String(ctrl.get_left_joy().x));
-    Serial.println("Y    : " + String(ctrl.get_left_joy().y));
     Serial.println();
 
     // Serial.println(joyAngle);

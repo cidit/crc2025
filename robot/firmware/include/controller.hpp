@@ -22,11 +22,12 @@ class Controller{
 
     private:
         //Functions
-        double rads(Joy j);
+        //double rads(Joy j);
         double radToDeg(double radian);
         double cartToPolNorm(Vec2D vector);
         void calculateLeftJoy();
         void calculateRightJoy();
+        float mapf(float x, float in_min, float in_max, float out_min, float out_max);
 
         // Values for Joystick
         Joy _joyLeft;
