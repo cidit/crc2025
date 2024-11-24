@@ -107,16 +107,17 @@ void loop()
 
   
   
-  Vec2D vector = SC::calculate(ctrl.get_left_joy().angleDeg, ctrl.get_left_joy().norm);
-  //Serial.println(vector.x());
-  setMotorPowers(vector);
+  // Vec2D vector = SC::calculate(ctrl.get_left_joy().angleDeg, ctrl.get_left_joy().norm);
+  // //Serial.println(vector.x());
+  // setMotorPowers(vector);
 
   if (millis() - printTimer >= printDelai) {
     printTimer = millis();
 
     
-    Serial.println("Angle: " + String(ctrl.get_left_joy().angleRad));
-    Serial.println("Norm : " + String(ctrl.get_left_joy().norm));
+    Serial.println("Angle: " + String(SC::getCurrentAngle()));
+    // Serial.println("Angle: " + String(ctrl.get_left_joy().angleRad));
+    // Serial.println("Norm : " + String(ctrl.get_left_joy().norm));
     Serial.println();
 
     // Serial.println(joyAngle);

@@ -58,14 +58,43 @@ double degToRad(double deg){
  * @return Return an angle value between -90 and 90 deg
  */
 double SC::getDiffAngle(double currentAngle, double targetAngle){
-  auto travelAngle = targetAngle - currentAngle;
 
-  //Change for shortest if to big
-  if(travelAngle < -90){
-    travelAngle = 180 + travelAngle;
+  if(targetAngle > 180){
+    targetAngle =targetAngle-180;
+  }
+  if(currentAngle > 180){
+    currentAngle = currentAngle-180;
+  }
+  auto angleCW = targetAngle-currentAngle;
+  auto angleCCW = 180 + angleCW;
+
+  if (abs(angleCW) > abs(angleCCW)) {
+    return angleCCW;
+  } else {
+    return angleCW;  
   }
 
-  return travelAngle;
+  // NOTES : On a un problème quand on passe de 0-180 à 180-360 sur le joystick
+
+
+
+
+  
+  // if(currentAngle > 180){
+  //   currentAngle = currentAngle -180;
+  // }
+  // if(targetAngle > 180){
+  //   targetAngle = targetAngle -180;
+  // }
+
+  // auto travelAngle = targetAngle - currentAngle;
+
+  // //Change for shortest if to big
+  // if(travelAngle < -90){
+  //   travelAngle = 180 + travelAngle;
+  // }
+
+  // return travelAngle;
 }
 
 /**
@@ -96,6 +125,7 @@ double SC::getCurrentAngle(){
   double enco = constrain(pulseIn(CRC_PWM_12, HIGH), 0.0, 4160.0);
 
   //Calculate angle
+  
   double angleAct = enco/4160.0*360;
 
   return angleAct;
