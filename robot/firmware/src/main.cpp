@@ -3,13 +3,20 @@
 #include <PID_RT.h>
 #include <Decodeur.h>
 
+// TODO: plot Processed Variable (of angle_pid graph) with serial plotter
+
 const double SETPOINT = 0;
-int target_angle = 0;
-float speed = 0, max_pulse = 0, min_pulse = 0;
-bool checking_1 = true;
+float target_angle_as_ratio = 0;
+bool motors_enabled = false;
 
 Decodeur decodeur(&Serial);
-// PID_RT pid;
+PID_RT angle_pid;
+
+float clamp_angle_0_to_1(float angle_to_clamp)
+{
+  auto wrapped = fmod(angle_to_clamp, 1);
+  return wrapped < 0 ? 1 - wrapped : wrapped;
+}
 
 void apply_cmds()
 {
@@ -24,26 +31,57 @@ void apply_cmds()
   {
     // change the angle
     auto newA = decodeur.getArg(0);
-    if (newA > 180)
-      newA -= 180;
-    target_angle = newA;
+    target_angle_as_ratio = clamp_angle_0_to_1(newA);
     break;
   }
-  case 'I': {
-    // increment
-    // TODO: temporary
-    speed = decodeur.getArg(0);
+  case 'K':
+  {
+    if (decodeur.getArgCount() != 3)
+    {
+      Serial.println("incorrect num of args");
+      ack = false;
+      break;
+    }
+    auto p = decodeur.getArg(0),
+         i = decodeur.getArg(1),
+         d = decodeur.getArg(2);
+    angle_pid.setK(p, i, d);
     break;
   }
-  case 'T' : {
-    // TODO: 
-    checking_1 = !checking_1;
+  case 'M':
+  {
+    motors_enabled = !motors_enabled;
     break;
   }
   default:
     ack = false;
   }
-  Serial.println(ack? '!': '?');
+  Serial.println(ack ? '!' : '?');
+}
+
+/**
+ * reads the angle as a ratio
+ */
+float read_angle_as_ratio()
+{
+  const double PULSE_MAX = 4160; // in micros
+  const double PULSE_MIN = 1; // in micros
+  auto pulse = pulseIn(CRC_PWM_12, HIGH);
+  auto normalized = constrain(pulse - PULSE_MIN, 0.0, PULSE_MAX);
+  auto ratio = normalized / PULSE_MAX;
+  // we do 1 - ratio because the encoder reverses clockwise and counter clockwise
+  return 1-ratio;
+}
+
+enum class Direction
+{
+  CLOCKWISE,
+  COUNTERCLOCKWISE
+};
+
+String direction_to_str(Direction dir)
+{
+  return dir == Direction::CLOCKWISE ? "CLCK" : "CNTR";
 }
 
 void setup()
@@ -56,31 +94,107 @@ void setup()
 
   // Pinmode pour le PWM
   pinMode(CRC_PWM_12, INPUT);
+  angle_pid.setK(300, 0, 0);
+  angle_pid.setPropOnError();
+  angle_pid.setOutputRange(-125, 125);
+  angle_pid.setInterval(1);
+  angle_pid.start();
 }
+
+struct ora_result
+{
+  float shortest;
+  bool reversed;
+};
+
+ora_result optimized_travel(float current, float target)
+{
+  auto zeroed = target - current;
+  auto shortest = zeroed;
+  if (zeroed > 0.5)
+  {
+    shortest = zeroed - 1;
+  }
+  else if (zeroed < -0.5)
+  {
+    shortest = zeroed + 1;
+  }
+
+  auto canOraOptimize = abs(shortest) > 0.25;
+  if (canOraOptimize)
+  {
+    shortest += shortest > 0 ? -0.5 : +0.5;
+  }
+
+  return {shortest, canOraOptimize};
+}
+
+#if false
+// guillaume's fucking thinger
+void loop() {
+  CrcLib::Update();
+  CrcLib::SetPwmOutput(CRC_PWM_1, -127);
+}
+#else
 
 void loop()
 {
-  decodeur.refresh();
   CrcLib::Update();
+  decodeur.refresh();
   apply_cmds();
 
-  if (checking_1) {
-    CrcLib::SetPwmOutput(CRC_PWM_1, speed);
-    CrcLib::SetPwmOutput(CRC_PWM_2, 0);
-  } else {
-    CrcLib::SetPwmOutput(CRC_PWM_1, 0);
-    CrcLib::SetPwmOutput(CRC_PWM_2, speed);
+  auto current_angle = read_angle_as_ratio();
+
+  auto ora_result = optimized_travel(current_angle, target_angle_as_ratio);
+
+  auto direction = ora_result.shortest > 0
+                       ? Direction::CLOCKWISE
+                       : Direction::COUNTERCLOCKWISE;
+
+  auto distance = abs(ora_result.shortest);
+
+  if (angle_pid.compute(abs(ora_result.shortest)) && motors_enabled)
+  {
+    // Serial.print("computed");
+    auto output = angle_pid.getOutput();
+
+    switch (direction)
+    {
+    case Direction::CLOCKWISE:
+    {
+      CrcLib::SetPwmOutput(CRC_PWM_1, -output);
+      CrcLib::SetPwmOutput(CRC_PWM_2, output);
+      break;
+    }
+    case Direction::COUNTERCLOCKWISE:
+    {
+      CrcLib::SetPwmOutput(CRC_PWM_1, output);
+      CrcLib::SetPwmOutput(CRC_PWM_2, -output);
+      break;
+    }
+    }
   }
 
-  auto pulse = pulseIn(CRC_PWM_12, HIGH);
-  if (pulse > max_pulse)
-    max_pulse = pulse;
-  if (pulse < min_pulse)
-    min_pulse = pulse;
-
-  Serial.println(
-      "pulse: " + String(pulse) +
-      "\tmin pulse: " + String(min_pulse) +
-      "\tmax pulse: " + String(max_pulse) +
-      "\ttarg: " + String(target_angle));
+  if (!motors_enabled)
+  {
+    CrcLib::SetPwmOutput(CRC_PWM_1, 0);
+    CrcLib::SetPwmOutput(CRC_PWM_2, 0);
+  }
+  static long last_print = 0;
+  if (millis() - last_print > 1000)
+  {
+    last_print = millis();
+    Serial.println(
+        "curr: " + String(current_angle) +
+        "  taag: " + String(target_angle_as_ratio) +
+        // "  taze: " + String(zeroed) +
+        "  opti: " + String(ora_result.shortest) +
+        "  dist: " + String(distance) +
+        "  dir: " + String(direction_to_str(direction)) +
+        "  [p " + String(angle_pid.getKp()) + "|i " + String(angle_pid.getKi()) + "|d " + String(angle_pid.getKd()) + "]" +
+        "  out: " + String(angle_pid.getOutput()) +
+        "");
+  }
 }
+
+#endif
