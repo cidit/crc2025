@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rotation reverse kinematics example</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script>
+        function applyRotation(type, event) {
+            $(`#${type}-pos`).css("transform", `rotate(${event.target.value}turn)`)
+            $(`#${type}-label`).text(event.target.value)
+        }
+        function showTooltip(type) {
+            $(`#${type}-tooltip`).toggle(true)
+        }
+        function hideTooltip(type) {
+            $(`#${type}-tooltip`).toggle(false)
+        }
+        function clampAngle(angle) {
+            const { floor, abs } = Math
+            return angle / floor(abs(angle))
+        }
+        function calculate() {
+            const { floor, abs } = Math
+            let current = Number($(`#current-label`).text())
+            let target = Number($(`#target-label`).text())
+            let oraOptimization = $(`#apply-reverse-optimization`).is(":checked")
+
+            let zeroed = target - current
+            let shortest = zeroed
+            if (zeroed > 0.5) {
+                shortest = zeroed - 1
+            } else if (zeroed < -0.5) {
+                shortest = zeroed + 1
+            }
+
+            let canOraOptimize = oraOptimization && abs(shortest) > 0.25
+            if (canOraOptimize) {
+                shortest = shortest > 0 ? shortest - 0.5 : shortest + 0.5
+            }
+
+
+            $(`#move-by`).text(shortest.toFixed(2))
+            $(`#distance`).text(abs(shortest).toFixed(2))
+            $(`#direction`).text(
+                shortest == 0
+                    ? "none"
+                    : shortest < 0
+                        ? "counter clockwise"
+                        : "clockwise"
+            )
+            $(`#reversed`).text(canOraOptimize)
+            $(`#optimized-pos`).toggle(canOraOptimize)
+            $(`#optimized-pos`).css("transform", `rotate(${current + shortest}turn)`)
+
+        } 
+    </script>
+</head>
+
+<body class="p-3">
+    <h1 class="text-xl">Rotation reverse kinematics example</h1>
+    <div class="flex flex-wrap w-full p-10 gap-5 ">
+        <div id="knob" class="w-40 h-40 bg-sky-500/20 rounded-full relative z-0 ">
+            <div id="absolute-pos" class="w-full h-full absolute -z-1">
+                <div class="w-0.5 h-7 bg-black mx-auto relative -top-2"></div>
+            </div>
+
+            <div id="current-pos" class="w-full h-full absolute z-2">
+                <div class="w-1 h-4 bg-orange-500 mx-auto relative -top-0"></div>
+            </div>
+
+            <div id="target-pos" class="w-full h-full absolute z-3">
+                <div class="w-0.5 h-4 bg-blue-500 mx-auto relative -top-1">
+                </div>
+            </div>
+
+            <div id="optimized-pos" class="w-full h-full absolute z-3 hidden">
+                <div class="w-1 h-2 bg-red-500 mx-auto relative -top-2">
+                </div>
+            </div>
+        </div>
+        <div class="space-y-2" oninput="calculate()" onchange="calculate()">
+            <h3>positions</h3>
+            <div>
+                <label for="current-range" class="block text-sm font-medium text-gray-900">
+                    current: <span id="current-label" class="text-orange-500">0</span>
+                </label>
+                <span>0</span>
+                <input id="current-range" type="range" value="0" min="0" max="1" step="0.01"
+                    class=" w-40 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    oninput="applyRotation('current', event)" />
+                <span>1</span>
+            </div>
+            <div>
+                <label for="target-range" class="block text-sm font-medium text-gray-900">
+                    target: <span id="target-label" class="text-blue-500">0</span></label>
+                <span>0</span>
+                <input id="target-range" type="range" value="0" min="0" max="1" step="0.01"
+                    class=" w-40 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    oninput="applyRotation('target', event)" />
+                <span>1</span>
+            </div>
+            <div>
+                <div id="apply-reverse-optimization-tooltip"
+                    class="hidden absolute z-10 inline-block tooltip bg-white border-dashed border-2 p-1 rounded-lg top-1 transition-opacity duration-250 w-80">
+                    Oposite and reverese optimization is used when you can optimized the distance travelled by inverting the speed of the motor and moving to the oposite of the target angle.
+                </div>
+                <label for="apply-reverse-optimization" class="block text-sm font-medium text-gray-900">
+                    apply o&r optimization <span
+                        class="inline-block w-5 aspect-square rounded-full bg-gray-700 text-white text-center"
+                        onmouseenter="showTooltip('apply-reverse-optimization')"
+                        onmouseleave="hideTooltip('apply-reverse-optimization')">?</span>
+                </label>
+                <input id="apply-reverse-optimization" type="checkbox" class="w-5 aspect-square" checked />
+            </div>
+        </div>
+        <div class="ring-2 ring-offset-2 rounded-lg p-2 space-y-2 w-80">
+            <h3 class="text-lg">results:</h3>
+            <div class="ring-2 ring-offset-1 rounded-lg p-1">
+                <p>
+                    move by:
+                    <span id="move-by" class="font-bold font-red-500">0</span> turn
+                </p>
+                <p>reversed?: <span id="reversed" class="font-bold text-red-500">false</span></p>
+            </div>
+            <div class="ring-2 ring-offset-1 rounded-lg p-1">
+                <p>distance: <span id="distance" class="font-bold">0</span> turn</p>
+                <p>direction: <span id="direction" class="font-bold">none</span></p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
