@@ -12,13 +12,13 @@ def test_from_problem_description():
     " g^-^ ",
     "|@_@|",
     "s> <i"]
+
     assert part_3(["chatons", "adorables!"]) == [
     " ^-r!^ ",
-    "|'_'| ",
-    "ble<  "]
+    "|'_'|",
+    "ble< "]
 
     assert part_3(["pun'ctu/ation", "pon~ctuat'ion"]) == [
     " ^-^' ",
-    "|''| ",
+    "|''|",
     " o ~ "]
-
