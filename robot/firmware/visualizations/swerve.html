@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Swerve</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script>
+        function applyRotation(type, event) {
+            $(`#${type}`).css("transform", `rotate(${event.target.value}turn)`)
+            $(`#${type}-label`).text(event.target.value)
+        }
+        function clampAngle(angle) {
+            const { floor, abs } = Math
+            return angle / floor(abs(angle))
+        }
+        function drawRing(start, moved) {
+            // TODO: unused       
+            //let [start, end] = [Math.min(current, target), Math.max(current, target)]       
+            //$(`#ring`).css("background", `conic-gradient(transparent ${start}turn, red ${start}turn, blue ${end}turn, transparent ${end}turn )`)
+        }
+        function calculate() {
+            const { floor, abs } = Math
+            let current = Number($(`#current-label`).text())
+            let target = Number($(`#target-label`).text())
+            let zeroed = target - current
+            let optimized = zeroed
+            if (zeroed > 0.5) {
+                optimized = zeroed - 1
+            } else if (zeroed < -0.5) {
+                optimized = zeroed + 1
+            }
+            $(`#move-by`).text(optimized.toFixed(2))
+            $(`#distance`).text(abs(optimized).toFixed(2))
+            $(`#direction`).text(optimized > 0 ? "clockwise" : optimized < 0 ? "counter clockwise" : "none")
+
+            // let [start, end] = [Math.min(current, target), Math.max(current, target)]       
+            // $(`#ring`).css("background", `conic-gradient(transparent ${start}turn, red ${start}turn ${end}turn, transparent ${end}turn )`)     
+        } 
+    </script>
+</head>
+
+<body>
+    <h1>Swerve example</h1>
+    <div class=" flex flex-row flex-wrap w-full p-10 gap-5 ">
+        <div id="knob" class="w-60 h-60 bg-sky-100/75 rounded-full relative z-0 border-solid border-2 border-black">
+            <div id="absolute" class="w-full h-full absolute -z-1">
+                <div class="w-0.5 h-4 bg-black mx-auto relative -top-2"></div>
+            </div>
+
+            <!-- <div id="ring" class="w-full h-full absolute z-0 rounded-full"></div>
+            <div id="ring-over" class="w-full h-full absolute z-1 rounded-full bg-sky-200 scale-95"></div> -->
+
+            <div id="current" class="w-full h-full absolute z-2">
+                <div class="w-1 h-4 bg-orange-500 absolute -top-0 inset-x-1/2"></div>
+                <div id="current-motors" class="flex flex-row absolute w-full h-1/2 top-1/4">
+                    <div class="w-1/2 aspect-square border-solid border-2 border-black rounded-full"></div>
+                    <div class="w-1/2 aspect-square border-solid border-2 border-black rounded-full"></div>
+                </div>
+                <div class="h-1"></div>
+            </div>
+
+            <div id="target" class="w-full h-full absolute z-3">
+                <div class="w-0.5 h-4 bg-blue-500 mx-auto relative -top-1"></div>
+            </div>
+        </div>
+        <div oninput="calculate()" onchange="calculate()">
+            <div>
+                <label for="current-range" class="block mb-2 text-sm font-medium text-gray-900">
+                    current: <span id="current-label" class="text-orange-500">0</span>
+                </label>
+                <span>0</span>
+                <input id="current-range" type="range" value="0" min="0" max="1" step="0.01"
+                    class=" w-40 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    oninput="applyRotation('current', event)" />
+                <span>1</span>
+            </div>
+            <div>
+                <label for="target-range" class="block mb-2 text-sm font-medium text-gray-900">
+                    target: <span id="target-label" class="text-blue-500">0</span></label>
+                <span>0</span>
+                <input id="target-range" type="range" value="0" min="0" max="1" step="0.01"
+                    class=" w-40 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    oninput="applyRotation('target', event)" />
+                <span>1</span>
+            </div>
+            <div>
+                <label for="move">move</label><input id="move" type="checkbox"/>
+            </div>
+            <div>
+                <label for="sim-speed" class="block mb-2 text-sm font-medium text-gray-900">
+                    simulation speed: <span id="target-label" class="text-blue-500">0</span></label>
+                <span>stopped</span>
+                <input id="sim-speed" type="range" value="0" min="0" max="1" step="0.01"
+                    class=" w-40 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    oninput="applyRotation('target', event)" />
+                <span>realtime</span>
+            </div>
+        </div>
+        <div class="ring-2 ring-offset-2 rounded-lg p-2 space-y-2 w-80">
+            <h3 class="text-lg">optimized results:</h3>
+            <p class="ring-2 ring-offset-1 rounded-lg p-1">move by: <span id="move-by"
+                    class="font-bold font-red-500">0</span>turn
+            </p>
+            <div class="ring-2 ring-offset-1 rounded-lg p-1">
+                <p>distance: <span id="distance" class="font-bold">0</span> turn</p>
+                <p>direction: <span id="direction" class="font-bold">none</span></p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

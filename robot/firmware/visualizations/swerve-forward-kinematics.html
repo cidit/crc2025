@@ -8,6 +8,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+
+    <!-- The loading of KaTeX is deferred to speed up page rendering -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+
+    <!-- To automatically render math in text elements, include the auto-render extension: -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+    
     <script>
         function applyRotation(type, event) {
             // $(`#${type}`).css("transform", `rotate(${event.target.value}turn)`)
@@ -75,6 +84,11 @@
                 <p>linear velodity: v(t) = <span id="v" class="font-bold">0</span> turn/t</p>
             </div>
             <p>! The linear velocity goes from -1 to 1 turns but <span class="font-bold">it's torque is doubled</span>, whereas angular velocity's speed can be be twice as fast but with a single motor's worth of torque</p>
+        </div>
+        <div>
+            <h3>Explanations</h3>
+            <p>Wa + wb = Ws</p>
+            <p>Wa - wb = Vs/2</p>
         </div>
     </div>
 </body>
