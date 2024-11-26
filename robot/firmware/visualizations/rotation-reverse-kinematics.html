@@ -13,12 +13,6 @@
             $(`#${type}-pos`).css("transform", `rotate(${event.target.value}turn)`)
             $(`#${type}-label`).text(event.target.value)
         }
-        function showTooltip(type) {
-            $(`#${type}-tooltip`).toggle(true)
-        }
-        function hideTooltip(type) {
-            $(`#${type}-tooltip`).toggle(false)
-        }
         function clampAngle(angle) {
             const { floor, abs } = Math
             return angle / floor(abs(angle))
@@ -103,16 +97,14 @@
                     oninput="applyRotation('target', event)" />
                 <span>1</span>
             </div>
-            <div>
+            <div class="group">
                 <div id="apply-reverse-optimization-tooltip"
-                    class="hidden absolute z-10 inline-block tooltip bg-white border-dashed border-2 p-1 rounded-lg top-1 transition-opacity duration-250 w-80">
+                    class="hidden absolute z-10 inline-block tooltip bg-white border-dashed border-2 p-1 rounded-lg top-1 transition-opacity duration-250 w-80 group-hover:block">
                     Oposite and reverese optimization is used when you can optimized the distance travelled by inverting the speed of the motor and moving to the oposite of the target angle.
                 </div>
                 <label for="apply-reverse-optimization" class="block text-sm font-medium text-gray-900">
-                    apply o&r optimization <span
-                        class="inline-block w-5 aspect-square rounded-full bg-gray-700 text-white text-center"
-                        onmouseenter="showTooltip('apply-reverse-optimization')"
-                        onmouseleave="hideTooltip('apply-reverse-optimization')">?</span>
+                    apply o&r optimization 
+                    <span class="inline-block w-5 aspect-square rounded-full bg-gray-700 text-white text-center">?<span>
                 </label>
                 <input id="apply-reverse-optimization" type="checkbox" class="w-5 aspect-square" checked />
             </div>
