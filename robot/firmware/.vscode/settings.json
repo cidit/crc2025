@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "memory": "cpp",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "iterator_base": "cpp",
+        "list": "cpp"
     }
 }
