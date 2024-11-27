@@ -7,18 +7,58 @@
 #include <Encoder.h>
 #include <swerveModule.hpp>
 #include <controller.hpp>
+#include <Decodeur.h>
 #include "math/vectors.hpp"
 using math::cartesian::Vec2D;
 
 //----- Variables -----
+Decodeur decodeur(&Serial);
+
 double joyAngle = 0;
 double joySpeed = 1;
 
 Controller ctrl;
 SwerveModule swerveA;
+bool motors_enabled = false;
 
 int printDelai = 500;
 int printTimer = millis();
+
+void apply_cmds()
+{
+  if (!decodeur.isAvailable())
+  {
+    return;
+  }
+  bool ack = true;
+  switch (decodeur.getCommand())
+  {
+  // case 'k':
+  // case 'K':
+  // {
+  //   if (decodeur.getArgCount() != 3)
+  //   {
+  //     Serial.println("incorrect num of args");
+  //     ack = false;
+  //     break;
+  //   }
+  //   auto p = decodeur.getArg(0),
+  //        i = decodeur.getArg(1),
+  //        d = decodeur.getArg(2);
+  //   angle_pid.setK(p, i, d);
+  //   break;
+  // }
+  case 'm':
+  case 'M':
+  {
+    motors_enabled = !motors_enabled;
+    break;
+  }
+  default:
+    ack = false;
+  }
+  Serial.println(ack ? '!' : '?');
+}
 
 //----- Main Program ----------------------------------------------------------------------
 void setup(){
@@ -41,12 +81,18 @@ void setup(){
 void loop(){
   CrcLib::Update();
   ctrl.update();
+  decodeur.refresh();
+  apply_cmds();
 
-  //ctrl.get_left_joy().angleDeg ctrl.get_left_joy().norm
-  Vec2D vector = swerveA.calculateRad(7*M_PI/4, 1);
-  Serial.println("X" + String(vector.x()));
-  Serial.println("Y" + String(vector.y()));
-  //swerveA.setMotorPowers(vector);
+  Vec2D vector = swerveA.calculateRad(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
+  // Serial.println("X" + String(vector.x()));
+  // Serial.println("Y" + String(vector.y()));
+  //Vec2D vector(0.2, 0.2);
+  //if(motors_enabled) {
+    swerveA.setMotorPowers(vector);
+  // } else {
+  //   swerveA.setMotorPowers(Vec2D(0, 0));
+  // }
 
   // if (millis() - printTimer >= printDelai) {
   //   printTimer = millis();
@@ -76,46 +122,7 @@ float xy_to_angle(float x, float y) {
     return angle_centered_on_zero > 0? angle_centered_on_zero: 1+angle_centered_on_zero;
 }
 
-// void apply_cmds()
-// {
-//   if (!decodeur.isAvailable())
-//   {
-//     return;
-//   }
-//   bool ack = true;
-//   switch (decodeur.getCommand())
-//   {
-//   case 'A':
-//   {
-//     // change the angle
-//     auto newA = decodeur.getArg(0);
-//     target_angle = clamp_angle_0_to_1(newA);
-//     break;
-//   }
-//   case 'K':
-//   {
-//     if (decodeur.getArgCount() != 3)
-//     {
-//       Serial.println("incorrect num of args");
-//       ack = false;
-//       break;
-//     }
-//     auto p = decodeur.getArg(0),
-//          i = decodeur.getArg(1),
-//          d = decodeur.getArg(2);
-//     angle_pid.setK(p, i, d);
-//     break;
-//   }
-//   case 'M':
-//   {
-//     motors_enabled = !motors_enabled;
-//     break;
-//   }
-//   default:
-//     ack = false;
-//   }
-//   Serial.println(ack ? '!' : '?');
-// }
+
 
 float cosine_optimization(float speed, float angle_travel)
 {

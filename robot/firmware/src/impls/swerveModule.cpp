@@ -6,7 +6,7 @@
 using math::cartesian::Vec2D;
 
 //------- CONSTANTS -------
-const int MAX_MOTEUR_POWER = 127;
+const double MAX_MOTEUR_POWER = 127;
 //-------------------------
 
 //---------------------- CONSTRUCTORS ---------------------------
@@ -82,6 +82,9 @@ Vec2D SwerveModule::calculateRad(double targetAngle, double tPower){
   _vecPower.set_y(getAngularComponentRad(fabs(_moveParam.shortest), fabs(tPower)));
   _vecPower.set_x(getTranslationComponentRad(fabs(_moveParam.shortest), fabs(tPower)));
 
+  Serial.println("X" + String(_vecPower.x()));
+  Serial.println("Y" + String(_vecPower.y()));
+
   //Apply the good sign
   switch(_moveParam.dir){
     case SwerveModule::Direction::CLOCKWISE:
@@ -129,25 +132,17 @@ Vec2D SwerveModule::calculateRad(double targetAngle, double tPower){
  */
 void SwerveModule::setMotorPowers(Vec2D powerVector){
 
-  double powerB = (powerVector.y() - 2*powerVector.x())/2;
-  double powerA = powerVector.y() - powerB;
+  double powerB = powerVector.y() + powerVector.x();
+  double powerA = powerVector.y() - powerVector.x();
 
-  Serial.println("PowerA: " + String(powerA));
-  Serial.println("PowerB: " + String(powerB));
+  // Serial.println("PowerA: " + String(powerA));
+  // Serial.println("PowerB: " + String(powerB));
 
   powerA = constrain(powerA*MAX_MOTEUR_POWER, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
   powerB = constrain(powerB*MAX_MOTEUR_POWER, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
 
-  // //Set power according to ratio
-  // powerVector.set_y(powerVector.y() * MAX_MOTEUR_POWER);
-  // powerVector.set_x(powerVector.x() * MAX_MOTEUR_POWER);
-
-  // //TODO Verify this, Si on reduit un on devrait réduire l'autre de la même proportion non?
-  // double powerA = constrain(powerVector.x() + powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
-  // double powerB = constrain(powerVector.x() - powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
-
-  CrcLib::SetPwmOutput(CRC_PWM_1, powerA);
-  CrcLib::SetPwmOutput(CRC_PWM_2, powerB);
+  CrcLib::SetPwmOutput(CRC_PWM_1, -powerA);
+  CrcLib::SetPwmOutput(CRC_PWM_2, -powerB);
 }
 
 

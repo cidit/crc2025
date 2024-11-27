@@ -11,6 +11,10 @@ namespace math
     {
     public:
         T components[D];
+        
+        // TODO: come back to that fucking shit
+        // Vector(): components {0, 0} {}
+        // Vector(T components[D]): components(components) {}
 
         T norm()
         {
@@ -49,6 +53,14 @@ namespace math
 
         class Vec2D: public Vector<double, 2> {
             public:
+                Vec2D() {
+                    components[0] = 0;
+                    components[1] = 0;
+                }
+                Vec2D(double x, double y){
+                    components[0] = x;
+                    components[1] = y;
+                }
                 double x() {
                     return components[0];
                 }
