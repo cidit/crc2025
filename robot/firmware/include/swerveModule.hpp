@@ -18,7 +18,7 @@ class SwerveModule
 
         struct TravelParam
         {
-            float shortest;
+            double shortest;
             Direction wheel; // if the WHEEL of the swerve reversed FWD/BWD
             Direction dir; // the direction of the rotation
         };

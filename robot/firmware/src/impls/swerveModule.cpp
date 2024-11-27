@@ -71,11 +71,12 @@ Vec2D SwerveModule::calculatePIDRad(double targetAngle, double tPower){
  */
 Vec2D SwerveModule::calculateRad(double targetAngle, double tPower){
   //On s'assure que les valeurs passés en param sont conformes au range
-  tPower = constrain(tPower, -1.0, 1.0);
-  targetAngle = constrain(targetAngle, 0, 2*M_PI) / (2*M_PI); //On transforme en tour
+  // tPower = constrain(tPower, -1.0, 1.0);
+  // targetAngle = constrain(targetAngle, 0, 2*M_PI) / (2*M_PI); //On transforme en tour
   
   //Set shortest and dir in _moveParam
-  getShortestAngleRad(getCurrentAngleRad(), targetAngle);
+  //getShortestAngleRad(getCurrentAngleRad(), targetAngle);
+  getShortestAngleRad(0, targetAngle);
 
   //Find the absolute components of the power vector of the entire module
   _vecPower.set_y(getAngularComponentRad(fabs(_moveParam.shortest), fabs(tPower)));
@@ -84,23 +85,31 @@ Vec2D SwerveModule::calculateRad(double targetAngle, double tPower){
   //Apply the good sign
   switch(_moveParam.dir){
     case SwerveModule::Direction::CLOCKWISE:
-      //Pas besoins d'inverser
+      _vecPower.set_y(fabs(_vecPower.y()));
       break;
     case SwerveModule::Direction::COUNTERCLOCKWISE:
-      _vecPower.set_y(-_vecPower.y());
+      _vecPower.set_y(-fabs(_vecPower.y()));
       break;
   }
 
-  switch(_moveParam.wheel){
-    case SwerveModule::Direction::FORWARD:
-      //Pas besoins d'inverser
-      break;
-    case SwerveModule::Direction::BACKWARD:
-      _vecPower.set_x(-_vecPower.x());
-      break;
+  if(targetAngle > M_PI){
+    //Backward
+    _vecPower.set_x(-fabs(_vecPower.x()));
+  }else{
+    //Forward
+    _vecPower.set_x(fabs(_vecPower.x()));
   }
+
+  // switch(_moveParam.wheel){
+  //   case SwerveModule::Direction::FORWARD:
+  //     //Pas besoins d'inverser
+  //     break;
+  //   case SwerveModule::Direction::BACKWARD:
+  //     _vecPower.set_x(-_vecPower.x());
+  //     break;
+  // }
   //Set the translation power
-  _vecPower.set_x(tPower);
+  //_vecPower.set_x(tPower);
     //TODO Scale translation power depending on angular power???
 
 
@@ -184,18 +193,28 @@ void SwerveModule::setMotorPowers(Vec2D powerVector){
  */
 void SwerveModule::getShortestAngleRad(double currentAngle, double targetAngle){
   //Reduce angles to only use half of the circle
-  currentAngle = currentAngle > M_PI ? currentAngle - M_PI : currentAngle;
-  targetAngle  = targetAngle  > M_PI ? targetAngle  - M_PI : targetAngle;
+  // currentAngle = currentAngle > M_PI ? currentAngle - M_PI : currentAngle;
+  // targetAngle  = targetAngle  > M_PI ? targetAngle  - M_PI : targetAngle;
 
   //Calculate travel angle, will be negative
   _moveParam.shortest = targetAngle - currentAngle;
-  _moveParam.dir = Direction::CLOCKWISE;
+  _moveParam.dir = _moveParam.shortest < M_PI ? 
+                                              _moveParam.shortest < M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE 
+                                              : _moveParam.shortest < 3*M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE;
+  
+  //Keep value in a cercle
+  while(_moveParam.shortest > 2*M_PI){
+    _moveParam.shortest = _moveParam.shortest - 2*M_PI;
+  }
+  while(_moveParam.shortest < -2*M_PI){
+    _moveParam.shortest = _moveParam.shortest + 2*M_PI;
+  }
 
   //If the angle is to large take the shortest and reverse
-  if(_moveParam.shortest < -M_PI_2){
-    _moveParam.shortest = M_PI + _moveParam.shortest;
-    _moveParam.dir = Direction::COUNTERCLOCKWISE;
-  }
+  // if(_moveParam.shortest < -M_PI_2){
+  //   _moveParam.shortest = M_PI + _moveParam.shortest;
+  //   _moveParam.dir = Direction::COUNTERCLOCKWISE;
+  // }
 }
 
 /**
@@ -217,6 +236,8 @@ double SwerveModule::getCurrentAngleRad(){
  */
 double SwerveModule::getAngularComponentRad(double shortest, double speedFactor){
     double component = sin(shortest)*speedFactor;
+
+    //component = shortest > M_PI ? -component:component;
     //Serial.println("AngComp: " + String(component));
     return component;
 }

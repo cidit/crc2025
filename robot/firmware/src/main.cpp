@@ -42,22 +42,21 @@ void loop(){
   CrcLib::Update();
   ctrl.update();
 
+  //ctrl.get_left_joy().angleDeg ctrl.get_left_joy().norm
+  Vec2D vector = swerveA.calculateRad(7*M_PI/4, 1);
+  Serial.println("X" + String(vector.x()));
+  Serial.println("Y" + String(vector.y()));
+  //swerveA.setMotorPowers(vector);
 
-  //swerveA.calculateAndApply(ctrl.get_left_joy().angleDeg, ctrl.get_left_joy().norm);
-  Vec2D vector;
-  vector.set_x(0.5);
-  vector.set_y(-0.5);
-  swerveA.setMotorPowers(vector);
+  // if (millis() - printTimer >= printDelai) {
+  //   printTimer = millis();
 
-  if (millis() - printTimer >= printDelai) {
-    printTimer = millis();
-
-    Serial.println("Angle: " + String(ctrl.get_left_joy().angleRad));
-    Serial.println("Norm : " + String(ctrl.get_left_joy().norm));
-    Serial.println("X    : " + String(ctrl.get_left_joy().x));
-    Serial.println("Y    : " + String(ctrl.get_left_joy().y));
-    Serial.println();
-  }
+  //   Serial.println("Angle: " + String(ctrl.get_left_joy().angleRad));
+  //   Serial.println("Norm : " + String(ctrl.get_left_joy().norm));
+  //   Serial.println("X    : " + String(ctrl.get_left_joy().x));
+  //   Serial.println("Y    : " + String(ctrl.get_left_joy().y));
+  //   Serial.println();
+  // }
 
 }
 
