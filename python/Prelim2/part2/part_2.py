@@ -20,15 +20,13 @@ def part_2(d: int, h: int, b: int, m_cost: float, margin: float) -> float:
     Returns:
         float: the price of the custom hat
     """
-    price = 0
-    ### You code goes here ###
-    ### Votre code va ici ###
+    _price = 0
+    
     _top = top(d)
     _side = side(d, h)
     _brim = brim(_top, d, b)
-    price = _price(_top+_side+_brim, m_cost, margin)
-    print(price)
-    return price
+    _price = price(_top+_side+_brim, m_cost, margin)
+    return _price
 
 def top(d:int)->float:
     return math.pi * pow(d/2.0, 2)
@@ -39,6 +37,5 @@ def side(d:int, h:int)->float:
 def brim(top:float, d:int, b:int)->float:
     return math.pi * pow(b + d/2.0, 2) - top
 
-def _price(materials:float, cost:float, profit:float):
-    print(materials)
+def price(materials:float, cost:float, profit:float):
     return round(materials * cost * profit * 100)/100

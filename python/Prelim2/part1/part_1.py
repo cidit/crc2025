@@ -16,16 +16,15 @@ def part_1(equation: str) -> int:
         int: the solution to the CAT math equation
     """
     result = 0
-    ### You code goes here ###
-    ### Votre code va ici ###
 
-    if equation.find("+") == -1:
-        #On multiply
-        values = equation.split("*", 1)
-        result = int(int(values[0]) * values[1])
-    else:
+    if equation.find("+") != -1:
+        # On additionne
         values = equation.split("+", 1)
         result = int(values[0] + values[1])
+    else:
+        # On multiply
+        values = equation.split("*", 1)
+        result = int(int(values[0]) * values[1])
 
     return result
 

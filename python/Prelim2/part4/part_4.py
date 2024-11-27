@@ -18,8 +18,6 @@ def part_4(weights, positions):
     """
     error_message = "On CHATvire!"
     position = 0
-    ### You code goes here ###
-    ### Votre code va ici ###
 
     gauche:float = 0
     droite:float = 0
