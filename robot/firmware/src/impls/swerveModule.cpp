@@ -33,7 +33,7 @@ void SwerveModule::init(double Kp, double Ki, double Kd){
  * @return done - True: Operation completed succesfully, False: Problem
  */
 bool SwerveModule::calculateAndApply(double targetAngle, double tPower){
-  Vec2D vector = calculatePIDRad(targetAngle, tPower);
+  Vec2D vector = calculateRad(targetAngle, tPower);
   setMotorPowers(vector);
 
   //TODO: Implementer la logique false
@@ -116,46 +116,6 @@ Vec2D SwerveModule::calculateRad(double targetAngle, double tPower){
   return _vecPower;
 }
 
-/**
- * Calculate the power vector (translation, angular) of a Swerve module
- * @param targetAngle Desired angle of wheel in rads (0 to 2pi)
- * @param tPower Multiplication factor for translation power between -1.0 and 1.0
- * @return vecPower - {x=translationComponent, y=angularComponent}
- */
-Vec2D SwerveModule::calculateTurns(double targetAngle, double tPower){
-  //On s'assure que les valeurs passés en param sont conformes au range
-  tPower = constrain(tPower, -1.0, 1.0);
-  targetAngle = constrain(targetAngle, 0, 2*M_PI) / (2*M_PI); //On transforme en tour
-
-  _moveParam = getShortestAngleTurn(getCurrentAngleTurn(), targetAngle);
-  //Serial.println(getCurrentAngle());
-
-  //Find the absolute components of the power vector of the entire module
-  _vecPower.set_y(getAngularComponent(fabs(_moveParam.shortest), fabs(tPower)));
-  _vecPower.set_x(getTranslationComponent(fabs(_moveParam.shortest), fabs(tPower)));
-
-  //Apply the good sign
-  switch(_moveParam.dir){
-    case SwerveModule::Direction::CLOCKWISE:
-      //Pas besoins d'inverser
-      break;
-    case SwerveModule::Direction::COUNTERCLOCKWISE:
-      _vecPower.set_y(-_vecPower.y());
-      break;
-  }
-
-  switch(_moveParam.wheel){
-    case SwerveModule::Direction::FORWARD:
-      //Pas besoins d'inverser
-      break;
-    case SwerveModule::Direction::BACKWARD:
-      _vecPower.set_x(-_vecPower.x());
-      break;
-  }
-
-  return _vecPower;
-}
-
 //####################
 //# Motors Functions #
 //####################
@@ -168,13 +128,23 @@ Vec2D SwerveModule::calculateTurns(double targetAngle, double tPower){
  * @param powerVector Vector2D with components between -1.0 and 1.0
  */
 void SwerveModule::setMotorPowers(Vec2D powerVector){
-  //Set power according to ratio
-  powerVector.set_y(powerVector.y() * MAX_MOTEUR_POWER);
-  powerVector.set_x(powerVector.x() * MAX_MOTEUR_POWER);
 
-  //TODO Verify this, Si on reduit un on devrait réduire l'autre de la même proportion non?
-  double powerA = constrain(powerVector.x() + powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
-  double powerB = constrain(powerVector.x() - powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+  double powerB = (powerVector.y() - 2*powerVector.x())/2;
+  double powerA = powerVector.y() - powerB;
+
+  Serial.println("PowerA: " + String(powerA));
+  Serial.println("PowerB: " + String(powerB));
+
+  powerA = constrain(powerA*MAX_MOTEUR_POWER, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+  powerB = constrain(powerB*MAX_MOTEUR_POWER, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+
+  // //Set power according to ratio
+  // powerVector.set_y(powerVector.y() * MAX_MOTEUR_POWER);
+  // powerVector.set_x(powerVector.x() * MAX_MOTEUR_POWER);
+
+  // //TODO Verify this, Si on reduit un on devrait réduire l'autre de la même proportion non?
+  // double powerA = constrain(powerVector.x() + powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+  // double powerB = constrain(powerVector.x() - powerVector.y(), -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
 
   CrcLib::SetPwmOutput(CRC_PWM_1, powerA);
   CrcLib::SetPwmOutput(CRC_PWM_2, powerB);
@@ -250,6 +220,64 @@ double SwerveModule::getTranslationComponentRad(double shortest, double speedFac
     double component = cos(shortest)*speedFactor;
     //Serial.println("TrsComp: " + String(component));
     return component;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------- FONCTIONS NON UTILISÉES: POTENTIELLEMENT INCORRECTES ------------ 
+
+/**
+ * Calculate the power vector (translation, angular) of a Swerve module
+ * @param targetAngle Desired angle of wheel in rads (0 to 2pi)
+ * @param tPower Multiplication factor for translation power between -1.0 and 1.0
+ * @return vecPower - {x=translationComponent, y=angularComponent}
+ */
+Vec2D SwerveModule::calculateTurns(double targetAngle, double tPower){
+  //On s'assure que les valeurs passés en param sont conformes au range
+  tPower = constrain(tPower, -1.0, 1.0);
+  targetAngle = constrain(targetAngle, 0, 2*M_PI) / (2*M_PI); //On transforme en tour
+
+  _moveParam = getShortestAngleTurn(getCurrentAngleTurn(), targetAngle);
+  //Serial.println(getCurrentAngle());
+
+  //Find the absolute components of the power vector of the entire module
+  _vecPower.set_y(getAngularComponent(fabs(_moveParam.shortest), fabs(tPower)));
+  _vecPower.set_x(getTranslationComponent(fabs(_moveParam.shortest), fabs(tPower)));
+
+  //Apply the good sign
+  switch(_moveParam.dir){
+    case SwerveModule::Direction::CLOCKWISE:
+      //Pas besoins d'inverser
+      break;
+    case SwerveModule::Direction::COUNTERCLOCKWISE:
+      _vecPower.set_y(-_vecPower.y());
+      break;
+  }
+
+  switch(_moveParam.wheel){
+    case SwerveModule::Direction::FORWARD:
+      //Pas besoins d'inverser
+      break;
+    case SwerveModule::Direction::BACKWARD:
+      _vecPower.set_x(-_vecPower.x());
+      break;
+  }
+
+  return _vecPower;
 }
 
 //######################
