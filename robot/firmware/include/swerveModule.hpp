@@ -12,13 +12,11 @@ class SwerveModule
         {
             CLOCKWISE,
             COUNTERCLOCKWISE,
-            FORWARD,
-            BACKWARD,
         };
 
         struct TravelParam
         {
-            double shortest;
+            double diff;
             Direction wheel; // if the WHEEL of the swerve reversed FWD/BWD
             Direction dir; // the direction of the rotation
         };
@@ -33,9 +31,9 @@ class SwerveModule
         Vec2D _vecPower; //x=trans, y=angular
         TravelParam _moveParam;
 
-        void getShortestAngleRad(double currentAngle, double targetAngle);
+        void getdiffAngleRad(double currentAngle, double targetAngle);
         double getCurrentAngleRad();
 
-        double getAngularComponentRad(double shortest, double speedFactor);
-        double getTranslationComponentRad(double shortest, double speedFactor);
+        double getAngularComponentRad(double diff, double speedFactor);
+        double getTranslationComponentRad(double diff, double speedFactor);
 };

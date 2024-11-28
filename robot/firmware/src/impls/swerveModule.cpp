@@ -48,16 +48,16 @@ bool SwerveModule::calculateAndApply(double targetAngle, double tPower){
  * @return vecPower - {x=translationComponent, y=angularComponent}
  */
 Vec2D SwerveModule::calculateRad(double targetAngle, double tPower){  
-  //Set shortest and dir in _moveParam
+  //Set diff and dir in _moveParam
   double currentAngle = getCurrentAngleRad();
-  getShortestAngleRad(currentAngle, targetAngle);
+  getdiffAngleRad(currentAngle, targetAngle);
 
   //Find the absolute components of the power vector of the entire module
-  _vecPower.set_y(getAngularComponentRad(fabs(_moveParam.shortest), fabs(tPower)));
-  _vecPower.set_x(getTranslationComponentRad(fabs(_moveParam.shortest), fabs(tPower)));
+  _vecPower.set_y(getAngularComponentRad(fabs(_moveParam.diff), fabs(tPower)));
+  _vecPower.set_x(getTranslationComponentRad(fabs(_moveParam.diff), fabs(tPower)));
 
-  Serial.println("X" + String(_vecPower.x()));
-  Serial.println("Y" + String(_vecPower.y()));
+  // Serial.println("X" + String(_vecPower.x()));
+  // Serial.println("Y" + String(_vecPower.y()));
 
   //Apply the good sign
   switch(_moveParam.dir){
@@ -123,25 +123,33 @@ void SwerveModule::setMotorPowers(Vec2D powerVector){
 //# Functions en radians #
 //########################
 /**
- * Set the shortest angle and spin direction in _moveParam
+ * Set the diff angle and spin direction in _moveParam
  * Also determines travel direction
  * @param currentAngle Wheel angle in radians
  * @param targetAngle Desired angle i radians
  */
-void SwerveModule::getShortestAngleRad(double currentAngle, double targetAngle){
+void SwerveModule::getdiffAngleRad(double currentAngle, double targetAngle){
   //Calculate travel angle, will be negative
-  _moveParam.shortest = targetAngle - currentAngle;
-  _moveParam.dir = _moveParam.shortest < M_PI ? 
-                                              _moveParam.shortest < M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE 
-                                              : _moveParam.shortest < 3*M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE;
+  _moveParam.diff = targetAngle - currentAngle;
+  if(_moveParam.diff >= 0){
+    _moveParam.dir = _moveParam.diff < M_PI ? 
+                      _moveParam.diff > M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE 
+                      :_moveParam.diff > 3*M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE;
+  }
+  else if(_moveParam.diff < 0){
+    _moveParam.dir = _moveParam.diff > -M_PI ? 
+                      _moveParam.diff > -M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE 
+                      :_moveParam.diff > -3*M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE;
+  }
   
-  //Keep value in a cercle
-  while(_moveParam.shortest > 2*M_PI){
-    _moveParam.shortest = _moveParam.shortest - 2*M_PI;
-  }
-  while(_moveParam.shortest < -2*M_PI){
-    _moveParam.shortest = _moveParam.shortest + 2*M_PI;
-  }
+  
+  // //Keep value in a cercle
+  // while(_moveParam.diff > 2*M_PI){
+  //   _moveParam.diff = _moveParam.diff - 2*M_PI;
+  // }
+  // while(_moveParam.diff < -2*M_PI){
+  //   _moveParam.diff = _moveParam.diff + 2*M_PI;
+  // }
 
 }
 
@@ -151,10 +159,11 @@ void SwerveModule::getShortestAngleRad(double currentAngle, double targetAngle){
  */
 double SwerveModule::getCurrentAngleRad(){
   //Get encoder value, make sure the value is between 0 and 4160 (Observation de Félix: L'encodeur retour parfois 8000)
-  double enco = constrain(pulseIn(CRC_PWM_12, HIGH), 0.0, 4160.0);
+  double enco = pulseIn(CRC_PWM_12, HIGH);
 
   //Calculate angle
   double angleAct = enco/4160.0 * (2*M_PI);
+  Serial.println("enco: " + String(enco));
   return angleAct;
 }
 
@@ -162,9 +171,9 @@ double SwerveModule::getCurrentAngleRad(){
  * Get the angular component using a ratio of the difference
  * between current and target angle, round to 0,001
  */
-double SwerveModule::getAngularComponentRad(double shortest, double speedFactor){
+double SwerveModule::getAngularComponentRad(double diff, double speedFactor){
   //TODO : Remplace with PID
-  double component = sin(shortest)*speedFactor;
+  double component = sin(diff)*speedFactor;
   return component;
 }
 
@@ -172,8 +181,8 @@ double SwerveModule::getAngularComponentRad(double shortest, double speedFactor)
  * Get the translation component using a ratio of the difference
  * between current and target angle, round to 0,001
  */
-double SwerveModule::getTranslationComponentRad(double shortest, double speedFactor){
-  double component = cos(shortest)*speedFactor;
+double SwerveModule::getTranslationComponentRad(double diff, double speedFactor){
+  double component = cos(diff)*speedFactor;
   return component;
 }
 
