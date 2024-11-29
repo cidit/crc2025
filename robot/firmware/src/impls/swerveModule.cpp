@@ -70,7 +70,7 @@ Vec2D SwerveModule::calculateRad(double targetAngle, double tPower){
   }
 
   //Determine the sign of the translation component dependind on current and target angle
-  if(targetAngle < M_PI){
+  if(targetAngle <= M_PI){
     //Forward
     if(currentAngle <= M_PI){
       _vecPower.set_x(fabs(_vecPower.x()));
