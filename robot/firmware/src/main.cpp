@@ -139,6 +139,10 @@ String direction_to_str(Direction dir)
 {
   return dir == Direction::CLOCKWISE ? "CLCK" : "CNTR";
 }
+Direction direction_from_sign(float v)
+{
+  return v>0 ? Direction::CLOCKWISE : Direction::COUNTERCLOCKWISE;
+}
 
 void setup()
 {

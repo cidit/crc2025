@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Swerve example forward kinematics</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+        integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+        integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg"
+        crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk"
+        crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            renderMathInElement(document.body, {
+                // customised options
+                // • auto-render specific keys, e.g.:
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '\\[', right: '\\]', display: true }
+                ],
+                // • rendering keys, e.g.:
+                throwOnError: false
+            });
+        });
+    </script>
+    <script>
+
+        function clampAngle(angle) {
+            const { floor, abs } = Math
+            return angle / floor(abs(angle))
+        }
+
+        function changeKinematicType(ktype) {
+            switch (ktype) {
+                case "forward": {
+                    $(`#forward-kinematics`).show()
+                    $(`#reverse-kinematics`).hide()
+                    $(`#forward-tab`).toggleClass("bg-white", true)
+                    $(`#reverse-tab`).toggleClass("bg-white", false)
+                    break
+                }
+                case "reverse": {
+                    $(`#forward-kinematics`).hide()
+                    $(`#reverse-kinematics`).show()
+                    $(`#forward-tab`).toggleClass("bg-white", false)
+                    $(`#reverse-tab`).toggleClass("bg-white", true)
+                    break
+                }
+            }
+        }
+
+        function calculateForwardKinematics() {
+            const { floor, abs } = Math
+
+            let a = Number($(`#a-range`).val())
+            let b = Number($(`#b-range`).val())
+
+            let aVelocity = (a + b)/2
+            let lVelocity = a - b
+
+            $(`#a-label`).text(a.toFixed(2))
+            $(`#b-label`).text(b.toFixed(2))
+            $(`#a-motor`).text(a.toFixed(2))
+            $(`#b-motor`).text(b.toFixed(2))
+
+            $(`#aVelocity-swerve`).text(aVelocity.toFixed(2))
+            $(`#aVelocity-small-gear`).text(lVelocity.toFixed(2))
+        }
+
+        function calculateReverseKinematics() {
+
+        }
+    </script>
+</head>
+
+<body class="p-3">
+    <h1 class="text-xl">Swerve example forward kinematics</h1>
+    <div class="flex flex-row flex-wrap w-full p-10 gap-5 ">
+        <div id="swerve" class="w-60 h-60 rounded-full relative z-0 border-solid border-2 border-black">
+            <div id="absolute" class="w-full h-full absolute -z-1">
+                <div class="w-0.5 h-4 bg-black mx-auto relative -top-2"></div>
+            </div>
+
+            <div id="current-motors" class="flex flex-row absolute w-full h-1/2 top-1/4">
+                <div id="a-motor"
+                    class="w-1/2 aspect-square border-solid border-2 border-black rounded-full bg-orange-500 text-center">
+                    0.00</div>
+                <div id="b-motor"
+                    class="w-1/2 aspect-square border-solid border-2 border-black rounded-full bg-blue-500 text-center">
+                    0.00</div>
+            </div>
+        </div>
+        <div class="rounded-xl ring-2 p-1.5 bg-slate-100">
+            <ul class="relative flex flex-row list-none rounded-t-xl  bg-slate-100" data-tabs="tabs" role="list">
+                <li id="forward-tab" class="z-30 w-1/2 flex justify-center rounded-t-md bg-white">
+                    <a class="z-30 text-center w-4/5 px-0 py-2 text-sm transition-all ease-in-out cursor-pointer text-slate-900 bg-inherit"
+                        role="tab" onclick="changeKinematicType('forward')">
+                        forward kinematics
+                    </a>
+                </li>
+                <li id="reverse-tab" class="z-30 w-1/2 flex justify-center rounded-t-md">
+                    <a class="z-30 text-center w-4/5 px-0 py-2 text-sm transition-all ease-in-out cursor-pointer text-slate-900 bg-inherit"
+                        role="tab" onclick="changeKinematicType('reverse')">
+                        reverse kinematics
+                    </a>
+                </li>
+            </ul>
+            <div id="forward-kinematics" class="bg-white p-2" oninput="calculateForwardKinematics()"
+                onchange="calculateForwardKinematics()">
+                <div class="flex flex-row space-x-2 items-center">
+                    <label for="a-range" class="block mb-2 text-sm font-medium text-gray-900 w-14">
+                        $\omega_{\color{orange}{a}}=$<span id="a-label" class="text-orange-500">0.00</span>
+                    </label>
+                    <span>-1</span>
+                    <input id="a-range" type="range" value="0" min="-1" max="1" step="0.01"
+                        class=" w-40 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                    <span>1</span>
+                </div>
+                <div class="flex flex-row space-x-2 items-center">
+                    <label for="b-range" class="block mb-2 text-sm font-medium text-gray-900 w-14">
+                        $\omega_{\color{blue}{b}}=$<span id="b-label" class="text-blue-500">0.00</span></label>
+                    <span>-1</span>
+                    <input id="b-range" type="range" value="0" min="-1" max="1" step="0.01"
+                        class=" w-40 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                    <span>1</span>
+                </div>
+                <h3 class="text-lg">results:</h3>
+                <div class="p-2">
+                    <p>
+                        $\omega_{\color{red}{s}}(t) =$
+                        <span id="aVelocity-swerve" class="font-bold">0</span>
+                        turn$/t$
+                    </p>
+                    <p>
+                        $\omega_{\color{orange}{a'}}(t) =$
+                        <span id="aVelocity-small-gear" class="font-bold">0</span>
+                        turn$/t$
+                    </p>
+                </div>
+            </div>
+            <div id="reverse-kinematics" class="bg-white p-2 hidden" oninput="calculateReverseKinematics()"
+                onchange="calculateReverseKinematics()">
+                <h3>swerve properties</h3>
+                <div class="flex flex-row space-x-2 items-center">
+                    <label for="a-range" class="block mb-2 text-sm font-medium text-gray-900 w-14">
+                        $\omega$: <span id="a-label" class="text-orange-500">0.00</span>
+                    </label>
+                    <span>-1</span>
+                    <input id="a-range" type="range" value="0" min="-1" max="1" step="0.01"
+                        class=" w-40 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        oninput="applyRotation('a', event)" />
+                    <span>1</span>
+                </div>
+                <div class="flex flex-row space-x-2 items-center">
+                    <label for="b-range" class="block mb-2 text-sm font-medium text-gray-900 w-14">
+                        $v$: <span id="b-label" class="text-blue-500">0.00</span></label>
+                    <span>-1</span>
+                    <input id="b-range" type="range" value="0" min="-1" max="1" step="0.01"
+                        class=" w-40 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        oninput="applyRotation('b', event)" />
+                    <span>1</span>
+                </div>
+                <h3>results:</h3>
+                <div>
+                    <p>
+                        $\omega_{\color{orange}{a}}(t)=$
+                        <span id="a-resulting">0.00</span>
+                         turn$/t$
+                    </p>
+                    <p>
+                        $\omega_{\color{blue}{b}}(t)=$
+                        <span id="b-resulting">0.00</span>
+                         turn$/t$
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="text-lg space-y-2 bg-red-200/20">
+            <h3 class="text-xl">Explanations</h3>
+            <div class="ring-2 rounded-xl text-sm p-2">
+                <h4 class="text-lg">notation:</h4>
+                <p>big wheel: $\color{orange}{a}$</p>
+                <p>small wheel: $\color{orange}{a'}$</p>
+                <p>swerve body: $\color{red}{s}$</p>
+                <p>swerve wheel: $\color{red}{w}$</p>
+                <p>bevel gear ratio: $\color{purple}{b}$</p>
+                <p>circumference wheel: $C_{\color{red}{w}}$</p>
+            </div>
+            <p>swerve relations, forward kinematics</p>
+            <p>$\frac{\omega_{\color{orange}{a}} + \omega_{\color{blue}{b}}}{2} = \omega_{\color{red}{s}}$</p>
+            <p>$\omega_{\color{orange}{a}} - \omega_{\color{blue}{b}} = \omega_{\color{orange}{a}'} =
+                -\omega_{\color{blue}{b}'}$</p>
+            <p>$\omega_{\color{red}{w}}={\color{purple}{b}} * -\omega_{\color{orange}{a'}}={\color{purple}{b}} *
+                \omega_{\color{blue}{b'}}$</p>
+            <p>$v_{\color{red}{w}}=\omega_{\color{red}{w}}C_{\color{red}{w}}$</p>
+            <p>deduced reverse kinematics</p>
+            <p>$\omega_{\color{orange}{a'}}=\frac{\omega_{\color{orange}{a}} - \omega_{\color{blue}{b}}}{2}$</p>
+            <p>$2\omega_{\color{orange}{a'}}=\omega_{\color{orange}{a}} - \omega_{\color{blue}{b}}$</p>
+            <p class="bg-slate-200">$\omega_{\color{orange}{a}} = 2\omega_{\color{orange}{a'}}+\omega_{\color{blue}{b}}$
+            </p>
+            <p>$\omega_{\color{red}{s}}=\omega_{\color{orange}{a}}+\omega_{\color{blue}{b}} $</p>
+            <p>$\omega_{\color{red}{s}}=(2\omega_{\color{orange}{a'}}+\omega_{\color{blue}{b}})+\omega_{\color{blue}{b}}
+                $</p>
+            <p>$\omega_{\color{red}{s}}=2\omega_{\color{orange}{a'}}+2\omega_{\color{blue}{b}}$</p>
+            <p>$\omega_{\color{red}{s}}-2\omega_{\color{orange}{a'}}=2\omega_{\color{blue}{b}}$</p>
+            <p class="bg-slate-200">
+                $\omega_{\color{blue}{b}}=\frac{\omega_{\color{red}{s}}-2\omega_{\color{orange}{a'}}}{2}$</p>
+        </div>
+    </div>
+</body>
+
+</html>
