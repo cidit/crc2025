@@ -42,9 +42,9 @@ void Controller::calculateLeftJoy(){
 
     //Calcul de la norm (Using minskovski's distances)
     _joyLeft.norm = constrain(sqrt(sq(_joyLeft.x)+sq(_joyLeft.y)), -1.0, 1.0);
-    if(_joyLeft.y < 0){
-        _joyLeft.norm = -_joyLeft.norm;
-    }
+    // if(_joyLeft.y < 0){
+    //     _joyLeft.norm = -_joyLeft.norm;
+    // }
 }
 
 //-------- Utility Functions ---------------

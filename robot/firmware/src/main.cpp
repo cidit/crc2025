@@ -84,12 +84,15 @@ void loop(){
   decodeur.refresh();
   apply_cmds();
 
+  Serial.println("joyAngle: " + String(ctrl.get_left_joy().angleRad));
+  Serial.println("joyNorm: " + String(ctrl.get_left_joy().norm));
   Vec2D vector = swerveA.calculateRad(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
-  // Serial.println("X" + String(vector.x()));
-  // Serial.println("Y" + String(vector.y()));
-  //Vec2D vector(0.2, 0.2);
+  //Serial.println("X" + String(vector.x()));
+  //Vec2D vector(0, 0.5);
+  //Serial.println("Y" + String(vector.y()));
   //if(motors_enabled) {
-    swerveA.setMotorPowers(vector);
+  swerveA.setMotorPowers(vector);
+  Serial.println();
   // } else {
   //   swerveA.setMotorPowers(Vec2D(0, 0));
   // }
