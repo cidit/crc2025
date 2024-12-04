@@ -5,7 +5,7 @@ This is the template file for the part 1 of the Prelim 3.
 Ceci est le fichier template pour la partie 1 du Prelim 3.
 """
 
-from itertools import product, accumulate
+from itertools import product
 
 
 def part_1(genes: list[str]) -> float:
