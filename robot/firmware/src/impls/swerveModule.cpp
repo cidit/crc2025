@@ -16,7 +16,6 @@ const double MAX_MOTEUR_POWER = 127;
  */
 void SwerveModule::init(double Kp, double Ki, double Kd){
   _pid.setPoint(0); //Toujours le garder à 0
-  //_pid.setReverse(false);   LL: non implementé dans la librairie alors on s'en fou
   _pid.setOutputRange(0.0, 1.0); //Interval de ratio de puissance angulaire, le signe est appliquer plus tard
   _pid.setK(Kp, Ki, Kd); //Proportionnal, Integral, Derivative
   _pid.start();
@@ -53,12 +52,13 @@ Vec2D SwerveModule::calculateRad(double targetAngle, double tPower){
   getdiffAngleRad(currentAngle, targetAngle);
 
   //Find the absolute components of the power vector of the entire module
-  _vecPower.set_y(getAngularComponentRad(fabs(_moveParam.diff), fabs(tPower)));
-  _vecPower.set_x(getTranslationComponentRad(fabs(_moveParam.diff), fabs(tPower)));
-
-  // Serial.println("X" + String(_vecPower.x()));
-  // Serial.println("Y" + String(_vecPower.y()));
-
+  if(_pid.compute(abs(_moveParam.diff))){
+    _vecPower.set_y(_pid.getOutput());  //getAngularComponentRad(fabs(_moveParam.diff), fabs(tPower))
+    _vecPower.set_x(getTranslationComponentRad(fabs(_moveParam.diff), fabs(tPower)));
+    Serial.print("diff: " + String(_moveParam.diff));
+    Serial.println("  AngPow: " + String(_vecPower.y()));
+  }
+  
   //Apply the good sign
   switch(_moveParam.dir){
     case SwerveModule::Direction::CLOCKWISE:
@@ -106,9 +106,6 @@ void SwerveModule::setMotorPowers(Vec2D powerVector){
 
   double powerB = powerVector.y() + powerVector.x();
   double powerA = powerVector.y() - powerVector.x();
-
-  // Serial.println("PowerA: " + String(powerA));
-  // Serial.println("PowerB: " + String(powerB));
 
   powerA = constrain(powerA*MAX_MOTEUR_POWER, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
   powerB = constrain(powerB*MAX_MOTEUR_POWER, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
@@ -163,7 +160,7 @@ double SwerveModule::getCurrentAngleRad(){
 
   //Calculate angle
   double angleAct = enco/4160.0 * (2*M_PI);
-  Serial.println("enco: " + String(enco));
+  //Serial.println(angleAct);
   return angleAct;
 }
 
