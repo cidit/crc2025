@@ -36,4 +36,6 @@ class SwerveModule
 
         double getAngularComponentRad(double diff, double speedFactor);
         double getTranslationComponentRad(double diff, double speedFactor);
+
+        double getPIDAngle(double diff);
 };

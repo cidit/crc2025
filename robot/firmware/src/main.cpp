@@ -73,7 +73,7 @@ void setup(){
   pinMode(CRC_PWM_12, INPUT);
 
   //Initialisation des modules Swerve
-  swerveA.init(0.5, 0.5, 0.5);
+  swerveA.init(1, 0.0, 0.0);
 
   Serial.println("Setup Done");
 }
@@ -86,12 +86,12 @@ void loop(){
 
   // Serial.println("joyAngle: " + String(ctrl.get_left_joy().angleRad));
   // Serial.println("joyNorm: " + String(ctrl.get_left_joy().norm));
-  Vec2D vector = swerveA.calculateRad(M_PI_2, 0); //(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
+  Vec2D vector = swerveA.calculateRad(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);//(M_PI_2, 0);
   // Serial.println("X" + String(vector.x()));
   // //Vec2D vector(0, 0.5);
   // Serial.println("Y" + String(vector.y()));
   // //if(motors_enabled) {
-  //swerveA.setMotorPowers(vector);
+  swerveA.setMotorPowers(vector);
   //Serial.println();
   // } else {
   //   swerveA.setMotorPowers(Vec2D(0, 0));

@@ -16,7 +16,7 @@ const double MAX_MOTEUR_POWER = 127;
  */
 void SwerveModule::init(double Kp, double Ki, double Kd){
   _pid.setPoint(0); //Toujours le garder à 0
-  _pid.setOutputRange(0.0, 1.0); //Interval de ratio de puissance angulaire, le signe est appliquer plus tard
+  _pid.setOutputRange(-1.0, 1.0); //Interval de ratio de puissance angulaire, le signe est appliquer plus tard
   _pid.setK(Kp, Ki, Kd); //Proportionnal, Integral, Derivative
   _pid.start();
 }
@@ -50,26 +50,32 @@ Vec2D SwerveModule::calculateRad(double targetAngle, double tPower){
   //Set diff and dir in _moveParam
   double currentAngle = getCurrentAngleRad();
   getdiffAngleRad(currentAngle, targetAngle);
+  _pid.start();
 
   //Find the absolute components of the power vector of the entire module
-  if(_pid.compute(abs(_moveParam.diff))){
-    _vecPower.set_y(_pid.getOutput());  //getAngularComponentRad(fabs(_moveParam.diff), fabs(tPower))
+  if(_pid.compute(getPIDAngle(_moveParam.diff))){
+    Serial.print("pid: " + String(_pid.getOutput()));
+    _vecPower.set_y(0);  //getAngularComponentRad(fabs(_moveParam.diff), fabs(tPower))
     _vecPower.set_x(getTranslationComponentRad(fabs(_moveParam.diff), fabs(tPower)));
-    Serial.print("diff: " + String(_moveParam.diff));
+
+    Serial.print(" diff: " + String(_moveParam.diff));
     Serial.println("  AngPow: " + String(_vecPower.y()));
   }
-  
-  //Apply the good sign
-  switch(_moveParam.dir){
-    case SwerveModule::Direction::CLOCKWISE:
-      _vecPower.set_y(fabs(_vecPower.y()));
-      break;
-    case SwerveModule::Direction::COUNTERCLOCKWISE:
-      _vecPower.set_y(-fabs(_vecPower.y()));
-      break;
+  else{
+    _pid.stop();
   }
+  
+  // //Apply the good sign
+  // switch(_moveParam.dir){
+  //   case SwerveModule::Direction::CLOCKWISE:
+  //     _vecPower.set_y(fabs(_vecPower.y()));
+  //     break;
+  //   case SwerveModule::Direction::COUNTERCLOCKWISE:
+  //     _vecPower.set_y(-fabs(_vecPower.y()));
+  //     break;
+  // }
 
-  //Determine the sign of the translation component dependind on current and target angle
+  //Determine the sign of the translation component depending on current and target angle
   if(targetAngle <= M_PI){
     //Forward
     if(currentAngle <= M_PI){
@@ -128,25 +134,25 @@ void SwerveModule::setMotorPowers(Vec2D powerVector){
 void SwerveModule::getdiffAngleRad(double currentAngle, double targetAngle){
   //Calculate travel angle, will be negative
   _moveParam.diff = targetAngle - currentAngle;
-  if(_moveParam.diff >= 0){
-    _moveParam.dir = _moveParam.diff < M_PI ? 
-                      _moveParam.diff > M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE 
-                      :_moveParam.diff > 3*M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE;
-  }
-  else if(_moveParam.diff < 0){
-    _moveParam.dir = _moveParam.diff > -M_PI ? 
-                      _moveParam.diff > -M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE 
-                      :_moveParam.diff > -3*M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE;
-  }
+  // if(_moveParam.diff >= 0){
+  //   _moveParam.dir = _moveParam.diff < M_PI ? 
+  //                     _moveParam.diff > M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE 
+  //                     :_moveParam.diff > 3*M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE;
+  // }
+  // else if(_moveParam.diff < 0){
+  //   _moveParam.dir = _moveParam.diff > -M_PI ? 
+  //                     _moveParam.diff > -M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE 
+  //                     :_moveParam.diff > -3*M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE;
+  // }
   
   
-  // //Keep value in a cercle
-  // while(_moveParam.diff > 2*M_PI){
-  //   _moveParam.diff = _moveParam.diff - 2*M_PI;
-  // }
-  // while(_moveParam.diff < -2*M_PI){
-  //   _moveParam.diff = _moveParam.diff + 2*M_PI;
-  // }
+  //Keep value in a cercle
+  while(_moveParam.diff > 2*M_PI){
+    _moveParam.diff = _moveParam.diff - 2*M_PI;
+  }
+  while(_moveParam.diff < -2*M_PI){
+    _moveParam.diff = _moveParam.diff + 2*M_PI;
+  }
 
 }
 
@@ -160,6 +166,15 @@ double SwerveModule::getCurrentAngleRad(){
 
   //Calculate angle
   double angleAct = enco/4160.0 * (2*M_PI);
+
+  //Constrain manuel, la fonction fourni bug des fois
+  if(angleAct > M_PI){
+    angleAct = M_PI;
+  }
+  else if(angleAct<0){
+    angleAct = 0;
+  }
+
   //Serial.println(angleAct);
   return angleAct;
 }
@@ -183,3 +198,37 @@ double SwerveModule::getTranslationComponentRad(double diff, double speedFactor)
   return component;
 }
 
+/**
+ * Transform the diff angle to be usable be the PID
+ */
+double SwerveModule::getPIDAngle(double diff){
+  if(diff > 0){
+    //Keep angle between 0 and M_PI
+    if(diff > M_PI){
+      diff -= M_PI;
+    }
+
+    //Take shortest angle
+    if(diff > M_PI_2){
+      diff = M_PI - diff;
+    }
+    else{
+      diff = -fabs(diff);
+    }
+
+  }
+  else if(diff < 0){
+    //Keep angle between 0 and M_PI
+    if(diff < -M_PI){
+      diff += M_PI;
+    }
+
+    //Take shortest angle
+    if(diff < -M_PI_2){
+      diff = M_PI + diff;
+    }
+    else{
+      diff = -fabs(diff);
+    }
+  }
+}
