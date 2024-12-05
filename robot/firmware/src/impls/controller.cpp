@@ -27,10 +27,10 @@ void Controller::calculateLeftJoy(){
     _joyLeft.y = roundf(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)/12.80)/10.0;
 
     //On enleve le dead zone au centre du joy
-    if(_joyLeft.x < 0.1 && _joyLeft.x > 0.1){
+    if(_joyLeft.x < 0.15 && _joyLeft.x > -0.15){
         _joyLeft.x = 0;
     }
-    if(_joyLeft.y < 0.1 && _joyLeft.y > 0.1){
+    if(_joyLeft.y < 0.15 && _joyLeft.y > -0.15){
         _joyLeft.y = 0;
     }
 
@@ -40,11 +40,8 @@ void Controller::calculateLeftJoy(){
         _joyLeft.angleDeg = _joyLeft.angleRad * 180.0 / M_PI;
     }
 
-    //Calcul de la norm (Using minskovski's distances)
+    //Calcul de la norm 
     _joyLeft.norm = constrain(sqrt(sq(_joyLeft.x)+sq(_joyLeft.y)), -1.0, 1.0);
-    // if(_joyLeft.y < 0){
-    //     _joyLeft.norm = -_joyLeft.norm;
-    // }
 }
 
 //-------- Utility Functions ---------------

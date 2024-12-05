@@ -21,7 +21,7 @@ class SwerveModule
             Direction dir; // the direction of the rotation
         };
 
-        void init(double Kp, double Ki, double Kd);
+        void init(PID_RT pid);
         bool calculateAndApply(double targetAngle, double tPower);
         Vec2D calculateRad(double targetAngle, double tPower);
         void setMotorPowers(Vec2D powerVector);
