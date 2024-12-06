@@ -2,6 +2,7 @@
 #include "CrcLib.h"
 #endif
 #include "drives/motor.hpp"
+#include <limits.h>
 
 void drives::Motor::begin()
 {
@@ -16,6 +17,14 @@ void drives::Motor::set_speed(double speed)
     auto direction_adjusted_speed = _is_inverted ? -speed : speed;
     auto constrained_speed = constrain(direction_adjusted_speed, -1.0, 1.0);
 #if defined(USING_CRCLIB)
-    CrcLib::SetPwmOutput(_pins.speed_pin, constrained_speed * HALF_PWM_OUTPUT);
+    auto actual_speed = constrained_speed > 0
+                            ? constrained_speed * CHAR_MAX
+                            : constrained_speed * (CHAR_MAX + 1);
+    _cached_real_speed = actual_speed;
 #endif
 }
+
+void drives::Motor::loop() {
+    CrcLib::SetPwmOutput(_pins.clockwise_pin, _cached_real_speed);
+}
+

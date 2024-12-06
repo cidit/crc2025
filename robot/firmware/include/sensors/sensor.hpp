@@ -1,10 +1,11 @@
 #pragma once
+#include "util/looped.hpp"
 
 namespace sensors
 {
 
     template <typename Measure>
-    class Sensor
+    class Sensor : public Looped
     {
 
     protected:
@@ -20,6 +21,7 @@ namespace sensors
         {
             Measure measure;
             auto success = sample(measure);
+            Serial.println(measure);
             if (success)
             {
                 _last = measure;
@@ -29,6 +31,10 @@ namespace sensors
         Measure getLast()
         {
             return _last;
+        }
+
+        void loop() override {
+            this->poll();
         }
     };
 

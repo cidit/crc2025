@@ -1,5 +1,6 @@
 #pragma once
 #include "util/misc.hpp"
+#include "util/looped.hpp"
 
 namespace drives
 {
@@ -9,10 +10,11 @@ namespace drives
         pin_t clockwise_pin, counter_clockwise_pin, speed_pin;
     } MotorPins_t;
 
-    class Motor
+    class Motor : public Looped
     {
         MotorPins_t _pins;
         bool _is_inverted;
+        char _cached_real_speed;
 
     public:
         Motor(MotorPins_t pins,
@@ -27,6 +29,9 @@ namespace drives
          * @param speed a double between -1 and 1. will immediatly modify the speed of the motor.
          */
         void set_speed(double);
+
+        void loop() override;
     };
+
 
 }

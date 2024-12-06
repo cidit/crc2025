@@ -7,11 +7,17 @@ namespace math
 
     const double MAX_RAD = PI * 2;
 
-    class Angle
+    class Angle: public Printable
     {
     public:
         double _radians;
 
+        
+        virtual size_t printTo(Print& p) const override {
+            p.print(_radians);
+            return sizeof(_radians);
+        }
+        
         static Angle from_deg(double degrees)
         {
             return from_ratio(degrees / 360);
