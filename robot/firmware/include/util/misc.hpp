@@ -16,3 +16,8 @@ constexpr uint16_t HALF_PWM_OUTPUT = 65536/2;
 #else
 constexpr uint8_t HALF_PWM_OUTPUT = 127;
 #endif
+
+
+struct PIDTunings {
+    float p, i, d;
+};

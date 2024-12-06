@@ -10,7 +10,7 @@ public:
     const timestamp _delay;
     Timer(timestamp delay): _delay(delay) {}
 
-    bool time(timestamp now) {
+    bool is_time(timestamp now) {
         if (now -_last > _delay) {
             _last = now;
             return true;

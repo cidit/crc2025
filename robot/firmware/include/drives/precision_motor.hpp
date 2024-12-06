@@ -6,6 +6,7 @@
 #include "math/angles.hpp"
 #include "util/looped.hpp"
 #include "util/timer.hpp"
+#include "util/misc.hpp"
 
 // Define the aggressive and conservative Tuning Parameters
 double aggKp = 4, aggKi = 0.2, aggKd = 1;
@@ -99,7 +100,7 @@ namespace drives
         {
             auto now = millis();
 
-            if (!_polling_timer.time(now))
+            if (!_polling_timer.is_time(now))
             {
                 return;
             }

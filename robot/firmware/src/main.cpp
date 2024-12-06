@@ -20,17 +20,7 @@ void setup()
   re.begin();
 }
 
-bool print_timer(long now)
-{
-  const long length = 500; // ms
-  static long last = 0;    // ms
-  if (now - last > length)
-  {
-    last = now;
-    return true;
-  }
-  return false;
-}
+Timer print_timer(500); // ms
 
 void loop()
 {
@@ -40,7 +30,7 @@ void loop()
   re.poll();
   motor.set_speed(motor_speed);
 
-  if (print_timer(millis()))
+  if (print_timer.is_time(millis()))
   {
     // Serial.println(re.getLast()._radians);
     Serial.println(le.getLast());
