@@ -5,19 +5,21 @@
 namespace math
 {
 
-    const double MAX_RAD = PI * 2;
 
-    class Angle: public Printable
+    class Angle : public Printable
     {
     public:
+        static const double MAX_RAD = PI * 2;
         double _radians;
 
-        
-        virtual size_t printTo(Print& p) const override {
+        Angle(double radians = 0) : _radians(radians) {}
+
+        virtual size_t printTo(Print &p) const override
+        {
             p.print(_radians);
             return sizeof(_radians);
         }
-        
+
         static Angle from_deg(double degrees)
         {
             return from_ratio(degrees / 360);
@@ -67,22 +69,33 @@ namespace math
             return _radians / MAX_RAD;
         }
 
-        static double travel(const Angle& source, const Angle& destination)
+        /**
+         * finds the shortest travel from the source to the destination
+         */
+        static double travel(const Angle &source, const Angle &destination)
         {
-            return source._radians - destination._radians;
+            auto zeroed = source._radians - destination._radians;
+            if (zeroed > PI)
+            {
+                return zeroed - PI;
+            }
+            else if (zeroed < -PI)
+            {
+                return zeroed + PI;
+            }
+            else
+            {
+                return zeroed;
+            }
         }
 
-        Angle() : _radians(0) {}
-
-    private:
-        Angle(double radians) : _radians(radians) {}
+        /**
+         * Reinterprets this object in the range [-PI, PI]
+         */
+        double zeroed()
+        {
+            return travel(*this, Angle::zero());
+        }
     };
-
-    Direction shortest_direction(const Angle& from, const Angle& to)
-    {
-        auto zeroed = Angle::from_rad(Angle::travel(from, to));
-        return zeroed._radians < PI ? Direction::CLOCKWISE 
-                                    : Direction::COUNTER_CLOCKWISE;
-    }
 
 }

@@ -27,29 +27,29 @@ namespace drives
         pid.SetTunings(aggKp, aggKi, aggKd);
     }
 
-    /**
-     * depending on which mode the precision motor is on, it will use the encoder differently.
-     */
-    enum class PrecisionMotorMode : int
-    {
-        /**
-         * when matching rpm, the motor will output as much power as needed to maintain a certain speed.
-         */
-        MATCH_RPM = 0,
-        /**
-         * when matching angle, the motor will apply oposite forces to maintain the specific angle of the wheel.
-         */
-        MATCH_ANGLE = 1,
-    };
-
     class PrecisionMotor : public Looped
     {
-        PrecisionMotorMode _mode;
 
     public:
+        /**
+         * depending on which mode the precision motor is on, it will use the encoder differently.
+         */
+        enum class Mode : int
+        {
+            /**
+             * when matching rpm, the motor will output as much power as needed to maintain a certain speed.
+             */
+            MATCH_RPM = 0,
+            /**
+             * when matching angle, the motor will apply oposite forces to maintain the specific angle of the wheel.
+             */
+            MATCH_ANGLE = 1,
+        };
+
         Motor _motor;
-        sensors::RotaryEncoder _encoder;
+        sensors::Sensor<math::Angle> &_encoder;
         PID _pid;
+        Mode _mode;
 
         /**
          * These are the parameters for the PID.
@@ -60,7 +60,6 @@ namespace drives
          */
         double _setpoint, _input, _output;
         double _ticks_per_rotation, current_rpm;
-
 
         math::Angle _target_angle;
         double _target_rpm;
@@ -73,24 +72,24 @@ namespace drives
         Timer _polling_timer;
 
         PrecisionMotor(Motor m,
-                       sensors::RotaryEncoder e,
+                       sensors::Sensor<math::Angle> &e,
                        PID pid,
                        uint16_t poll_rate)
-            : _mode(PrecisionMotorMode::MATCH_ANGLE),
+            : _mode(Mode::MATCH_ANGLE),
               _motor(m),
               _encoder(e),
               _pid(pid),
               _polling_timer(ONE_SECOND / poll_rate)
         {
             _pid.SetMode(AUTOMATIC); // turns the PID on.
-            
-            _pid.SetOutputLimits(-HALF_PWM_OUTPUT, HALF_PWM_OUTPUT); // limits for the vex, will be 
+
+            _pid.SetOutputLimits(-HALF_PWM_OUTPUT, HALF_PWM_OUTPUT); // limits for the vex, will be
             _pid.SetSampleTime(_polling_timer._delay);
             pid_set_agressive(_pid);
             set_target_angle(math::Angle::zero()); // initialize for angle control
         }
 
-        PrecisionMotor(Motor m, sensors::RotaryEncoder e)
+        PrecisionMotor(Motor m, sensors::Sensor<math::Angle> &e)
             : PrecisionMotor(
                   m, e,
                   PID(&_input, &_output, &_setpoint, Kp, Ki, Kd, DIRECT),
@@ -98,6 +97,7 @@ namespace drives
 
         virtual void loop() override
         {
+            _motor.loop();
             auto now = millis();
 
             if (!_polling_timer.is_time(now))
@@ -105,13 +105,9 @@ namespace drives
                 return;
             }
 
-            // const int INPUT_LIM = 1024; //, OUPUT_LIM = 255;
-            // _encoder.poll();
-            // TODO: input should not be position, but distance from target angle
-            // _input = _encoder.getLast().ratio() * INPUT_LIM;
-            // _pid.Compute();
+            _encoder.poll();
 
-            if (_mode == PrecisionMotorMode::MATCH_ANGLE)
+            if (_mode == Mode::MATCH_ANGLE)
             {
                 math::Angle current_angle;
                 _encoder.sample(current_angle);
@@ -121,7 +117,7 @@ namespace drives
                 _pid.Compute();
             }
 
-            if (_mode == PrecisionMotorMode::MATCH_RPM)
+            if (_mode == Mode::MATCH_RPM)
             {
                 // math::Angle new_a, old_a = _encoder.getLast();
                 // _encoder.sample(new_a);
@@ -134,8 +130,7 @@ namespace drives
 
         void set_target_angle(math::Angle angle)
         {
-            // const int INPUT_LIM = 1024, OUPUT_LIM = 255;
-            _mode = PrecisionMotorMode::MATCH_ANGLE;
+            _mode = Mode::MATCH_ANGLE;
             _target_angle = angle;
             _setpoint = 0;
             // TODO: unimplemented
@@ -143,12 +138,11 @@ namespace drives
 
         void set_target_speed(double rpm)
         {
-            _mode = PrecisionMotorMode::MATCH_RPM;
+            _mode = Mode::MATCH_RPM;
             _target_rpm = rpm;
             _setpoint = rpm;
             // TODO: unimplemented
         }
-
     };
 
 }
