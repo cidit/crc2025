@@ -21,7 +21,6 @@ namespace sensors
         {
             Measure measure;
             auto success = sample(measure);
-            Serial.println(measure);
             if (success)
             {
                 _last = measure;

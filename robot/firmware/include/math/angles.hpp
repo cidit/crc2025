@@ -74,14 +74,14 @@ namespace math
          */
         static double travel(const Angle &source, const Angle &destination)
         {
-            auto zeroed = source._radians - destination._radians;
+            auto zeroed = destination._radians - source._radians;
             if (zeroed > PI)
             {
-                return zeroed - PI;
+                return zeroed - MAX_RAD;
             }
             else if (zeroed < -PI)
             {
-                return zeroed + PI;
+                return zeroed + MAX_RAD;
             }
             else
             {

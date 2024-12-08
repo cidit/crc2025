@@ -1,8 +1,8 @@
 #pragma once
 
 #include <PID_v1.h>
+#include "sensors/sensor.hpp"
 #include "drives/motor.hpp"
-#include "sensors/rotary_encoder.hpp"
 #include "math/angles.hpp"
 #include "util/looped.hpp"
 #include "util/timer.hpp"
@@ -46,23 +46,20 @@ namespace drives
             MATCH_ANGLE = 1,
         };
 
+        Mode _mode;
         Motor _motor;
         sensors::Sensor<math::Angle> &_encoder;
         PID _pid;
-        Mode _mode;
+        math::Angle _last_polled_position;
 
         /**
          * These are the parameters for the PID.
-         * `_setpoint` should always be 0 and represents the target direction of the wheel.
-         * `_input` represents the angular disatance between the wheel position and where we want it to go when in
-         *          MATCH_ANGLE mode and the expected RPM in MATCH_SPEED mode
-         * `_output` represents the strength at which the motor must move to reach the position.
          */
         double _setpoint, _input, _output;
         double _ticks_per_rotation, current_rpm;
 
         math::Angle _target_angle;
-        double _target_rpm;
+        double _target_rps;
 
         /**
          * handles how often the encoder will be polled.
@@ -79,13 +76,12 @@ namespace drives
               _motor(m),
               _encoder(e),
               _pid(pid),
+              _last_polled_position(e.getLast()),
               _polling_timer(ONE_SECOND / poll_rate)
         {
-            _pid.SetMode(AUTOMATIC); // turns the PID on.
-
-            _pid.SetOutputLimits(-HALF_PWM_OUTPUT, HALF_PWM_OUTPUT); // limits for the vex, will be
+            _pid.SetMode(AUTOMATIC);
+            _pid.SetOutputLimits(-1, 1);
             _pid.SetSampleTime(_polling_timer._delay);
-            pid_set_agressive(_pid);
             set_target_angle(math::Angle::zero()); // initialize for angle control
         }
 
@@ -106,19 +102,24 @@ namespace drives
             }
 
             _encoder.poll();
+            if (!_pid.Compute())
+            {
+                Serial.println("!? - pid didnt compute, but should have.");
+            }
 
             if (_mode == Mode::MATCH_ANGLE)
             {
-                math::Angle current_angle;
-                _encoder.sample(current_angle);
-
-                const auto to_travel = math::Angle::travel(current_angle, _target_angle);
-                _input = to_travel - PI;
-                _pid.Compute();
+                _input = math::Angle::travel(_encoder.getLast(), _target_angle);
+                motor.set_speed(_output);
             }
 
             if (_mode == Mode::MATCH_RPM)
             {
+                auto distance_travelled = math::Angle::travel(_last_polled_position, _encoder.getLast());
+                auto current_rpm = distance_travelled * ONE_SECOND/_polling_timer._delay;
+                // TODO: now do the prop on measurements PID thing
+
+                
                 // math::Angle new_a, old_a = _encoder.getLast();
                 // _encoder.sample(new_a);
                 // auto travel = math::Angle::travel(old_a, new_a);
@@ -133,15 +134,12 @@ namespace drives
             _mode = Mode::MATCH_ANGLE;
             _target_angle = angle;
             _setpoint = 0;
-            // TODO: unimplemented
         }
 
         void set_target_speed(double rpm)
         {
             _mode = Mode::MATCH_RPM;
-            _target_rpm = rpm;
-            _setpoint = rpm;
-            // TODO: unimplemented
+            _target_rps = _setpoint = rpm;
         }
     };
 

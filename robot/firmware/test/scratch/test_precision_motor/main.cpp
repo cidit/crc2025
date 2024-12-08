@@ -1,18 +1,22 @@
 #include <Arduino.h>
 #include <Decodeur.h>
 #include <CrcLib.h>
-#include <PID_v1.h>
+#include <unity.h>
 #include "drives/precision_motor.hpp"
 #include "drives/motor.hpp"
 #include "sensors/gobuilda_rotary_enc.hpp"
 
-
 Decodeur cmdl(&Serial);
 drives::Motor motor({CRC_PWM_1, 0, 0}, false);
 sensors::GobuildaRotaryEnco re(CRC_ENCO_A, CRC_ENCO_B, 538.4);
-double in, out, s=0;
-PID pid(&in, &out, &s, 0,0,0, DIRECT);
-auto target_angle = math::Angle::zero();
+float motor_speed;
+
+
+void test_led_builtin_pin_number(void)
+{
+  TEST_ASSERT_EQUAL(true, true);
+}
+
 
 void setup()
 {
@@ -20,9 +24,7 @@ void setup()
   CrcLib::Initialize();
   motor.begin();
   re.begin();
-  pid.SetSampleTime(1);
-  pid.SetOutputLimits(-1, 1);
-  pid.SetMode(AUTOMATIC);
+  UNITY_BEGIN(); // IMPORTANT LINE!
 }
 
 Timer print_timer(500); // ms
@@ -31,26 +33,22 @@ void loop()
 {
   cmdl.refresh();
   CrcLib::Update();
+  // le.poll();
   re.poll();
-  motor.loop();
-
-  in = math::Angle::travel(re.getLast(), target_angle);
-  if (pid.Compute()) {
-    motor.set_speed(out);
-  }
+  motor.set_speed(motor_speed);
 
   if (print_timer.is_time(millis()))
   {
-    Serial.println("a:"+ String(re.getLast()._radians) + " i:" + String(in) + " o:" + String(out));
+    // Serial.println(re.getLast()._radians);
+    Serial.println(re.getLast());
   }
 
   if (!cmdl.isAvailable())
   {
     return;
   }
-
   auto ack = true;
-  switch (toupper(cmdl.getCommand()))
+  switch (cmdl.getCommand())
   {
   case 'S':
   {
@@ -61,24 +59,7 @@ void loop()
     }
     auto speed = cmdl.getArg(0);
     Serial.println("setting speed to: " + String(speed));
-    motor.set_speed(speed);
-    break;
-  }
-  case 'K': {
-    if (cmdl.getArgCount() < 3) {
-      ack = false;
-      break;
-    }
-    double p = cmdl.getArg(0), i = cmdl.getArg(1), d=cmdl.getArg(2);
-    pid.SetTunings(p, i, d);
-    break;
-  }
-  case 'A': {
-    if (cmdl.getArgCount()<1) {
-      ack = false;
-      break;
-    }
-    target_angle = math::Angle::from_rad(cmdl.getArg(0));
+    motor_speed = speed;
     break;
   }
   default:
