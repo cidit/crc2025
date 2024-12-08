@@ -5,11 +5,11 @@
 namespace math
 {
 
+    static const double MAX_RAD = PI * 2;
 
     class Angle : public Printable
     {
     public:
-        static const double MAX_RAD = PI * 2;
         double _radians;
 
         Angle(double radians = 0) : _radians(radians) {}
@@ -29,7 +29,7 @@ namespace math
         {
             double bounds_checked = fmod(rads, MAX_RAD);
             auto positive_angle = bounds_checked < 0
-                                      ? MAX_RAD - bounds_checked
+                                      ? MAX_RAD + bounds_checked
                                       : bounds_checked;
             return Angle(positive_angle);
         }
