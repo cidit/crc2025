@@ -6,44 +6,27 @@
 #include "drives/motor.hpp"
 #include "sensors/gobuilda_rotary_enc.hpp"
 
+//-------------------------- DEFINES -----------------------------
+#define TICKS_117 1425.1  //Bras
+#define TICKS_312 537.7 
+#define TICKS_1150 145.1 //Lanceur, swerve
 
-Decodeur cmdl(&Serial);
-drives::Motor motor({CRC_PWM_1, 0, 0}, false);
-sensors::GobuildaRotaryEnco re(CRC_ENCO_A, CRC_ENCO_B, 538.4);
+
+//-------------------------- VARIABLES -----------------------------
 double in, out, s=0;
-PID pid(&in, &out, &s, 0,0,0, DIRECT);
 auto target_angle = math::Angle::zero();
 
-void setup()
-{
-  Serial.begin(115200);
-  CrcLib::Initialize();
-  motor.begin();
-  re.begin();
-  pid.SetSampleTime(1);
-  pid.SetOutputLimits(-1, 1);
-  pid.SetMode(AUTOMATIC);
-}
 
+//-------------------------- OBJECTS -----------------------------
+Decodeur cmdl(&Serial);
+drives::Motor motor({CRC_PWM_1, 0, 0}, false);
+sensors::GobuildaRotaryEnco re(CRC_ENCO_A, CRC_ENCO_B, 537.7);
+drives::PrecisionMotor pm(motor, re, 1.0, 0.0, 0.0, 5);
 Timer print_timer(500); // ms
 
-void loop()
-{
-  cmdl.refresh();
-  CrcLib::Update();
-  re.poll();
-  motor.loop();
 
-  in = math::Angle::travel(re.getLast(), target_angle);
-  if (pid.Compute()) {
-    motor.set_speed(out);
-  }
-
-  if (print_timer.is_time(millis()))
-  {
-    Serial.println("a:"+ String(re.getLast()._radians) + " i:" + String(in) + " o:" + String(out));
-  }
-
+//-------------------------- FUNCTIONS -----------------------------
+void update_cmd(){
   if (!cmdl.isAvailable())
   {
     return;
@@ -70,7 +53,7 @@ void loop()
       break;
     }
     double p = cmdl.getArg(0), i = cmdl.getArg(1), d=cmdl.getArg(2);
-    pid.SetTunings(p, i, d);
+    // pid.SetTunings(p, i, d);
     break;
   }
   case 'A': {
@@ -79,6 +62,8 @@ void loop()
       break;
     }
     target_angle = math::Angle::from_rad(cmdl.getArg(0));
+    Serial.println(target_angle._radians);
+    pm.set_target_angle(target_angle);
     break;
   }
   default:
@@ -89,3 +74,35 @@ void loop()
   }
   Serial.println(ack ? "!" : "?");
 }
+
+
+//-------------------------- MAIN PROG -----------------------------
+void setup()
+{
+  Serial.begin(115200);
+  CrcLib::Initialize();
+  motor.begin();
+  re.begin();
+  pm.set_target_angle(target_angle);
+}
+
+void loop()
+{
+  cmdl.refresh();
+  CrcLib::Update();
+  pm.loop();
+
+  // in = math::Angle::travel(re.getLast(), target_angle);
+  // if (pid.Compute()) {
+  //   motor.set_speed(out);
+  // }
+
+  // if (print_timer.is_time(millis()))
+  // {
+  //   Serial.println("a:"+ String(re.getLast()._radians) + " i:" + String(in) + " o:" + String(out));
+  // }
+
+  update_cmd();
+}
+
+
