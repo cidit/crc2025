@@ -8,17 +8,17 @@ class Timer
     timestamp _last = 0;
 
 public:
-    const timestamp _delay;
+    timestamp _delay;
 
     Timer(timestamp delay) : _delay(delay) {}
 
     bool is_time(timestamp now)
     {
-        if (now - _last > _delay)
+        if (now - _last < _delay)
         {
-            _last = now;
-            return true;
+            return false;
         }
-        return false;
+        _last = now;
+        return true;
     }
 };
