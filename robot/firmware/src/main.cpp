@@ -5,6 +5,7 @@
 #include "drives/precision_motor.hpp"
 #include "drives/motor.hpp"
 #include "sensors/gobuilda_rotary_enc.hpp"
+#include "Encoder.h"
 
 //-------------------------- DEFINES -----------------------------
 #define TICKS_117 1425.1  //Bras
@@ -19,10 +20,13 @@ auto target_angle = math::Angle::zero();
 
 //-------------------------- OBJECTS -----------------------------
 Decodeur cmdl(&Serial);
+
 drives::Motor motor({CRC_PWM_1, 0, 0}, false);
-sensors::GobuildaRotaryEnco re(CRC_ENCO_A, CRC_ENCO_B, 537.7);
-drives::PrecisionMotor pm(motor, re, 1.0, 0.0, 0.0, 5);
+Encoder enco(CRC_ENCO_A, CRC_ENCO_B);
+//sensors::GobuildaRotaryEnco re(enco, 537.7);
+drives::PrecisionMotor pm(motor, enco, 1.0, 0.0, 0.0, 1.0, 0.5, 0.5, 100);
 Timer print_timer(500); // ms
+
 
 
 //-------------------------- FUNCTIONS -----------------------------
@@ -44,7 +48,7 @@ void update_cmd(){
     }
     auto speed = cmdl.getArg(0);
     Serial.println("setting speed to: " + String(speed));
-    motor.set_speed(speed);
+    pm.set_target_speed(speed);
     break;
   }
   case 'K': {
@@ -53,7 +57,7 @@ void update_cmd(){
       break;
     }
     double p = cmdl.getArg(0), i = cmdl.getArg(1), d=cmdl.getArg(2);
-    // pid.SetTunings(p, i, d);
+    pm.set_error_pid(p, i, d);
     break;
   }
   case 'A': {
@@ -82,15 +86,18 @@ void setup()
   Serial.begin(115200);
   CrcLib::Initialize();
   motor.begin();
-  re.begin();
+  //re.begin();
   pm.set_target_angle(target_angle);
 }
 
 void loop()
 {
   cmdl.refresh();
+  update_cmd();
+
   CrcLib::Update();
   pm.loop();
+
 
   // in = math::Angle::travel(re.getLast(), target_angle);
   // if (pid.Compute()) {
@@ -102,7 +109,7 @@ void loop()
   //   Serial.println("a:"+ String(re.getLast()._radians) + " i:" + String(in) + " o:" + String(out));
   // }
 
-  update_cmd();
+  
 }
 
 
