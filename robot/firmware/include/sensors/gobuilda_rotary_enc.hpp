@@ -47,7 +47,7 @@ namespace sensors
 
     private:
         //-------------------------- VARIABLES -----------------------------
-        Encoder _internal_encoder;
+        Encoder &_internal_encoder;
         const double _ticks_per_rotation;
     };
 

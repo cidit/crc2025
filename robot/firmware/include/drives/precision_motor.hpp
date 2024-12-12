@@ -41,7 +41,7 @@ namespace drives
               _motor(m),
               _encoder(e),
               _pidE(&_inputE, &_outputE, &_setpointE, Ep, Ei, Ed, P_ON_E, DIRECT),
-              _pidM(&_inputM, &_outputM, &_setpointM, Mp, Mi, Md, P_ON_E, DIRECT),
+              _pidM(&_inputM, &_outputM, &_setpointM, Mp, Mi, Md, P_ON_M, DIRECT),
               _last_polled_position(math::Angle::zero()),
               _polling_timer(ONE_SECOND / poll_rate),
               _target_rps(0)
@@ -116,8 +116,9 @@ namespace drives
             else if (_mode == Mode::MATCH_RPM){
 
                 //Calculate current speed of motor
-                auto distance_travelled = math::Angle::travel(_last_polled_position, enco_out);
-                auto _current_rps = distance_travelled * ONE_SECOND/_polling_timer._delay;
+                auto distance_travelled = enco_out._radians - _last_polled_position._radians;
+                auto current_radps = distance_travelled / (_polling_timer._delay/1000.0);
+                _current_rps = current_radps/(2*M_PI);
                 
                 //Compute using currrent speed
                 _inputM = _current_rps;
@@ -125,15 +126,15 @@ namespace drives
                     Serial.println("!? - pid didnt compute, but should have.");
                     return;
                 }
-                _target_rps += _outputM;
-                _target_rps = constrain(_target_rps, -1.0, 1.0);
-                Serial.println(_current_rps);
-                Serial.println(_target_rps);
+                Serial.println(distance_travelled);
+                Serial.println(_setpointM);
                 Serial.println(_inputM);
                 Serial.println(_outputM);
                 Serial.println();
-                _motor.set_speed(_target_rps);
+                _motor.set_speed(_outputM);
             }
+
+            _last_polled_position = enco_out;
         }
 
         /**
@@ -148,11 +149,11 @@ namespace drives
 
         /**
          * Set the mode to MATCH_RPM
-         * @param rps Set the target speed
+         * @param rps_ratio Set the target speed
          */
-        void set_target_speed(double rps){
+        void set_target_speed(double rps_ratio){
             _mode = Mode::MATCH_RPM;
-            _setpointM = rps;
+            _setpointM = rps_ratio*5.2;
         }
 
         /**
