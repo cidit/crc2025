@@ -1,6 +1,5 @@
 #pragma once
-
-#include <PID_v1.h>
+#include <PID_RT.h>
 #include "sensors/sensor.hpp"
 #include "drives/motor.hpp"
 #include "math/angles.hpp"
@@ -15,126 +14,114 @@
 
 namespace drives
 {
-    class PrecisionMotor : public Looped
+    class PrecisionMotor
     {
 
     public:
         //-------------------------- CONST -----------------------------
         /**
          * Depending on which mode the precision motor is on, it will use the encoder differently.
+         * When MATCH_RPM, the motor will output as much power as needed to maintain a certain speed.
+         * When MATCH_ANGLE, the motor will apply oposite forces to maintain the specific angle of the wheel.
          */
         enum class Mode : int
         {
-            /**
-             * When matching rpm, the motor will output as much power as needed to maintain a certain speed.
-             */
             MATCH_RPM = 0,
-            /**
-             * When matching angle, the motor will apply oposite forces to maintain the specific angle of the wheel.
-             */
             MATCH_ANGLE = 1,
-        }; 
+        };
 
         //---------------------- CONSTRUCTORS ---------------------------
-        PrecisionMotor(Motor m, Encoder &e, double Ep, double Ei, double Ed, double Mp, double Mi, double Md, uint16_t poll_rate)
-            : _mode(Mode::MATCH_ANGLE),
+        PrecisionMotor(Motor m, Encoder &e, double pA, double iA, double dA, double pS, double iS, double dS, int pid_interval, double max_rpm, double ticks_turn)
+            : _mode(Mode::MATCH_RPM),
               _motor(m),
               _encoder(e),
-              _pidE(&_inputE, &_outputE, &_setpointE, Ep, Ei, Ed, P_ON_E, DIRECT),
-              _pidM(&_inputM, &_outputM, &_setpointM, Mp, Mi, Md, P_ON_M, DIRECT),
-              _last_polled_position(math::Angle::zero()),
-              _polling_timer(ONE_SECOND / poll_rate),
-              _target_rps(0)
+              _max_rpm(max_rpm),
+              _ticks_turn(ticks_turn),
+              _last_enco(e.read()),
+              _delai(pid_interval)
         {
-            //Config of PID on error
-            _pidE.SetMode(AUTOMATIC);
-            _pidE.SetOutputLimits(-1, 1);
-            _pidE.SetSampleTime(_polling_timer._delay);
+            //Config of PID on angle
+            _pidA.setOutputRange(-1, 1);
+            _pidA.setInterval(pid_interval);
+            _pidA.setK(pA, iA, dA);
+            _pidA.setPoint(0);
 
-            //Config of PID on Measurement
-            _pidM.SetMode(AUTOMATIC);
-            _pidM.SetOutputLimits(-1, 1);
-            _pidM.SetSampleTime(_polling_timer._delay);
+            //Config of PID on speed
+            _pidS.setOutputRange(-128, 127);
+            _pidS.setInterval(pid_interval);
+            _pidS.setK(pS, iS, dS);
+            _pidS.setPoint(0);
 
-            set_target_angle(math::Angle::zero()); // initialize for angle control
+            _timer = millis();
+
+            set_target_angle(math::Angle::zero());
         }
-        // PrecisionMotor(Motor m, sensors::Sensor<math::Angle> &e, double Ep, double Ei, double Ed, double Mp, double Mi, double Md, uint16_t poll_rate)
-        //     : _mode(Mode::MATCH_ANGLE),
-        //       _motor(m),
-        //       _encoder(e),
-        //       _pidE(&_inputE, &_outputE, &_setpointE, Ep, Ei, Ed, P_ON_E, DIRECT),
-        //       _pidM(&_inputM, &_outputM, &_setpointM, Mp, Mi, Md, P_ON_M, DIRECT),
-        //       _last_polled_position(e.getLast()),
-        //       _polling_timer(ONE_SECOND / poll_rate)
-        // {
-        //     //Config of PID on error
-        //     _pidE.SetMode(AUTOMATIC);
-        //     _pidE.SetOutputLimits(-1, 1);
-        //     _pidE.SetSampleTime(_polling_timer._delay);
-
-        //     //Config of PID on Measurement
-        //     _pidM.SetMode(AUTOMATIC);
-        //     _pidM.SetOutputLimits(-1, 1);
-        //     _pidM.SetSampleTime(_polling_timer._delay);
-
-        //     set_target_angle(math::Angle::zero()); // initialize for angle control
-        // }
 
         //-------------------------- FUNCTIONS -----------------------------
-        virtual void loop() override
+        void loop() 
         {
-            _motor.loop();
+            _pidS.start();
+            _pidA.start();
+            
+            double interval = millis() - _timer;
+            if(interval >= _delai){
+                _timer = millis();
 
-            //Return if not enough time has passed
-            auto now = millis();
-            if (!_polling_timer.is_time(now)){
-                return;
-            }
+                auto enco_out = _encoder.read();
+                //Serial.print("   enco: " +String(enco_out));
+                auto distance_travelled = _last_enco - enco_out;
+                //Serial.print("   dist: " +String(distance_travelled));
 
-            // _encoder.poll();
-            // auto enco_out = _encoder.getLast();
-            auto enco_out = math::Angle::from_ratio(fmod(_encoder.read(), 537.7)/537.7);
-
-            if (_mode == Mode::MATCH_ANGLE){
-                
-                //Calculate the diff between current and target angle
-                _inputE = math::Angle::travel(enco_out, _target_angle);
-
-                if (!_pidE.Compute()) {
-                    Serial.println("!? - pid didnt compute, but should have.");
-                    return;
-                }
-                // //TODO: Dont do 360
-                // // Command rotation + direction
-                // Serial.println(enco_out);
-                // Serial.println(_target_angle);
-                // Serial.println(_inputE);
-                // Serial.println(_outputE);
-                // Serial.println();
-                _motor.set_speed(_outputE);
-            }
-            else if (_mode == Mode::MATCH_RPM){
+                //Calculate current Angle
+                _current_angle = math::Angle::from_ratio(fmod(enco_out, _ticks_turn)/_ticks_turn);
 
                 //Calculate current speed of motor
-                auto distance_travelled = enco_out._radians - _last_polled_position._radians;
-                auto current_radps = distance_travelled / (_polling_timer._delay/1000.0);
-                _current_rps = current_radps/(2*M_PI);
-                
-                //Compute using currrent speed
-                _inputM = _current_rps;
-                if (!_pidM.Compute()) {
-                    Serial.println("!? - pid didnt compute, but should have.");
-                    return;
+                auto current_rpm = (distance_travelled /_ticks_turn / (interval/1000.0))*60;
+
+                _last_enco = enco_out;
+
+                //constrain
+                if(current_rpm > _max_rpm){
+                current_rpm = _max_rpm;
+                }else if(current_rpm < -_max_rpm){
+                current_rpm = -_max_rpm;
                 }
-                Serial.println(distance_travelled);
-                Serial.println(_setpointM);
-                Serial.println(_inputM);
-                Serial.println(_outputM);
-                Serial.println();
-                _motor.set_speed(_outputM);
+                
+                //Compute using current speed
+                //Serial.print("   cRPM: " +String(current_rpm));
+                _inputS = current_rpm;
+                
+                //Calculate the diff between current and target angle
+                _inputA = math::Angle::travel(_current_angle, _target_angle);
+                // Serial.print("   curr: " +String(_current_angle._radians));
+                // Serial.print("   tar: " +String(_target_angle._radians));
+                // Serial.println("   diff: " +String(_inputA));
+            } 
+
+            //Apply right PID
+            if(_mode == Mode::MATCH_RPM){
+                if (_pidS.compute(_inputS)) {
+                    //Serial.print("set/targetRPM: " + String(_setpointS));
+                    //Serial.print("    in/RPM: " + String(_inputS));
+                    _outputS = _pidS.getOutput();
+                    //Serial.println("    out/Power: " + String(_outputS));
+
+                    _motor.set_power(_outputS);
+                }
+            }
+            else if(_mode == Mode::MATCH_ANGLE){
+                if (_pidA.compute(_inputA)) {
+                    //Serial.print("set/targetAngle: " + String(_setpointA));
+                    //Serial.print("    in/diffAngle: " + String(_inputA));
+                    _outputA = _pidA.getOutput();
+                    //Serial.println("    out/Power: " + String(_outputA));
+
+                    _motor.set_speed(_outputA);
+                }
+                //TODO: Dont do 360
+                // Command rotation + direction
             }
 
-            _last_polled_position = enco_out;
         }
 
         /**
@@ -144,69 +131,64 @@ namespace drives
         void set_target_angle(math::Angle angle){
             _mode = Mode::MATCH_ANGLE;
             _target_angle = angle;
-            _setpointE = 0;
         }
 
         /**
          * Set the mode to MATCH_RPM
-         * @param rps_ratio Set the target speed
+         * @param target_rpm Set the target speed in RPM
          */
-        void set_target_speed(double rps_ratio){
+        void set_target_speed(double target_rpm){
             _mode = Mode::MATCH_RPM;
-            _setpointM = rps_ratio*5.2;
+            _pidS.setPoint(target_rpm);
         }
 
         /**
          * Configure the PID on error
          * Used when in MATCH_ANGLE mode
          */
-        void set_error_pid(double p, double i, double d){
-            _pidE.SetTunings(p, i, d);
+        void set_angle_pid(double p, double i, double d){
+            _pidA.setK(p, i, d);
         }
 
         /**
          * Configure the PID on measurement
          * Used when in MATCH_RPM mode
          */
-        void set_measurement_pid(double p, double i, double d){
-            _pidM.SetTunings(p, i, d);
+        void set_speed_pid(double p, double i, double d){
+            _pidS.setK(p, i, d);
         }
 
 
     private:
         //-------------------------- VARIABLES -----------------------------
         /**
-         * These are the parameters for the PID on error.
+         * These are the parameters for the PID on angle.
          * Used as reference by the PID
          */
-        double _setpointE, _inputE, _outputE;
+        double _setpointA, _inputA, _outputA;
         /**
-         * These are the parameters for the PID on measurement.
-         * Used as reference by the PID, as RPS
+         * These are the parameters for the PID on speed.
+         * Used by the PID, as RPM
          */
-        double _setpointM, _inputM, _outputM;
+        double _setpointS, _inputS, _outputS;
 
         Mode _mode;
         Motor _motor;
         Encoder &_encoder;
-        //sensors::Sensor<math::Angle> &_encoder;
 
-        /** PID on error */
-        PID _pidE;
-        /** PID on measurement */
-        PID _pidM;
+        /** PID for Angle */
+        PID_RT _pidA;
+        /** PID for Speed */
+        PID_RT _pidS;
 
-        math::Angle _last_polled_position;
+        double _max_rpm;
+        double _ticks_turn;
 
-        /**
-         * Handles how often the encoder will be polled.
-         * Poll rate must be fast enough so that the wheel doesn't have the time make more than half a turn.
-         */
-        Timer _polling_timer;
+        double _last_enco;
+        int _timer;
+        int _delai;
 
-        double _ticks_per_rotation, _current_rps;
-        math::Angle _target_angle;
-        double _target_rps;
+        math::Angle _current_angle, _target_angle;
     };
 
 }
