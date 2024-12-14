@@ -9,9 +9,7 @@
 #include "math/angles.hpp"
 
 //-------------------------- DEFINES -----------------------------
-#define TICKS_117 1425.1  //Bras
-double TICKS_312 = 537.7; 
-#define TICKS_1150 145.1 //Lanceur, swerve
+
 
 
 //-------------------------- VARIABLES -----------------------------
@@ -24,15 +22,7 @@ Decodeur cmdl(&Serial);
 
 drives::Motor motor(CRC_PWM_1, false);
 Encoder enco(CRC_ENCO_A, CRC_ENCO_B);
-//sensors::GobuildaRotaryEnco re(enco, 537.7);
-drives::PrecisionMotor pm(motor, enco, 1.0, 0.6, 0.0, 0.08, 0.08, 0.0002, 10, 312.0, TICKS_312);
-//_timer print__timer(500); // ms
-double _setpointS, _inputS, _outputS;
-PID_RT _pidS;
-int _last_enco;
-
-int _delai = 10;
-int _timer = millis();
+drives::PrecisionMotor pm(motor, enco, 1.0, 0.6, 0.0, 0.08, 0.08, 0.0002, 10, 312.0, drives::PrecisionMotor::TICKS_312);
 
 //-------------------------- FUNCTIONS -----------------------------
 void update_cmd(){
@@ -53,7 +43,6 @@ void update_cmd(){
     }
     auto speed = cmdl.getArg(0);
     Serial.println("setting speed to: " + String(speed));
-    _setpointS = speed;
     Serial.print("Speed: ");
     Serial.println(speed);
     pm.set_target_speed(speed);
@@ -96,19 +85,6 @@ void setup()
   Serial.begin(115200);
   CrcLib::Initialize();
   motor.begin();
-  //re.begin();
-  //pm.set_target_angle(target_angle);
-  //CrcLib::InitializePwmOutput(CRC_PWM_1); 
-
-  // _last_enco = enco.read();
-  // _pidS.setOutputRange(-128, 127);
-  // _pidS.setInterval(_delai);
-  // _setpointS = 312.0;
-  // _pidS.setPoint(_setpointS);
-  // _pidS.setK(0.08, 0.08, 0.0002);
-  // _pidS.start();
-
-  //CrcLib::SetPwmOutput(CRC_PWM_1, 127);
 }
 
 void loop()
@@ -118,42 +94,7 @@ void loop()
 
   CrcLib::Update();
   pm.loop();
-  //Serial.println(enco.read());
-  
 
-  // double interval = millis() - _timer;
-  // if(interval >= _delai){
-  //   _timer = millis();
-
-  //   int enco_out = enco.read();
-
-  //   //Calculate current speed of motor
-  //   auto distance_travelled = _last_enco - enco_out;
-  //   auto current_rpm = (distance_travelled /TICKS_312 / (interval/1000))*60;
-
-  //   _last_enco = enco_out;
-
-  //   //constrain
-  //   if(current_rpm > 312.0){
-  //     current_rpm = 312.0;
-  //   }else if(current_rpm < -312.0){
-  //     current_rpm = -312.0;
-  //   }
-    
-  //   //Compute using currrent speed
-  //   Serial.print("current RPM: " + String(current_rpm));
-  //   _inputS = current_rpm;
-    
-  // } 
-
-  // if (_pidS.compute(_inputS)) {
-  //   Serial.print("    set/targetRPM: " + String(_setpointS));
-  //   Serial.print("    in/RPM: " + String(_inputS));
-  //   _outputS = _pidS.getOutput();
-  //   Serial.println("    out/Power: " + String(_outputS));
-
-  //   CrcLib::SetPwmOutput(CRC_PWM_1, _outputS);
-  // }
 }
 
 

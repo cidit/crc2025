@@ -8,9 +8,6 @@
 #include "util/misc.hpp"
 #include <Encoder.h>
 
-// // Define the aggressive and conservative Tuning Parameters
-// double aggKp = 4, aggKi = 0.2, aggKd = 1;
-// double consKp = 1, consKi = 0.05, consKd = 0.25;
 
 namespace drives
 {
@@ -29,6 +26,10 @@ namespace drives
             MATCH_RPM = 0,
             MATCH_ANGLE = 1,
         };
+
+        static constexpr double TICKS_117 = 1425.1;  //Bras
+        static constexpr double TICKS_312 = 537.7; 
+        static constexpr double TICKS_1150 = 145.1; //Lanceur, swerve
 
         //---------------------- CONSTRUCTORS ---------------------------
         PrecisionMotor(Motor m, Encoder &e, double pA, double iA, double dA, double pS, double iS, double dS, int pid_interval, double max_rpm, double ticks_turn)
@@ -68,9 +69,7 @@ namespace drives
                 _timer = millis();
 
                 auto enco_out = _encoder.read();
-                //Serial.print("   enco: " +String(enco_out));
                 auto distance_travelled = _last_enco - enco_out;
-                //Serial.print("   dist: " +String(distance_travelled));
 
                 //Calculate current Angle
                 _current_angle = math::Angle::from_ratio(fmod(enco_out, _ticks_turn)/_ticks_turn);
@@ -88,35 +87,25 @@ namespace drives
                 }
                 
                 //Compute using current speed
-                //Serial.print("   cRPM: " +String(current_rpm));
                 _inputS = current_rpm;
                 
                 //Calculate the diff between current and target angle
                 _inputA = math::Angle::travel(_current_angle, _target_angle);
-                // Serial.print("   curr: " +String(_current_angle._radians));
-                // Serial.print("   tar: " +String(_target_angle._radians));
-                // Serial.println("   diff: " +String(_inputA));
             } 
 
             //Apply right PID
             if(_mode == Mode::MATCH_RPM){
                 if (_pidS.compute(_inputS)) {
-                    //Serial.print("set/targetRPM: " + String(_setpointS));
-                    //Serial.print("    in/RPM: " + String(_inputS));
                     _outputS = _pidS.getOutput();
-                    //Serial.println("    out/Power: " + String(_outputS));
 
                     _motor.set_power(_outputS);
                 }
             }
             else if(_mode == Mode::MATCH_ANGLE){
                 if (_pidA.compute(_inputA)) {
-                    //Serial.print("set/targetAngle: " + String(_setpointA));
-                    //Serial.print("    in/diffAngle: " + String(_inputA));
                     _outputA = _pidA.getOutput();
-                    //Serial.println("    out/Power: " + String(_outputA));
 
-                    _motor.set_speed(_outputA);
+                    _motor.set_power_ratio(_outputA);
                 }
                 //TODO: Dont do 360
                 // Command rotation + direction
