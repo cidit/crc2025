@@ -1,0 +1,3 @@
+# THIS FOLDER IS FOR SCREATCH TESTS, TO AVOID TOUCHING THE MAIN
+
+use the command `pio test -f <name_of_your_test>` to run your scratch file.

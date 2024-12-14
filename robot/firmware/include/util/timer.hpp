@@ -3,18 +3,22 @@
 
 using timestamp = uint32_t;
 
-class Timer {
-    timestamp _last=0;
+class Timer
+{
+    timestamp _last = 0;
 
 public:
-    const timestamp _delay;
-    Timer(timestamp delay): _delay(delay) {}
+    timestamp _delay;
 
-    bool time(timestamp now) {
-        if (now -_last > _delay) {
-            _last = now;
-            return true;
+    Timer(timestamp delay) : _delay(delay) {}
+
+    bool is_time(timestamp now)
+    {
+        if (now - _last < _delay)
+        {
+            return false;
         }
-        return false;
+        _last = now;
+        return true;
     }
 };

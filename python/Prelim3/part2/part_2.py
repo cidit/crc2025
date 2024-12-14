@@ -36,6 +36,33 @@ def part_2(arrivals: int, mu: int, c: int) -> float:
     wait_time_minutes = 0
     ### You code goes here ###
     ### Votre code va ici ###
-    
+    p = get_ratio(arrivals, mu, c)
+
+    lq = get_Lq(proba_full[p][c-2], p)
+
+    wait_time_minutes = get_wait_time(lq, arrivals, mu)
+    print("wait " + str(wait_time_minutes))
 
     return wait_time_minutes
+
+
+def get_ratio(a:int, u:int, c:int):
+    '''
+    Détermine le ratio des arrivés/traités
+    '''
+    return a/(u*c)
+
+def get_Lq(prob_occ, ratio):
+    '''
+    Trouve le nombre de clients dans le file d'attente
+    '''
+    lq = prob_occ * (ratio/(1-ratio))
+    return round(lq, 2)
+
+def get_wait_time(lq, a:int, u:int):
+    '''
+    Trouve le temps d'attente moyen
+    '''
+    print("lq " + str(lq))
+    wait = (((a/u)+lq)/a)*60
+    return round(wait, 2)

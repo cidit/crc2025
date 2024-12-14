@@ -5,7 +5,7 @@
 */
 #include <CrcLib.h>
 #include <Encoder.h>
-#include <swerveModule.hpp>
+#include <drives/swerveModule.hpp>
 #include <controller.hpp>
 #include "math/vectors.hpp"
 using math::cartesian::Vec2D;
