@@ -1,153 +1,183 @@
 #pragma once
-
-#include <PID_v1.h>
+#include <PID_RT.h>
+#include "sensors/sensor.hpp"
 #include "drives/motor.hpp"
-#include "sensors/rotary_encoder.hpp"
 #include "math/angles.hpp"
 #include "util/looped.hpp"
 #include "util/timer.hpp"
+#include "util/misc.hpp"
+#include <Encoder.h>
 
-// Define the aggressive and conservative Tuning Parameters
-double aggKp = 4, aggKi = 0.2, aggKd = 1;
-double consKp = 1, consKi = 0.05, consKd = 0.25;
 
 namespace drives
 {
-
-    // TAKEN FROM EXAMPLE `PID_Basic.ino`
-    const double Kp = 2, Ki = 5, Kd = 1;
-
-    void pid_set_conservative(PID &pid)
+    class PrecisionMotor
     {
-        pid.SetTunings(consKp, consKi, consKd);
-    }
-    void pid_set_agressive(PID &pid)
-    {
-        pid.SetTunings(aggKp, aggKi, aggKd);
-    }
-
-    /**
-     * depending on which mode the precision motor is on, it will use the encoder differently.
-     */
-    enum class PrecisionMotorMode : int
-    {
-        /**
-         * when matching rpm, the motor will output as much power as needed to maintain a certain speed.
-         */
-        MATCH_RPM = 0,
-        /**
-         * when matching angle, the motor will apply oposite forces to maintain the specific angle of the wheel.
-         */
-        MATCH_ANGLE = 1,
-    };
-
-    class PrecisionMotor : public Looped
-    {
-        PrecisionMotorMode _mode;
 
     public:
-        Motor _motor;
-        sensors::RotaryEncoder _encoder;
-        PID _pid;
-
+        //-------------------------- CONST -----------------------------
         /**
-         * These are the parameters for the PID.
-         * `_setpoint` should always be 0 and represents the target direction of the wheel.
-         * `_input` represents the angular disatance between the wheel position and where we want it to go when in
-         *          MATCH_ANGLE mode and the expected RPM in MATCH_SPEED mode
-         * `_output` represents the strength at which the motor must move to reach the position.
+         * Depending on which mode the precision motor is on, it will use the encoder differently.
+         * When MATCH_RPM, the motor will output as much power as needed to maintain a certain speed.
+         * When MATCH_ANGLE, the motor will apply oposite forces to maintain the specific angle of the wheel.
          */
-        double _setpoint, _input, _output;
-        double _ticks_per_rotation, current_rpm;
+        enum class Mode : int
+        {
+            MATCH_RPM = 0,
+            MATCH_ANGLE = 1,
+        };
 
+        static constexpr double TICKS_117 = 1425.1;  //Bras
+        static constexpr double TICKS_312 = 537.7; 
+        static constexpr double TICKS_1150 = 145.1; //Lanceur, swerve
 
-        math::Angle _target_angle;
-        double _target_rpm;
-
-        /**
-         * handles how often the encoder will be polled.
-         *
-         * poll rate must be fast enough so that the wheel doesnt have the time make more than half a turn.
-         */
-        Timer _polling_timer;
-
-        PrecisionMotor(Motor m,
-                       sensors::RotaryEncoder e,
-                       PID pid,
-                       uint16_t poll_rate)
-            : _mode(PrecisionMotorMode::MATCH_ANGLE),
+        //---------------------- CONSTRUCTORS ---------------------------
+        PrecisionMotor(Motor m, Encoder &e, double pA, double iA, double dA, double pS, double iS, double dS, int pid_interval, double max_rpm, double ticks_turn)
+            : _mode(Mode::MATCH_RPM),
               _motor(m),
               _encoder(e),
-              _pid(pid),
-              _polling_timer(ONE_SECOND / poll_rate)
+              _max_rpm(max_rpm),
+              _ticks_turn(ticks_turn),
+              _last_enco(e.read()),
+              _delai(pid_interval)
         {
-            _pid.SetMode(AUTOMATIC); // turns the PID on.
+            //Config of PID on angle
+            _pidA.setOutputRange(-1, 1);
+            _pidA.setInterval(pid_interval);
+            _pidA.setK(pA, iA, dA);
+            _pidA.setPoint(0);
+
+            //Config of PID on speed
+            _pidS.setOutputRange(-128, 127);
+            _pidS.setInterval(pid_interval);
+            _pidS.setK(pS, iS, dS);
+            _pidS.setPoint(0);
+
+            _timer = millis();
+
+            set_target_angle(math::Angle::zero());
+        }
+
+        //-------------------------- FUNCTIONS -----------------------------
+        void loop() 
+        {
+            _pidS.start();
+            _pidA.start();
             
-            _pid.SetOutputLimits(-HALF_PWM_OUTPUT, HALF_PWM_OUTPUT); // limits for the vex, will be 
-            _pid.SetSampleTime(_polling_timer._delay);
-            pid_set_agressive(_pid);
-            set_target_angle(math::Angle::zero()); // initialize for angle control
+            double interval = millis() - _timer;
+            if(interval >= _delai){
+                _timer = millis();
+
+                auto enco_out = _encoder.read();
+                auto distance_travelled = _last_enco - enco_out;
+
+                //Calculate current Angle
+                _current_angle = math::Angle::from_ratio(fmod(enco_out, _ticks_turn)/_ticks_turn);
+
+                //Calculate current speed of motor
+                auto current_rpm = (distance_travelled /_ticks_turn / (interval/1000.0))*60;
+
+                _last_enco = enco_out;
+
+                //constrain
+                if(current_rpm > _max_rpm){
+                current_rpm = _max_rpm;
+                }else if(current_rpm < -_max_rpm){
+                current_rpm = -_max_rpm;
+                }
+                
+                //Compute using current speed
+                _inputS = current_rpm;
+                
+                //Calculate the diff between current and target angle
+                _inputA = math::Angle::travel(_current_angle, _target_angle);
+            } 
+
+            //Apply right PID
+            if(_mode == Mode::MATCH_RPM){
+                if (_pidS.compute(_inputS)) {
+                    _outputS = _pidS.getOutput();
+
+                    _motor.set_power(_outputS);
+                }
+            }
+            else if(_mode == Mode::MATCH_ANGLE){
+                if (_pidA.compute(_inputA)) {
+                    _outputA = _pidA.getOutput();
+
+                    _motor.set_power_ratio(_outputA);
+                }
+                //TODO: Dont do 360
+                // Command rotation + direction
+            }
+
         }
 
-        PrecisionMotor(Motor m, sensors::RotaryEncoder e)
-            : PrecisionMotor(
-                  m, e,
-                  PID(&_input, &_output, &_setpoint, Kp, Ki, Kd, DIRECT),
-                  100) {}
-
-        virtual void loop() override
-        {
-            auto now = millis();
-
-            if (!_polling_timer.time(now))
-            {
-                return;
-            }
-
-            // const int INPUT_LIM = 1024; //, OUPUT_LIM = 255;
-            // _encoder.poll();
-            // TODO: input should not be position, but distance from target angle
-            // _input = _encoder.getLast().ratio() * INPUT_LIM;
-            // _pid.Compute();
-
-            if (_mode == PrecisionMotorMode::MATCH_ANGLE)
-            {
-                math::Angle current_angle;
-                _encoder.sample(current_angle);
-
-                const auto to_travel = math::Angle::travel(current_angle, _target_angle);
-                _input = to_travel - PI;
-                _pid.Compute();
-            }
-
-            if (_mode == PrecisionMotorMode::MATCH_RPM)
-            {
-                // math::Angle new_a, old_a = _encoder.getLast();
-                // _encoder.sample(new_a);
-                // auto travel = math::Angle::travel(old_a, new_a);
-                // current_rpm = travel * (1000 / _polling_timer._delay) * (60 * ONE_SECOND);
-            }
-
-            // _motor.set_speed(_output/OUTPUT_LIM);
-        }
-
-        void set_target_angle(math::Angle angle)
-        {
-            // const int INPUT_LIM = 1024, OUPUT_LIM = 255;
-            _mode = PrecisionMotorMode::MATCH_ANGLE;
+        /**
+         * Set the mode to MATCH_ANGLE
+         * @param angle Angle Object
+         */
+        void set_target_angle(math::Angle angle){
+            _mode = Mode::MATCH_ANGLE;
             _target_angle = angle;
-            _setpoint = 0;
-            // TODO: unimplemented
         }
 
-        void set_target_speed(double rpm)
-        {
-            _mode = PrecisionMotorMode::MATCH_RPM;
-            _target_rpm = rpm;
-            _setpoint = rpm;
-            // TODO: unimplemented
+        /**
+         * Set the mode to MATCH_RPM
+         * @param target_rpm Set the target speed in RPM
+         */
+        void set_target_speed(double target_rpm){
+            _mode = Mode::MATCH_RPM;
+            _pidS.setPoint(target_rpm);
         }
 
+        /**
+         * Configure the PID on error
+         * Used when in MATCH_ANGLE mode
+         */
+        void set_angle_pid(double p, double i, double d){
+            _pidA.setK(p, i, d);
+        }
+
+        /**
+         * Configure the PID on measurement
+         * Used when in MATCH_RPM mode
+         */
+        void set_speed_pid(double p, double i, double d){
+            _pidS.setK(p, i, d);
+        }
+
+
+    private:
+        //-------------------------- VARIABLES -----------------------------
+        /**
+         * These are the parameters for the PID on angle.
+         * Used as reference by the PID
+         */
+        double _setpointA, _inputA, _outputA;
+        /**
+         * These are the parameters for the PID on speed.
+         * Used by the PID, as RPM
+         */
+        double _setpointS, _inputS, _outputS;
+
+        Mode _mode;
+        Motor _motor;
+        Encoder &_encoder;
+
+        /** PID for Angle */
+        PID_RT _pidA;
+        /** PID for Speed */
+        PID_RT _pidS;
+
+        double _max_rpm;
+        double _ticks_turn;
+
+        double _last_enco;
+        int _timer;
+        int _delai;
+
+        math::Angle _current_angle, _target_angle;
     };
 
 }
