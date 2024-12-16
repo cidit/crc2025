@@ -5,14 +5,16 @@
 */
 #include <CrcLib.h>
 #include <Encoder.h>
-#include <drives/swerveModule.hpp>
+#include <drives/swerve_module.hpp>
 #include <controller.hpp>
 #include "math/vectors.hpp"
 using math::cartesian::Vec2D;
 
 //----- Variables -----
 Controller ctrl;
-SwerveModule swerveA;
+drives::Motor motorAH(CRC_PWM)
+drives::PrecisionMotor()
+SwerveModule swerveA();
 PID_RT pidSwerveA;
 
 bool motors_enabled = false;
@@ -35,8 +37,6 @@ void setup(){
   pidSwerveA.setK(1.0, 0, 0); //Proportionnal, Integral, Derivative
   pidSwerveA.start();
 
-  //Initialisation des modules Swerve
-  swerveA.init(pidSwerveA);
 
   Serial.println("Setup Done");
 }
@@ -45,8 +45,7 @@ void loop(){
   CrcLib::Update();
   ctrl.update();
 
-  Vec2D vector = swerveA.calculateRad(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
-  swerveA.setMotorPowers(vector);
-
+  Vec2D vector = swerveA.calculate(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
+  swerveA.set_motor_powers(vector);
 }
 
