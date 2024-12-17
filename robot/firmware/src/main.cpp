@@ -7,17 +7,29 @@
 #include <Encoder.h>
 #include <drives/swerve_module.hpp>
 #include <controller.hpp>
+#include "util/looped.hpp"
 #include "math/vectors.hpp"
 using math::cartesian::Vec2D;
 
 //----- Variables -----
 Controller ctrl;
-drives::Motor motorAH(CRC_PWM)
-drives::PrecisionMotor()
-SwerveModule swerveA();
+
+//SWERVE A
+drives::Motor motorAH(CRC_PWM_4);
+Encoder encoAH(CRC_ENCO_A, CRC_ENCO_B);
+drives::PrecisionMotor pmAH(motorAH, encoAH, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
+drives::Motor motorAB(CRC_PWM_3);
+Encoder encoAB(CRC_ENCO_A, CRC_ENCO_B);
+drives::PrecisionMotor pmAB(motorAB, encoAB, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
+SwerveModule swerveA(pmAH, pmAB, CRC_PWM_12);
 PID_RT pidSwerveA;
 
-bool motors_enabled = false;
+
+Looped *loopable[] = {
+  &pmAH,
+  &pmAB,
+  &swerveA
+};
 
 //----- Main Program ----------------------------------------------------------------------
 void setup(){
@@ -28,24 +40,20 @@ void setup(){
   CrcLib::InitializePwmOutput(CRC_PWM_2);
   CrcLib::InitializePwmOutput(CRC_PWM_1);
 
-  // Pinmode pour le PWM
-  pinMode(CRC_PWM_12, INPUT);
-
-  //Init SwerveA
-  pidSwerveA.setPoint(0); //Toujours le garder à 0
-  pidSwerveA.setOutputRange(-1.0, 1.0); //Interval de ratio de puissance angulaire, le signe est appliquer plus tard
-  pidSwerveA.setK(1.0, 0, 0); //Proportionnal, Integral, Derivative
-  pidSwerveA.start();
-
-
+  swerveA.begin();
+  
   Serial.println("Setup Done");
 }
 
 void loop(){
   CrcLib::Update();
   ctrl.update();
+  //Serial.println(ctrl.get_left_joy().angleRad, ctrl.get_left_joy().norm);
+  swerveA.set_target(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
 
-  Vec2D vector = swerveA.calculate(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
-  swerveA.set_motor_powers(vector);
+  //Loop through all loopable
+  for(auto item:loopable){
+    item->loop();
+  }
 }
 

@@ -5,9 +5,10 @@
 #include <PID_RT.h>
 using math::cartesian::Vec2D;
 #include "drives/precision_motor.hpp"
+#include "util/looped.hpp"
 #include <CrcLib.h>
 
-class SwerveModule
+class SwerveModule : public Looped
 {
     public:
         //---------------------- CONSTANTS ---------------------------
@@ -27,52 +28,59 @@ class SwerveModule
         const double MAX_MOTEUR_POWER = 127;
         
         //---------------------- CONSTRUCTORS ---------------------------
-        SwerveModule(drives::PrecisionMotor motorH, drives::PrecisionMotor motorB)
+        SwerveModule(drives::PrecisionMotor motorH, drives::PrecisionMotor motorB, double abs_enco_pin)
             : _motorH(motorH),
-            _motorB(motorB)
+            _motorB(motorB),
+            _abs_enco_pin(abs_enco_pin)
         {
-
+            _pid.setPoint(0);
+            _pid.setOutputRange(-1.0, 1.0);
+            _pid.setK(1.0, 0.0, 0.0);
+            _pid.setInterval(10);
         }
+
         /**
          * Initialise the default values for the calculations
          * Must be call in Setup()
          */
-        void init()
-        {
+        void begin(){
+            _motorB.begin();
+            _motorH.begin();
+
+            _pid.start();
+
+            CrcLib::InitializePwmOutput(_abs_enco_pin);
         }
 
         //-------------------------- PUBLICS -----------------------------
         /**
          * Calculate the power vector (translation, angular) of a Swerve module
          * and set the power of the motors accorddingly
-         * @param targetAngle Desired angle of wheel in rads (0 to 2pi)
-         * @param tPower Multiplication factor for translation power between -1.0 and 1.0
+         * @param _target_angle Desired angle of wheel in rads (0 to 2pi)
+         * @param _trans_power Multiplication factor for translation power between -1.0 and 1.0
          * @return done - True: Operation completed succesfully, False: Problem
          */
-        void loop(double targetAngle, double tPower){
-            Vec2D vector = calculate(targetAngle, tPower);
+        void loop() override
+        {
+            Vec2D vector = calculate();
             set_motor_powers(vector);
         }
 
         /**
          * Calculate the power vector (translation, angular) of a Swerve module
-         * @param targetAngle Desired angle of wheel in rads (0 to 2pi)
-         * @param tPower Multiplication factor for translation power between -1.0 and 1.0
          * @return vecPower - {x=translationComponent, y=angularComponent}
          */
-        Vec2D calculate(double targetAngle, double tPower){
-            Serial.println(tPower);
-
+        Vec2D calculate(){
             //Set diff and dir in _moveParam
             double currentAngle = get_current_angle();
-            get_diff_angle(currentAngle, targetAngle);
+            get_diff_angle(currentAngle);
 
             //Find the absolute components of the power vector of the entire module
-            if(_pid.compute(get_PID_angle(_moveParam.diff)) && tPower != 0){
+            if(_pid.compute(get_PID_angle(_moveParam.diff)) && _trans_power != 0){
                 _vecPower.set_y(fabs(_pid.getOutput()));
-                _vecPower.set_x(get_translation_component(fabs(_moveParam.diff), fabs(tPower)));
+                _vecPower.set_x(get_translation_component(fabs(_moveParam.diff), fabs(_trans_power)));
             }
-            else if(tPower == 0){ //If the joy is not in use
+            else if(_trans_power == 0){ //If the joy is not in use
                 _vecPower.set_x(0);
                 _vecPower.set_y(0);
             }
@@ -88,7 +96,7 @@ class SwerveModule
             }
 
             //Determine the sign of the translation component depending on current and target angle
-            if(targetAngle <= M_PI){
+            if(_target_angle <= M_PI){
                 //Forward
                 if(currentAngle <= M_PI){
                 _vecPower.set_x(fabs(_vecPower.x()));
@@ -122,22 +130,30 @@ class SwerveModule
             double powerB = powerVector.y() + powerVector.x();
             double powerA = powerVector.y() - powerVector.x();
 
-            powerA = constrain(powerA*MAX_MOTEUR_POWER, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
-            powerB = constrain(powerB*MAX_MOTEUR_POWER, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+            double max_rpm_h = _motorH.get_max_rpm();
+            double max_rpm_b = _motorB.get_max_rpm();
 
-            CrcLib::SetPwmOutput(CRC_PWM_1, -powerA);
-            CrcLib::SetPwmOutput(CRC_PWM_2, -powerB);
+            powerA = constrain(powerA*max_rpm_h, -max_rpm_h, max_rpm_h);
+            powerB = constrain(powerB*max_rpm_b, -max_rpm_b, max_rpm_b);
+
+            Serial.println(powerA, powerB);
+
+            _motorH.set_target_speed(powerA);
+            _motorB.set_target_speed(powerB);
+
+            // CrcLib::SetPwmOutput(CRC_PWM_1, -powerA);
+            // CrcLib::SetPwmOutput(CRC_PWM_2, -powerB);
         }
 
         /**
          * Set the diff angle and spin direction in _moveParam
          * Also determines travel direction
          * @param currentAngle Wheel angle in radians
-         * @param targetAngle Desired angle i radians
+         * @param _target_angle Desired angle i radians
          */
-        void get_diff_angle(double currentAngle, double targetAngle){
+        void get_diff_angle(double currentAngle){
             //Calculate travel angle, will be negative
-            _moveParam.diff = targetAngle - currentAngle;
+            _moveParam.diff = _target_angle - currentAngle;
             if(_moveParam.diff >= 0){
                 _moveParam.dir = _moveParam.diff < M_PI ? 
                                 _moveParam.diff > M_PI/2 ? Direction::CLOCKWISE:Direction::COUNTERCLOCKWISE 
@@ -165,7 +181,7 @@ class SwerveModule
          */
         double get_current_angle(){
             //Get encoder value, make sure the value is between 0 and 4160 (Observation de Félix: L'encodeur retour parfois 8000)
-            double enco = pulseIn(CRC_PWM_12, HIGH);
+            double enco = pulseIn(_abs_enco_pin, HIGH);
 
             //Calculate angle
             double angleAct = enco/4160.0 * (2*M_PI);
@@ -235,7 +251,17 @@ class SwerveModule
 
             return diff;
         }
-    
+
+        /**
+         * Set the next position and power of swerve
+         * @param _target_angle Desired angle of wheel in rads (0 to 2pi)
+         * @param _trans_power Multiplication factor for translation power between -1.0 and 1.0
+         */
+        void set_target(double tar_angle, double trans_power){
+            _target_angle = tar_angle;
+            _trans_power = trans_power;
+        }
+
     private:
         //-------------------------- VARIABLES ----------------------------
         PID_RT _pid;
@@ -244,4 +270,7 @@ class SwerveModule
 
         Vec2D _vecPower; //x=trans, y=angular
         TravelParam _moveParam;
+
+        double _target_angle, _trans_power;
+        double _abs_enco_pin;
 };

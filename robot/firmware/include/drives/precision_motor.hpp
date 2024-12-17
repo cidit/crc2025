@@ -11,7 +11,7 @@
 
 namespace drives
 {
-    class PrecisionMotor
+    class PrecisionMotor : public Looped
     {
 
     public:
@@ -54,16 +54,23 @@ namespace drives
             _pidS.setPoint(0);
 
             _timer = millis();
+        }
 
+        /**
+         * Must be called in setup
+         */
+        void begin(){
             set_target_angle(math::Angle::zero());
+
+            _motor.begin();
+
+            _pidS.start();
+            _pidA.start();
         }
 
         //-------------------------- FUNCTIONS -----------------------------
-        void loop() 
-        {
-            _pidS.start();
-            _pidA.start();
-            
+        void loop() override
+        {          
             double interval = millis() - _timer;
             if(interval >= _delai){
                 _timer = millis();
@@ -95,6 +102,7 @@ namespace drives
 
             //Apply right PID
             if(_mode == Mode::MATCH_RPM){
+                Serial.println("calcul!!");
                 if (_pidS.compute(_inputS)) {
                     _outputS = _pidS.getOutput();
 
@@ -145,6 +153,13 @@ namespace drives
          */
         void set_speed_pid(double p, double i, double d){
             _pidS.setK(p, i, d);
+        }
+
+        /**
+         * @return Max RPM programmed in the motor
+         */
+        double get_max_rpm(){
+            return _max_rpm;
         }
 
 
