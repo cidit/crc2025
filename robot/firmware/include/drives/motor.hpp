@@ -24,6 +24,7 @@ namespace drives
          * Initialize basic things like Pins
          */
         void begin(){
+            Serial.println(" > Init Motor");
             CrcLib::InitializePwmOutput(_pin);
         }
 
@@ -51,6 +52,7 @@ namespace drives
          */
         void set_power(double power){
             power = constrain(power, -128.0, 127.0);
+            Serial.print(" Power: "+String(power));
             CrcLib::SetPwmOutput(_pin, power);
         }
 

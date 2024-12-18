@@ -1,7 +1,7 @@
 /*
   Main program for robot control
 
-  
+    
 */
 #include <CrcLib.h>
 #include <Encoder.h>
@@ -19,16 +19,16 @@ drives::Motor motorAH(CRC_PWM_4);
 Encoder encoAH(CRC_ENCO_A, CRC_ENCO_B);
 drives::PrecisionMotor pmAH(motorAH, encoAH, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
 drives::Motor motorAB(CRC_PWM_3);
-Encoder encoAB(CRC_ENCO_A, CRC_ENCO_B);
+Encoder encoAB(CRC_I2C_SCL, CRC_I2C_SDA);
 drives::PrecisionMotor pmAB(motorAB, encoAB, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
 SwerveModule swerveA(pmAH, pmAB, CRC_PWM_12);
 PID_RT pidSwerveA;
 
 
 Looped *loopable[] = {
+  &swerveA,
   &pmAH,
-  &pmAB,
-  &swerveA
+  &pmAB
 };
 
 //----- Main Program ----------------------------------------------------------------------
@@ -55,5 +55,6 @@ void loop(){
   for(auto item:loopable){
     item->loop();
   }
+  Serial.println();
 }
 

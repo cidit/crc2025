@@ -60,17 +60,18 @@ namespace drives
          * Must be called in setup
          */
         void begin(){
+            Serial.println(" > Init Precise Motor");
             set_target_angle(math::Angle::zero());
 
             _motor.begin();
-
-            _pidS.start();
-            _pidA.start();
         }
 
         //-------------------------- FUNCTIONS -----------------------------
         void loop() override
         {          
+            _pidS.start();
+            _pidA.start();
+            
             double interval = millis() - _timer;
             if(interval >= _delai){
                 _timer = millis();
@@ -102,11 +103,11 @@ namespace drives
 
             //Apply right PID
             if(_mode == Mode::MATCH_RPM){
-                Serial.println("calcul!!");
                 if (_pidS.compute(_inputS)) {
                     _outputS = _pidS.getOutput();
 
                     _motor.set_power(_outputS);
+                    Serial.print(" PIDOutS: "+String(_outputS));
                 }
             }
             else if(_mode == Mode::MATCH_ANGLE){
@@ -114,6 +115,7 @@ namespace drives
                     _outputA = _pidA.getOutput();
 
                     _motor.set_power_ratio(_outputA);
+                    Serial.print(" PIDOutA: "+String(_outputA));
                 }
                 //TODO: Dont do 360
                 // Command rotation + direction
