@@ -139,7 +139,7 @@ class SwerveModule : public Looped
             powerA = constrain(powerA*max_rpm_h, -max_rpm_h, max_rpm_h);
             powerB = constrain(powerB*max_rpm_b, -max_rpm_b, max_rpm_b);
 
-            Serial.print(" PowA: "+String(powerA)+"PowB: "+String(powerB));
+            Serial.print(" PowA: "+String(powerA)+" PowB: "+String(powerB));
 
             _motorH.set_target_speed(powerA);
             _motorB.set_target_speed(powerB);

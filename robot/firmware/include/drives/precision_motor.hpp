@@ -105,17 +105,17 @@ namespace drives
             if(_mode == Mode::MATCH_RPM){
                 if (_pidS.compute(_inputS)) {
                     _outputS = _pidS.getOutput();
-
+                    
+                    Serial.print(" PIDInS: "+String(_inputS)+" PIDOutS: "+String(_outputS));
                     _motor.set_power(_outputS);
-                    Serial.print(" PIDOutS: "+String(_outputS));
                 }
             }
             else if(_mode == Mode::MATCH_ANGLE){
                 if (_pidA.compute(_inputA)) {
                     _outputA = _pidA.getOutput();
 
+                    Serial.print(" PIDInA: "+String(_inputA)+" PIDOutA: "+String(_outputA));
                     _motor.set_power_ratio(_outputA);
-                    Serial.print(" PIDOutA: "+String(_outputA));
                 }
                 //TODO: Dont do 360
                 // Command rotation + direction
