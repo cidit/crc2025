@@ -35,7 +35,7 @@ class SwerveModule : public Looped
         {
             _pid.setPoint(0);
             _pid.setOutputRange(-1.0, 1.0);
-            _pid.setK(1.0, 0.0, 0.0);
+            _pid.setK(0.5, 0.01, 0.001);
             _pid.setInterval(10);
         }
 
@@ -49,9 +49,12 @@ class SwerveModule : public Looped
             _motorB.begin();
             _motorH.begin();
 
+            _motorB.set_target_power(0);
+            _motorH.set_target_power(0);
+
             _pid.start();
 
-            CrcLib::InitializePwmOutput(_abs_enco_pin);
+            //CrcLib::InitializePwmOutput(_abs_enco_pin);
         }
 
         //-------------------------- PUBLICS -----------------------------
@@ -133,16 +136,16 @@ class SwerveModule : public Looped
             double powerB = powerVector.y() + powerVector.x();
             double powerA = powerVector.y() - powerVector.x();
 
-            double max_rpm_h = _motorH.get_max_rpm();
-            double max_rpm_b = _motorB.get_max_rpm();
+            // double max_rpm_h = _motorH.get_max_rpm();
+            // double max_rpm_b = _motorB.get_max_rpm();
 
-            powerA = constrain(powerA*max_rpm_h, -max_rpm_h, max_rpm_h);
-            powerB = constrain(powerB*max_rpm_b, -max_rpm_b, max_rpm_b);
+            powerA = constrain(powerA*MAX_MOTEUR_POWER, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
+            powerB = constrain(powerB*MAX_MOTEUR_POWER, -MAX_MOTEUR_POWER, MAX_MOTEUR_POWER);
 
             Serial.print(" PowA: "+String(powerA)+" PowB: "+String(powerB));
 
-            _motorH.set_target_speed(powerA);
-            _motorB.set_target_speed(powerB);
+            _motorH.set_target_power(powerA);
+            _motorB.set_target_power(powerB);
 
             // CrcLib::SetPwmOutput(CRC_PWM_1, -powerA);
             // CrcLib::SetPwmOutput(CRC_PWM_2, -powerB);
@@ -152,7 +155,7 @@ class SwerveModule : public Looped
          * Set the diff angle and spin direction in _moveParam
          * Also determines travel direction
          * @param currentAngle Wheel angle in radians
-         * @param _target_angle Desired angle i radians
+         * @param _target_angle Desired angle in radians
          */
         void get_diff_angle(double currentAngle){
             //Calculate travel angle, will be negative

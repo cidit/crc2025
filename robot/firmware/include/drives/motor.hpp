@@ -33,17 +33,10 @@ namespace drives
          * @param ratio a double between -1 and 1. will immediatly modify the speed of the motor.
          */
         void set_power_ratio(double ratio){
-            //Apply sign and contrain
-            auto direction_adjusted_speed = _is_inverted ? -ratio : ratio;
-            auto constrained_speed = constrain(direction_adjusted_speed, -1.0, 1.0);
+            auto constrained_speed = constrain(ratio, -1.0, 1.0);
 
             //Multiply the speed ratio by the max value
-            //-1 if positive because the value is between -128 and 127
-            auto actual_speed = constrained_speed > 0
-                                    ? constrained_speed * (MAX_SPEED - 1)
-                                    : constrained_speed * MAX_SPEED ;
-            _cached_real_speed = actual_speed;
-            set_power(_cached_real_speed);
+            set_power(constrained_speed * MAX_SPEED);
         }
 
         /**
@@ -52,13 +45,16 @@ namespace drives
          */
         void set_power(double power){
             power = constrain(power, -128.0, 127.0);
-            Serial.print(" Power: "+String(power));
+            
+            //Change sign if inverted
+            power = _is_inverted ? -power : power;
+
+            Serial.print(" Power: "+String(power)+"\n");
             CrcLib::SetPwmOutput(_pin, power);
         }
 
     private:
         int _pin;
         bool _is_inverted;
-        char _cached_real_speed;
     };
 }
