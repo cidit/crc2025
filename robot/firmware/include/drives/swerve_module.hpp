@@ -28,15 +28,19 @@ class SwerveModule : public Looped
         const double MAX_MOTEUR_POWER = 127;
         
         //---------------------- CONSTRUCTORS ---------------------------
-        SwerveModule(drives::PrecisionMotor motorH, drives::PrecisionMotor motorB, double abs_enco_pin)
+        SwerveModule(drives::PrecisionMotor &motorH, drives::PrecisionMotor &motorB, double abs_enco_pin)
             : _motorH(motorH),
             _motorB(motorB),
             _abs_enco_pin(abs_enco_pin)
         {
             _pid.setPoint(0);
             _pid.setOutputRange(-1.0, 1.0);
-            _pid.setK(0.5, 0.01, 0.001);
+            _pid.setK(5.0, 0.02, 0.001);
             _pid.setInterval(10);
+            _pid.setPropOnError();
+
+            _motorB.set_speed_pid(0.021, 0.001, 0.0001);
+            _motorH.set_speed_pid(0.021, 0.001, 0.0001);
         }
 
         /**
@@ -82,8 +86,12 @@ class SwerveModule : public Looped
             get_diff_angle(currentAngle);
 
             //Find the absolute components of the power vector of the entire module
-            if(_pid.compute(get_PID_angle(_moveParam.diff)) && _trans_power != 0){
-                _vecPower.set_y(fabs(_pid.getOutput()));
+            // if(_pid.compute(get_PID_angle(_moveParam.diff)) && _trans_power != 0){
+            //     _vecPower.set_y(fabs(_pid.getOutput()));
+            //     _vecPower.set_x(get_translation_component(fabs(_moveParam.diff), fabs(_trans_power)));
+            // }
+            if(_trans_power != 0){
+                _vecPower.set_y(get_angular_component(fabs(_moveParam.diff), fabs(_trans_power)));
                 _vecPower.set_x(get_translation_component(fabs(_moveParam.diff), fabs(_trans_power)));
             }
             else if(_trans_power == 0){ //If the joy is not in use
@@ -272,8 +280,8 @@ class SwerveModule : public Looped
     private:
         //-------------------------- VARIABLES ----------------------------
         PID_RT _pid;
-        drives::PrecisionMotor _motorH;
-        drives::PrecisionMotor _motorB;
+        drives::PrecisionMotor &_motorH;
+        drives::PrecisionMotor &_motorB;
 
         Vec2D _vecPower; //x=trans, y=angular
         TravelParam _moveParam;

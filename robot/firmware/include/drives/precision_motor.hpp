@@ -70,7 +70,7 @@ namespace drives
 
         //-------------------------- FUNCTIONS -----------------------------
         void loop() override
-        {          
+        {
             _pidS.start();
             _pidA.start();
             
@@ -104,18 +104,17 @@ namespace drives
                 //Calculate the diff between current and target angle
                 _inputA = math::Angle::travel(_current_angle, _target_angle);
                 //Serial.print(" CurrentAngle: "+String(_current_angle._radians)+" TarAngle: "+String(_target_angle._radians)+" Travel: "+String(_inputA));
-                
             } 
 
             //Apply right PID
             if(_mode == Mode::MATCH_POWER){
                 if (_pidS.compute(_inputS)) {
                     _outputS = _pidS.getOutput();
-                    
+
                     _current_motor_out = constrain(_current_motor_out + _outputS, -127.0, 127.0);
 
-                    Serial.print(" PIDInS: "+String(_inputS)+" PIDSetS: "+String(_pidS.getSetPoint())+" PIDOutS: "+String(_outputS));
-                    //_motor.set_power(_current_motor_out);
+                    Serial.print(" PIDInS: "+String(_inputS)+" PIDSetS: "+String(_setpointS)+" PIDOutS: "+String(_outputS));
+                    _motor.set_power(_current_motor_out);
                 }
             }
             else if(_mode == Mode::MATCH_ANGLE){
@@ -123,7 +122,7 @@ namespace drives
                     _outputA = _pidA.getOutput();
 
                     Serial.print(" PIDInA: "+String(_inputA)+" PIDSetA: "+String(_pidA.getSetPoint())+" PIDOutA: "+String(_outputA));
-                    //_motor.set_power(_outputA*MAX_MOTEUR_POWER);
+                    _motor.set_power(_outputA*MAX_MOTEUR_POWER);
                 }
                 //TODO: Dont do 360
                 // Command rotation + direction
@@ -146,7 +145,8 @@ namespace drives
          */
         void set_target_power(double target_pow){
             _mode = Mode::MATCH_POWER;
-            _pidS.setPoint(target_pow);
+            _setpointS = target_pow;
+            _pidS.setPoint(_setpointS);
         }
 
         /**

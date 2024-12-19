@@ -15,6 +15,7 @@ Controller::Controller(){}
  */
 void Controller::update(){
     calculateLeftJoy();
+    read_buttons();
 }
 
 //-------- Getter Functions ----------------
@@ -97,4 +98,12 @@ double Controller::radToDeg(double radian){
 double Controller::cartToPolNorm(Vec2D vector)
 {
     return sqrt(sq(vector.x()) + sq(vector.y()));
+}
+
+/**
+ * Read and store value of all buttons
+ */
+void Controller::read_buttons(){
+    _X = CrcLib::ReadDigitalChannel(BUTTON::COLORS_DOWN);
+    _T = CrcLib::ReadDigitalChannel(BUTTON::COLORS_UP);
 }
