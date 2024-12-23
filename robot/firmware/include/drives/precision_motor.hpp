@@ -44,14 +44,14 @@ namespace drives
               _delai(pid_interval)
         {
             //Config of PID on angle
-            _pidA.setOutputRange(-127, 127);
+            _pidA.setOutputRange(-1, 1);
             _pidA.setInterval(pid_interval);
             _pidA.setK(_KpA, _KiA, _KdA);
             _pidA.setPoint(0);
             _pidA.setPropOnError();
 
             //Config of PID on speed
-            _pidS.setOutputRange(-1, 1);
+            _pidS.setOutputRange(-127, 127);
             _pidS.setInterval(pid_interval);
             _pidS.setK(_KpS, _KiS, _KdS);
             _pidS.setPoint(0);
@@ -99,7 +99,7 @@ namespace drives
                 
                 //Compute using current "power"
                 _inputS = current_rpm * 127.0 / _max_rpm;
-                //Serial.print(" CurrentRPM: "+String(current_rpm)+" MaxRPM: "+String(_max_rpm)+" Ticks: "+String(delta_pos)+" MaxTicks: "+String(_ticks_turn));
+                Serial.print(" CurrentRPM: "+String(current_rpm)+" MaxRPM: "+String(_max_rpm)+" Ticks: "+String(delta_pos)+" MaxTicks: "+String(_ticks_turn));
                 
                 //Calculate the diff between current and target angle
                 _inputA = math::Angle::travel(_current_angle, _target_angle);
@@ -181,9 +181,9 @@ namespace drives
         double _setpointA;
         double _inputA;
         double _outputA;
-        double _KpA = 3.837;
-        double _KiA = 0.0;
-        double _KdA = 0;
+        double _KpA = 0.8;
+        double _KiA = 0.01;
+        double _KdA = 0.001;
 
         /**
          * These are the parameters for the PID on speed.
