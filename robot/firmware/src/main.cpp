@@ -20,10 +20,10 @@ auto target_angle = math::Angle::zero();
 //-------------------------- OBJECTS -----------------------------
 Decodeur cmdl(&Serial);
 
-Encoder enco1(CRC_ENCO_A, CRC_DIG_1), 
-        enco2(CRC_ENCO_B, CRC_DIG_2),
-        enco3(CRC_I2C_SDA, CRC_DIG_3),
-        enco4(CRC_I2C_SCL, CRC_DIG_4);
+Encoder enco1(CRC_I2C_SDA, CRC_DIG_2), 
+        enco2(CRC_I2C_SCL, CRC_DIG_3),
+        enco3(CRC_ENCO_A, CRC_DIG_4),
+        enco4(CRC_ENCO_B, CRC_DIG_5);
 
 //-------------------------- FUNCTIONS -----------------------------
 void update_cmd(){
