@@ -20,9 +20,10 @@ auto target_angle = math::Angle::zero();
 //-------------------------- OBJECTS -----------------------------
 Decodeur cmdl(&Serial);
 
-drives::Motor motor(CRC_PWM_1, false);
-Encoder enco(CRC_ENCO_A, CRC_ENCO_B);
-drives::PrecisionMotor pm(motor, enco, 1.0, 0.6, 0.0, 0.08, 0.08, 0.0002, 10, 312.0, drives::PrecisionMotor::TICKS_312);
+Encoder enco1(CRC_ENCO_A, CRC_DIG_1), 
+        enco2(CRC_ENCO_B, CRC_DIG_2),
+        enco3(CRC_I2C_SDA, CRC_DIG_3),
+        enco4(CRC_I2C_SCL, CRC_DIG_4);
 
 //-------------------------- FUNCTIONS -----------------------------
 void update_cmd(){
@@ -34,41 +35,41 @@ void update_cmd(){
   auto ack = true;
   switch (toupper(cmdl.getCommand()))
   {
-  case 'S':
-  {
-    if (cmdl.getArgCount() < 1)
-    {
-      ack = false;
-      break;
-    }
-    auto speed = cmdl.getArg(0);
-    Serial.println("setting speed to: " + String(speed));
-    Serial.print("Speed: ");
-    Serial.println(speed);
-    pm.set_target_speed(speed);
-    break;
-  }
-  case 'K': {
-    if (cmdl.getArgCount() < 3) {
-      ack = false;
-      break;
-    }
-    double p = cmdl.getArg(0), i = cmdl.getArg(1), d=cmdl.getArg(2);
-    Serial.print("Tunings: " + String(p) + " " + String(i) + " " + String(d));
-    pm.set_speed_pid(p, i, d);
-    break;
-  }
-  case 'A': {
-    if (cmdl.getArgCount()<1) {
-      ack = false;
-      break;
-    }
-    target_angle = math::Angle::from_rad(cmdl.getArg(0));
-    Serial.print("Rads: ");
-    Serial.println(target_angle._radians);
-    pm.set_target_angle(target_angle);
-    break;
-  }
+  // case 'S':
+  // {
+  //   if (cmdl.getArgCount() < 1)
+  //   {
+  //     ack = false;
+  //     break;
+  //   }
+  //   auto speed = cmdl.getArg(0);
+  //   Serial.println("setting speed to: " + String(speed));
+  //   Serial.print("Speed: ");
+  //   Serial.println(speed);
+  //   pm.set_target_speed(speed);
+  //   break;
+  // }
+  // case 'K': {
+  //   if (cmdl.getArgCount() < 3) {
+  //     ack = false;
+  //     break;
+  //   }
+  //   double p = cmdl.getArg(0), i = cmdl.getArg(1), d=cmdl.getArg(2);
+  //   Serial.print("Tunings: " + String(p) + " " + String(i) + " " + String(d));
+  //   pm.set_speed_pid(p, i, d);
+  //   break;
+  // }
+  // case 'A': {
+  //   if (cmdl.getArgCount()<1) {
+  //     ack = false;
+  //     break;
+  //   }
+  //   target_angle = math::Angle::from_rad(cmdl.getArg(0));
+  //   Serial.print("Rads: ");
+  //   Serial.println(target_angle._radians);
+  //   pm.set_target_angle(target_angle);
+  //   break;
+  // }
   default:
   {
     ack = false;
@@ -84,17 +85,17 @@ void setup()
 {
   Serial.begin(115200);
   CrcLib::Initialize();
-  motor.begin();
 }
 
 void loop()
 {
   cmdl.refresh();
   update_cmd();
-
   CrcLib::Update();
-  pm.loop();
 
+  char buf[150];
+  sprintf(buf, "1:%d 2:%d 3:%d 4:%d\n", enco1.read(), enco2.read(), enco3.read(), enco4.read());
+  Serial.print(buf);  
 }
 
 
