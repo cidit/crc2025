@@ -126,10 +126,10 @@ void loop()
   }
   else
   {
-    motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
-    motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y));
-    motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X));
-    motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y));
+    motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X)/5);
+    motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)/5);
+    motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X)/5);
+    motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y)/5);
   }
 
   Serial.print("\tj1x:");
