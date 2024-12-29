@@ -91,6 +91,16 @@ drives::Motor motorBB(CRC_PWM_1);
 
 // }
 
+#define SP(things) Serial.print(things)
+
+const uint8_t ABS_ENC_A = CRC_PWM_12, ABS_ENC_B=CRC_DIG_1;
+
+double get_abs_enc_angle(uint8_t pin) {
+  double pulse = pulseIn(pin, HIGH);
+  double angle = pulse/4160.0 * (2*M_PI);
+  return angle;
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -109,7 +119,7 @@ void loop()
   motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X));
   motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y));
 
-  Serial.print("j1x:");
+  Serial.print("\tj1x:");
   Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
   Serial.print("\tj1y:");
   Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y));
@@ -117,5 +127,12 @@ void loop()
   Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X));
   Serial.print("\tj2y:");
   Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y));
+  Serial.print("\t");
+  SP("\teA:");
+  SP(String(get_abs_enc_angle(ABS_ENC_A)));
+  SP("\teB:");
+  SP(String(get_abs_enc_angle(ABS_ENC_B)));
+
+
   Serial.println();
 }
