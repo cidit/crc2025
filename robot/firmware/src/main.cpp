@@ -54,8 +54,14 @@ void loop()
     Serial.print(" ");
   }
   Serial.print("\t\t");
-  sprintf(buf, "1:%d 2:%d 3:%d 4:%d", enco1.read(), enco2.read(), enco3.read(), enco4.read());
-  Serial.println(buf);  
+  Serial.print("1:");
+  Serial.print(enco1.read());
+  Serial.print("2:");
+  Serial.print(enco2.read());
+  Serial.print("3:");
+  Serial.print(enco3.read());
+  Serial.print("4:");
+  Serial.print(enco4.read());
   Serial.println();
 
 }
