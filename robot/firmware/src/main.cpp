@@ -104,10 +104,10 @@ void setup()
 void loop()
 {
   CrcLib::Update();
-  // motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
-  // motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
-  // motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
-  // motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y));
+  motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X));
+  motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y));
 
   Serial.print("j1x:");
   Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
