@@ -20,10 +20,15 @@ auto target_angle = math::Angle::zero();
 //-------------------------- OBJECTS -----------------------------
 Decodeur cmdl(&Serial);
 
-Encoder enco1(CRC_I2C_SDA, CRC_DIG_2), 
-        enco2(CRC_I2C_SCL, CRC_DIG_3),
-        enco3(CRC_ENCO_A, CRC_DIG_4),
-        enco4(CRC_ENCO_B, CRC_DIG_5);
+// Encoder enco1(CRC_I2C_SDA, CRC_DIG_2), 
+//         enco2(CRC_I2C_SCL, CRC_DIG_3),
+//         enco3(CRC_ENCO_A, CRC_DIG_4),
+//         enco4(CRC_ENCO_B, CRC_DIG_5);
+
+const int pins[8] = {
+  CRC_DIG_2, CRC_DIG_3, CRC_DIG_4, CRC_DIG_5,
+  CRC_I2C_SDA, CRC_I2C_SCL, CRC_ENCO_A, CRC_ENCO_B
+};
 
 //-------------------------- FUNCTIONS -----------------------------
 void update_cmd(){
@@ -85,6 +90,9 @@ void setup()
 {
   Serial.begin(115200);
   CrcLib::Initialize();
+  for (auto p : pins) {
+    CrcLib::SetDigitalPinMode(p, INPUT);
+  }
 }
 
 void loop()
@@ -93,9 +101,12 @@ void loop()
   update_cmd();
   CrcLib::Update();
 
-  char buf[150];
-  sprintf(buf, "1:%d 2:%d 3:%d 4:%d", enco1.read(), enco2.read(), enco3.read(), enco4.read());
-  Serial.println(buf);  
+  // char buf[150];
+  // sprintf(buf, "1:%d 2:%d 3:%d 4:%d", enco1.read(), enco2.read(), enco3.read(), enco4.read());
+  // Serial.println(buf);  
+  for (auto p: pins) {
+    auto state = CrcLib::GetDigitalInput(p);
+    Serial.print(String(p)+":"+String(state)+" ");
+  }
+  Serial.println();
 }
-
-
