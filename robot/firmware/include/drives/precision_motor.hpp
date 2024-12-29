@@ -64,7 +64,6 @@ namespace drives
          * Must be called in setup
          */
         void begin(){
-            Serial.println(" > Init Precise Motor");
             _motor.begin();
         }
 

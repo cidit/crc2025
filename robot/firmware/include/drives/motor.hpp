@@ -24,7 +24,7 @@ namespace drives
          * Initialize basic things like Pins
          */
         void begin(){
-            Serial.println(" > Init Motor");
+            Serial.println(" > Init Motor" + String(_pin));
             CrcLib::InitializePwmOutput(_pin);
         }
 
@@ -49,7 +49,6 @@ namespace drives
             //Change sign if inverted
             power = _is_inverted ? -power : power;
 
-            Serial.print(" Power: "+String(power)+"\n");
             CrcLib::SetPwmOutput(_pin, power);
         }
 

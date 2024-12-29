@@ -26,70 +26,88 @@
 #include <Decodeur.h>
 using math::cartesian::Vec2D;
 
-//----- Variables -----
-Controller ctrl;
-Decodeur cmd(&Serial);
+
+// //----- Variables -----
+// Controller ctrl;
+// Decodeur cmd(&Serial);
 
 
-//----- SWERVE A (gauche) -----
+// //----- SWERVE A (gauche) -----
 drives::Motor motorAH(CRC_PWM_4);
-Encoder encoAH(CRC_ENCO_A, CRC_DIG_2);
-drives::PrecisionMotor pmAH(motorAH, encoAH, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
+// Encoder encoAH(CRC_ENCO_A, CRC_DIG_2);
+// drives::PrecisionMotor pmAH(motorAH, encoAH, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
 drives::Motor motorAB(CRC_PWM_3);
-Encoder encoAB(CRC_I2C_SDA, CRC_DIG_4);
-drives::PrecisionMotor pmAB(motorAB, encoAB, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
-SwerveModule swerveA(pmAH, pmAB, CRC_PWM_12);
-PID_RT pidSwerveA;
+// Encoder encoAB(CRC_I2C_SDA, CRC_DIG_4);
+// drives::PrecisionMotor pmAB(motorAB, encoAB, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
+// SwerveModule swerveA(pmAH, pmAB, CRC_PWM_12);
+// PID_RT pidSwerveA;
 
-//----- SWERVE B (droite) -----
+// //----- SWERVE B (droite) -----
 drives::Motor motorBH(CRC_PWM_7);
-Encoder encoBH(CRC_I2C_SCL, CRC_DIG_5);
-drives::PrecisionMotor pmBH(motorBH, encoBH, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
+// Encoder encoBH(CRC_I2C_SCL, CRC_DIG_5);
+// drives::PrecisionMotor pmBH(motorBH, encoBH, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
 drives::Motor motorBB(CRC_PWM_1);
-Encoder encoBB(CRC_ENCO_B, CRC_DIG_3);
-drives::PrecisionMotor pmBB(motorBB, encoBB, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
-SwerveModule swerveB(pmBH, pmBB, CRC_DIG_1);
-PID_RT pidSwerveB;
+// Encoder encoBB(CRC_ENCO_B, CRC_DIG_3);
+// drives::PrecisionMotor pmBB(motorBB, encoBB, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
+// SwerveModule swerveB(pmBH, pmBB, CRC_DIG_1);
+// PID_RT pidSwerveB;
 
 
-//----- Main Program ----------------------------------------------------------------------
-void setup(){
+// //----- Main Program ----------------------------------------------------------------------
+// void setup(){
+//   Serial.begin(115200);
+
+//   // Initialisation des Moteurs
+//   CrcLib::Initialize();
+//   //CrcLib::InitializePwmOutput(CRC_PWM_2);
+//   //CrcLib::InitializePwmOutput(CRC_PWM_1);
+
+//   swerveA.begin();
+//   swerveB.begin();
+  
+//   Serial.println("Setup Done");
+// }
+
+// void loop(){
+//   CrcLib::Update();
+
+//   ctrl.update();
+//   cmd.refresh();
+
+//   // if(cmd.isAvailable()){
+//   //   auto commande = cmd.getCommand();
+//   //   switch(commande){
+//   //     case 'P':
+//   //         pmO.set_target_power(cmd.getArg(0));
+//   //         break;
+//   //   }
+//   // }
+
+//   //Serial.println(ctrl.get_left_joy().angleRad, ctrl.get_left_joy().norm);
+//   swerveA.set_target(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
+//   swerveB.set_target(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
+
+//   swerveA.loop();
+//   swerveB.loop();
+
+//   Serial.println();
+
+// }
+
+
+
+void setup() {
   Serial.begin(115200);
-
-  // Initialisation des Moteurs
   CrcLib::Initialize();
-  //CrcLib::InitializePwmOutput(CRC_PWM_2);
-  //CrcLib::InitializePwmOutput(CRC_PWM_1);
-
-  swerveA.begin();
-  swerveB.begin();
-  
-  Serial.println("Setup Done");
+  motorAB.begin();
+  motorAH.begin();
+  motorBB.begin();
+  motorBH.begin();
 }
 
-void loop(){
-  CrcLib::Update();
-
-  ctrl.update();
-  cmd.refresh();
-
-  // if(cmd.isAvailable()){
-  //   auto commande = cmd.getCommand();
-  //   switch(commande){
-  //     case 'P':
-  //         pmO.set_target_power(cmd.getArg(0));
-  //         break;
-  //   }
-  // }
-
-  //Serial.println(ctrl.get_left_joy().angleRad, ctrl.get_left_joy().norm);
-  swerveA.set_target(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
-  swerveB.set_target(ctrl.get_left_joy().angleRad , ctrl.get_left_joy().norm);
-
-  swerveA.loop();
-  swerveB.loop();
-  
-  Serial.println();
-
+void loop() {
+  motorAB.set_power_ratio(0.1);
+  motorAH.set_power_ratio(0.1);
+  motorBB.set_power_ratio(0.1);
+  motorBH.set_power_ratio(0.1);
 }
-
