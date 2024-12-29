@@ -97,7 +97,7 @@ const uint8_t ABS_ENC_A = CRC_DIG_12, ABS_ENC_B = CRC_DIG_1;
 
 double get_abs_enc_angle(uint8_t pin)
 {
-  double pulse = pulseIn(pin, HIGH);
+  double pulse = pulseIn(pin, HIGH, 5000);
   double angle = pulse / 4160.0 * (2 * M_PI);
   return angle;
 }
