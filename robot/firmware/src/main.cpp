@@ -26,11 +26,9 @@
 #include <Decodeur.h>
 using math::cartesian::Vec2D;
 
-
 // //----- Variables -----
 // Controller ctrl;
 // Decodeur cmd(&Serial);
-
 
 // //----- SWERVE A (gauche) -----
 drives::Motor motorAH(CRC_PWM_4);
@@ -52,7 +50,6 @@ drives::Motor motorBB(CRC_PWM_1);
 // SwerveModule swerveB(pmBH, pmBB, CRC_DIG_1);
 // PID_RT pidSwerveB;
 
-
 // //----- Main Program ----------------------------------------------------------------------
 // void setup(){
 //   Serial.begin(115200);
@@ -64,7 +61,7 @@ drives::Motor motorBB(CRC_PWM_1);
 
 //   swerveA.begin();
 //   swerveB.begin();
-  
+
 //   Serial.println("Setup Done");
 // }
 
@@ -94,9 +91,8 @@ drives::Motor motorBB(CRC_PWM_1);
 
 // }
 
-
-
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   CrcLib::Initialize();
   motorAB.begin();
@@ -105,10 +101,21 @@ void setup() {
   motorBH.begin();
 }
 
-void loop() {
+void loop()
+{
   CrcLib::Update();
-  motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
-  motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
-  motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
-  motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  // motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  // motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  // motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  // motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+
+  Serial.print("j1x:");
+  Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  Serial.print("\tj1y:");
+  Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y));
+  Serial.print("\tj2x:");
+  Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X));
+  Serial.print("\tj2y:");
+  Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y));
+  Serial.println();
 }
