@@ -89,9 +89,9 @@ void update_cmd(){
 void setup()
 {
   Serial.begin(115200);
-  CrcLib::Initialize();
+  // CrcLib::Initialize();
   for (auto p : pins) {
-    CrcLib::SetDigitalPinMode(p, INPUT);
+    pinMode(p, INPUT);
   }
 }
 
@@ -99,13 +99,13 @@ void loop()
 {
   cmdl.refresh();
   update_cmd();
-  CrcLib::Update();
+  // CrcLib::Update();
 
   // char buf[150];
   // sprintf(buf, "1:%d 2:%d 3:%d 4:%d", enco1.read(), enco2.read(), enco3.read(), enco4.read());
   // Serial.println(buf);  
   for (auto p: pins) {
-    auto state = CrcLib::GetDigitalInput(p);
+    auto state = digitalRead(p);
     Serial.print(String(p)+":"+String(state)+" ");
   }
   Serial.println();
