@@ -111,14 +111,15 @@ void setup()
   motorBB.begin();
   motorBH.begin();
 }
-
 void loop()
 {
+  static int iteration = 0;
+  SP(String(iteration++));
   CrcLib::Update();
 
   if (!CrcLib::IsCommValid())
   {
-    SP("COMINV");
+    SP("\tCOMINV");
     motorAB.set_power(0);
     motorAH.set_power(0);
     motorBB.set_power(0);
@@ -126,10 +127,10 @@ void loop()
   }
   else
   {
-    motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X)/5);
-    motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)/5);
-    motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X)/5);
-    motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y)/5);
+    motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X)/2);
+    motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)/2);
+    motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X)/2);
+    motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y)/2);
   }
 
   Serial.print("\tj1x:");
