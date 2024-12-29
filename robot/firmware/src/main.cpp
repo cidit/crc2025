@@ -106,8 +106,9 @@ void setup() {
 }
 
 void loop() {
-  motorAB.set_power_ratio(0.1);
-  motorAH.set_power_ratio(0.1);
-  motorBB.set_power_ratio(0.1);
-  motorBH.set_power_ratio(0.1);
+  CrcLib::Update();
+  motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
 }
