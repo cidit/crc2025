@@ -93,11 +93,12 @@ drives::Motor motorBB(CRC_PWM_1);
 
 #define SP(things) Serial.print(things)
 
-const uint8_t ABS_ENC_A = CRC_PWM_12, ABS_ENC_B=CRC_DIG_1;
+const uint8_t ABS_ENC_A = CRC_PWM_12, ABS_ENC_B = CRC_DIG_1;
 
-double get_abs_enc_angle(uint8_t pin) {
+double get_abs_enc_angle(uint8_t pin)
+{
   double pulse = pulseIn(pin, HIGH);
-  double angle = pulse/4160.0 * (2*M_PI);
+  double angle = pulse / 4160.0 * (2 * M_PI);
   return angle;
 }
 
@@ -114,10 +115,22 @@ void setup()
 void loop()
 {
   CrcLib::Update();
-  motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
-  motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y));
-  motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X));
-  motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y));
+
+  if (!CrcLib::IsCommValid())
+  {
+    SP("COMINV");
+    motorAB.set_power(0);
+    motorAH.set_power(0);
+    motorBB.set_power(0);
+    motorBH.set_power(0);
+  }
+  else
+  {
+    motorAB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+    motorAH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y));
+    motorBB.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X));
+    motorBH.set_power(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y));
+  }
 
   Serial.print("\tj1x:");
   Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
@@ -132,7 +145,6 @@ void loop()
   SP(String(get_abs_enc_angle(ABS_ENC_A)));
   SP("\teB:");
   SP(String(get_abs_enc_angle(ABS_ENC_B)));
-
 
   Serial.println();
 }
