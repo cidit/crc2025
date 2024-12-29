@@ -13,19 +13,24 @@
 #define ENCODER_DO_NOT_USE_INTERRUPTS
 
 //-------------------------- VARIABLES -----------------------------
-double in, out, s=0;
-auto target_angle = math::Angle::zero();
 
 
 //-------------------------- OBJECTS -----------------------------
+
 Decodeur cmdl(&Serial);
 
-Encoder enco1(CRC_I2C_SDA, CRC_DIG_2), 
-        enco2(CRC_I2C_SCL, CRC_DIG_3),
-        enco3(CRC_ENCO_A, CRC_DIG_4),
-        enco4(CRC_ENCO_B, CRC_DIG_5);
+// Encoder enco1(CRC_I2C_SDA, CRC_DIG_2), 
+//         enco2(CRC_I2C_SCL, CRC_DIG_3),
+//         enco3(CRC_ENCO_A, CRC_DIG_4),
+//         enco4(CRC_ENCO_B, CRC_DIG_5);
+        
+Encoder enco1(CRC_I2C_SDA, CRC_DIG_4), 
+        enco2(CRC_I2C_SCL, CRC_DIG_5),
+        enco3(CRC_ENCO_A, CRC_DIG_2),
+        enco4(CRC_ENCO_B, CRC_DIG_3);
 
 //-------------------------- MAIN PROG -----------------------------
+
 void setup()
 {
   Serial.begin(115200);
