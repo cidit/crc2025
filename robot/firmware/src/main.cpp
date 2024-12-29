@@ -93,7 +93,7 @@ drives::Motor motorBB(CRC_PWM_1);
 
 #define SP(things) Serial.print(things)
 
-const uint8_t ABS_ENC_A = CRC_PWM_12, ABS_ENC_B = CRC_DIG_1;
+const uint8_t ABS_ENC_A = CRC_DIG_12, ABS_ENC_B = CRC_DIG_1;
 
 double get_abs_enc_angle(uint8_t pin)
 {
@@ -115,6 +115,8 @@ void loop()
 {
   static int iteration = 0;
   SP(String(iteration++));
+  SP("\t");
+  SP(millis());
   CrcLib::Update();
 
   if (!CrcLib::IsCommValid())
