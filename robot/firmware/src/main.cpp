@@ -97,7 +97,8 @@ const uint8_t ABS_ENC_A = CRC_DIG_12, ABS_ENC_B = CRC_DIG_1;
 
 double get_abs_enc_angle(uint8_t pin)
 {
-  double pulse = pulseIn(pin, HIGH, 5000);
+  const auto MAX_PULSE_LEN = 4160.0;
+  double pulse = pulseIn(pin, HIGH, MAX_PULSE_LEN);
   double angle = pulse / 4160.0 * (2 * M_PI);
   return angle;
 }
@@ -113,10 +114,20 @@ void setup()
 }
 void loop()
 {
+  static int last_now = 0;
   static int iteration = 0;
+
+  auto now = millis();
+
   SP(String(iteration++));
   SP("\t");
   SP(millis());
+  SP("\t");
+  SP(String(now - last_now));
+
+  SP("\t");
+  last_now = now;
+
   CrcLib::Update();
 
   if (!CrcLib::IsCommValid())
