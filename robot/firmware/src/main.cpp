@@ -53,7 +53,7 @@ void loop()
     Serial.print(digitalRead(p));
     Serial.print(" ");
   }
-  Serial.println();
+  Serial.print("\t\t");
   sprintf(buf, "1:%d 2:%d 3:%d 4:%d", enco1.read(), enco2.read(), enco3.read(), enco4.read());
   Serial.println(buf);  
   Serial.println();
