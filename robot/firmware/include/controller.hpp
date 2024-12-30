@@ -1,8 +1,5 @@
 #pragma once
 
-#include "math/vectors.hpp"
-using math::cartesian::Vec2D;
-
 class Controller{
 
     public:
@@ -34,7 +31,7 @@ class Controller{
 
 
         /// @brief Constructor
-        Controller();
+        Controller() {}
 
         /// @brief Update the internal value of the controller instance
         void update(){
@@ -58,7 +55,7 @@ class Controller{
                 joyLeft.y = 0;
             }
             if(joyRight.x < 0.15 && joyRight.x > -0.15){
-                joyLeft.x = 0;
+                joyRight.x = 0;
             }
             if(joyRight.y < 0.15 && joyRight.y > -0.15){
                 joyRight.y = 0;

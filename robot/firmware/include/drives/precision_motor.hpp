@@ -28,7 +28,7 @@ namespace drives
         };
 
         static constexpr double TICKS_117 = 1425.1;  //Bras
-        static constexpr double TICKS_312 = 537.7; 
+        static constexpr double TICKS_312 = 537.7;
         static constexpr double TICKS_1150 = 145.1; //Lanceur, swerve
 
         const double MAX_MOTEUR_POWER = 127;
@@ -98,7 +98,7 @@ namespace drives
                 
                 //Compute using current "power"
                 _inputS = current_rpm * 127.0 / _max_rpm;
-                Serial.print(" CurrentRPM: "+String(current_rpm)+" MaxRPM: "+String(_max_rpm)+" Ticks: "+String(delta_pos)+" MaxTicks: "+String(_ticks_turn));
+                //Serial.print(" CurrentRPM: "+String(current_rpm)+" MaxRPM: "+String(_max_rpm)+" Ticks: "+String(delta_pos)+" MaxTicks: "+String(_ticks_turn));
                 
                 //Calculate the diff between current and target angle
                 _inputA = math::Angle::travel(_current_angle, _target_angle);
@@ -112,7 +112,7 @@ namespace drives
 
                     _current_motor_out = constrain(_current_motor_out + _outputS, -127.0, 127.0);
 
-                    Serial.print(" PIDInS: "+String(_inputS)+" PIDSetS: "+String(_setpointS)+" PIDOutS: "+String(_outputS));
+                    //Serial.print(" PIDInS: "+String(_inputS)+" PIDSetS: "+String(_setpointS)+" PIDOutS: "+String(_outputS));
                     _motor.set_power(_current_motor_out);
                 }
             }
@@ -120,7 +120,7 @@ namespace drives
                 if (_pidA.compute(_inputA)) {
                     _outputA = _pidA.getOutput();
 
-                    Serial.print(" PIDInA: "+String(_inputA)+" PIDSetA: "+String(_pidA.getSetPoint())+" PIDOutA: "+String(_outputA));
+                    //Serial.print(" PIDInA: "+String(_inputA)+" PIDSetA: "+String(_pidA.getSetPoint())+" PIDOutA: "+String(_outputA));
                     _motor.set_power(_outputA*MAX_MOTEUR_POWER);
                 }
                 //TODO: Dont do 360
@@ -170,8 +170,16 @@ namespace drives
             _pidS.setK(_KpS, _KiS, _KdS);
         }
 
+        double get_input(){
+            return _inputS;
+        }
 
-    private:
+        void print_params(){
+            Serial.print(_pidS.getKp()); Serial.print(", "); Serial.print(_pidS.getKi()); Serial.print(", "); Serial.println(_pidS.getKd());
+        }
+
+
+    // private:
         //-------------------------- VARIABLES -----------------------------
         /**
          * These are the parameters for the PID on angle.
