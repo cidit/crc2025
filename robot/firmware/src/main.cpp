@@ -27,7 +27,7 @@
 using math::cartesian::Vec2D;
 
 // //----- Variables -----
-// Controller ctrl;
+Controller ctrl;
 // Decodeur cmd(&Serial);
 
 // //----- SWERVE A (gauche) -----
@@ -112,8 +112,11 @@ void setup()
   motorBB.begin();
   motorBH.begin();
 }
+
 void loop()
 {
+  ctrl.update();
+
   static uint32_t last_now = 0;
   static uint32_t iteration = 0;
 
@@ -147,13 +150,13 @@ void loop()
   }
 
   Serial.print("\tj1x:");
-  Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X));
+  Serial.print(ctrl.joyLeft.x);
   Serial.print("\tj1y:");
-  Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y));
+  Serial.print(ctrl.joyLeft.y);
   Serial.print("\tj2x:");
-  Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X));
+  Serial.print(ctrl.joyRight.x);
   Serial.print("\tj2y:");
-  Serial.print(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y));
+  Serial.print(ctrl.joyRight.x);
   Serial.print("\t");
   SP("\teA:");
   SP(String(get_abs_enc_angle(ABS_ENC_A)));
