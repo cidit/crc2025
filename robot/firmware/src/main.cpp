@@ -13,7 +13,7 @@ using math::cartesian::Vec2D;
 #define SP(things) Serial.print(things)
 
 Decodeur cmd(&Serial);
-bool read_mode = false;
+bool read_mode = true;
 Timer print_timer(ONE_SECOND / 10);
 
 drives::Motor motor(CRC_PWM_1);
@@ -33,7 +33,6 @@ void setup()
     pmotor._pid.setPropOnError();
     pmotor._pid.setReverse(true);
 
-    read_mode = true;
     pmotor.begin();
 
     Serial.println("Setup Done");
@@ -124,31 +123,31 @@ void loop()
     auto now = millis();
     CrcLib::Update();
     cmd.refresh();
-    // execute_commands();
+    execute_commands();
     pmotor.loop();
 
     if (read_mode && print_timer.is_time(now))
     {
-        Serial.print("speed: " + String(pmotor.get_current_rpm()));
+        Serial.print("speed: " + padLeft(String(pmotor.get_current_rpm()), 6));
         Serial.print("\t");
-        Serial.print("enco: " + String(pmotor._e.read()));
+        Serial.print("enco: " + padLeft(String(pmotor._e.read()), 6));
         Serial.print("\t");
 
         Serial.print("(");
-        Serial.print("s: " + padLeft(String(pmotor._pid.getSetPoint()), 6));
+        Serial.print("s: " + padLeft(String(pmotor._pid.getSetPoint()), 7));
         Serial.print(",");
-        Serial.print("i: " + padLeft(String(pmotor._pid.getInput()), 6));
+        Serial.print("i: " + padLeft(String(pmotor._pid.getInput()), 7));
         Serial.print(",");
-        Serial.print("o: " + padLeft(String(pmotor._pid.getOutput()), 6));
+        Serial.print("o: " + padLeft(String(pmotor._pid.getOutput()), 7));
         Serial.print(")");
         Serial.print("\t");
 
         Serial.print("(");
-        Serial.print("p: " + padLeft(String(pmotor._pid.getKp()), 6));
+        Serial.print("p: " + padLeft(String(pmotor._pid.getKp()), 7));
         Serial.print(",");
-        Serial.print("i: " + padLeft(String(pmotor._pid.getKi()), 6));
+        Serial.print("i: " + padLeft(String(pmotor._pid.getKi()), 7));
         Serial.print(",");
-        Serial.print("d: " + padLeft(String(pmotor._pid.getKd()), 6));
+        Serial.print("d: " + padLeft(String(pmotor._pid.getKd()), 7));
         Serial.print(")");
         Serial.print("\t");
 
