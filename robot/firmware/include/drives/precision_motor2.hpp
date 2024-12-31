@@ -15,8 +15,8 @@ namespace drives
     class PrecisionMotor2 : public Looped
     {
     public:
-        Motor _m;
-        Encoder _e;
+        Motor &_m;
+        Encoder &_e;
 
         /**
          * INPUT: current rpm
@@ -25,7 +25,7 @@ namespace drives
          *
          * DOES NOT ASSUME ANYTHING ELSE ABOUT THE PID (should be configured externally)
          */
-        PID_RT _pid;
+        PID_RT &_pid;
 
         // Timer _timer; the PID has a builtin timer (.getInterval())
 
@@ -35,7 +35,7 @@ namespace drives
         int32_t _e_old1, _e_old2;  
         boolean _enabled;
 
-        PrecisionMotor2(Motor m, Encoder e, PID_RT pid, double ticks_per_turn)
+        PrecisionMotor2(Motor &m, Encoder &e, PID_RT &pid, double ticks_per_turn)
             : _m(m),
               _e(e),
               _pid(pid),
