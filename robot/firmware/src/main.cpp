@@ -41,6 +41,9 @@ void setup()
 
 
     /** TIENS, GUILLAUME. JOUE A PARTIR DE ICI. */
+    pid.setK(0, 0, 0);
+    pid.setPoint(0);
+     pmotor.enable(true);
 }
 
 void print_pid_vals()
