@@ -135,7 +135,10 @@ void loop()
 
     if (read_mode && print_timer.is_time(now)) {
         double speed = pmBH.get_input();
-        Serial.println("Current Speed: " + String(speed));
+        Serial.print("Current Speed: " + String(speed));
+        Serial.print("\t");
+        Serial.print("enco: " + String(encoBH.read()));
+        Serial.println();
     }
 }
 
