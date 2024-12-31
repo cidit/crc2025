@@ -85,6 +85,11 @@ namespace drives
         void enable(bool enable)
         {
             _enabled = enable;
+            if (_enabled) {
+                _pid.start();
+            } else {
+                _pid.stop();
+            }
         }
 
         /**
