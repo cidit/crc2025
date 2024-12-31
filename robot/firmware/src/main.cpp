@@ -37,9 +37,14 @@ void setup()
     pid.setPoint(0);
     pid.setPropOnError();
 
+    read_mode = true;
     pmBH.begin();
 
     Serial.println("Setup Done");
+
+
+
+    /** TIENS, GUILLAUME. JOUE A PARTIR DE ICI. */
 }
 
 void print_pid_vals()
@@ -47,13 +52,8 @@ void print_pid_vals()
     Serial.println("Kp: " + String(pid.getKp(), 5) + " Ki: " + String(pid.getKi(), 5) + " Kd: " + String(pid.getKd(), 5));
 }
 
-void loop()
+void execute_commands()
 {
-    auto now = millis();
-    CrcLib::Update();
-    cmd.refresh();
-    pmBH.loop();
-
     switch (toupper(cmd.getCommand()))
     {
     case 'T':
@@ -95,7 +95,6 @@ void loop()
     }
     case 'M':
     {
-        // pmBH._pidS.setK(0, 0, 0);
         pmBH.enable(!pmBH._enabled);
         break;
     }
@@ -105,6 +104,18 @@ void loop()
         break;
     }
     }
+}
+
+void loop()
+{
+    auto now = millis();
+    CrcLib::Update();
+    cmd.refresh();
+    // execute_commands();
+    pmBH.loop();
+
+
+
 
     if (read_mode && print_timer.is_time(now))
     {
