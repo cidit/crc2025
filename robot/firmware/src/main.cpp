@@ -11,6 +11,7 @@
 using math::cartesian::Vec2D;
 
 #define SP(things) Serial.print(things)
+#define SPACER Serial.print("    ")
 
 Decodeur cmd(&Serial);
 bool read_mode = true;
@@ -104,7 +105,7 @@ void execute_commands()
 }
 
 // https://github.com/ElvisKremmen/Arduino-Code-Fragments/blob/main/Numeric%20string%20left-pad%20function
-String padLeft(String inString, int newLen) {    // Pad a numeric string with spaces for output
+String padLeft(String inString, uint16_t newLen) {    // Pad a numeric string with spaces for output
     while (inString.length() < newLen) {
     inString = String(" ") + inString; 
   };
@@ -121,24 +122,27 @@ void loop()
 
     if (read_mode && print_timer.is_time(now))
     {
-        Serial.print("speed:" + padLeft(String(pmotor.get_current_rpm()), 6));
-        Serial.print("\t");
-        Serial.print("enco:" + padLeft(String(pmotor._e.read()), 6));
-        Serial.print("\t");
+        SP("speed:" + padLeft(String(pmotor.get_current_rpm()), 6));
+        SPACER;
+        SP("enco:" + padLeft(String(pmotor._e.read()), 6));
+        SPACER;
 
-        Serial.print("s:" + padLeft(String(pmotor._pid.getSetPoint()), 7));
-        Serial.print("\t");
-        Serial.print("i:" + padLeft(String(pmotor._pid.getInput()), 7));
-        Serial.print("\t");
-        Serial.print("o:" + padLeft(String(pmotor._pid.getOutput()), 7));
-        Serial.print("\t");
+        SP("s:" + padLeft(String(pmotor._pid.getSetPoint()), 7));
+        SPACER;
+        SP("i:" + padLeft(String(pmotor._pid.getInput()), 7));
+        SPACER;
+        SP("o:" + padLeft(String(pmotor._pid.getOutput()), 7));
+        SPACER;
 
-        Serial.print("p:" + padLeft(String(pmotor._pid.getKp(), 5), 7));
-        Serial.print("\t");
-        Serial.print("i:" + padLeft(String(pmotor._pid.getKi(), 5), 7));
-        Serial.print("\t");
-        Serial.print("d:" + padLeft(String(pmotor._pid.getKd(), 5), 7));
-        Serial.print("\t");
+        SP("P%:" + padLeft(String(pmotor._m._last_power), 7));
+        SPACER;
+
+        SP("p:" + padLeft(String(pmotor._pid.getKp(), 5), 7));
+        SPACER;
+        SP("i:" + padLeft(String(pmotor._pid.getKi(), 5), 7));
+        SPACER;
+        SP("d:" + padLeft(String(pmotor._pid.getKd(), 5), 7));
+        SPACER;
 
         Serial.println();
     }
