@@ -58,9 +58,6 @@ void loop()
     {
     case 'T':
     {
-        // const auto max_rpm = 1150.0;
-        // const auto pow = cmd.getArg(0) / max_rpm;
-        // auto targetRPM = constrain(pow, -128, 127);
         auto targetRPM = cmd.getArg(0);
         pmBH.set_target_rpm(targetRPM);
         Serial.println("Target RPM: " + String(targetRPM));
@@ -115,6 +112,12 @@ void loop()
         Serial.print("Current Speed: " + String(speed));
         Serial.print("\t");
         Serial.print("enco: " + String(encoBH.read()));
+        Serial.print("\t");
+        Serial.print("s: " + String(pid.getSetPoint()));
+        Serial.print("\t");
+        Serial.print("i: " + String(pid.getInput()));
+        Serial.print("\t");
+        Serial.print("o: " + String(pid.getOutput()));
         Serial.println();
     }
 }
