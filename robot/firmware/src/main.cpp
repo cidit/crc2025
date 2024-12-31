@@ -143,11 +143,11 @@ void loop()
         Serial.print("\t");
 
         Serial.print("(");
-        Serial.print("p: " + padLeft(String(pmotor._pid.getKp()), 7));
+        Serial.print("p: " + padLeft(String(pmotor._pid.getKp(), 5), 7));
         Serial.print(",");
-        Serial.print("i: " + padLeft(String(pmotor._pid.getKi()), 7));
+        Serial.print("i: " + padLeft(String(pmotor._pid.getKi(), 5), 7));
         Serial.print(",");
-        Serial.print("d: " + padLeft(String(pmotor._pid.getKd()), 7));
+        Serial.print("d: " + padLeft(String(pmotor._pid.getKd(), 5), 7));
         Serial.print(")");
         Serial.print("\t");
 
