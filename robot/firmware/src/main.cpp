@@ -123,16 +123,18 @@ void loop()
 
     if (read_mode && print_timer.is_time(now))
     {
-        SP("speed:" + padLeft(String(pmotor.get_current_rpm()), 6));
+        SP("speed:" + padLeft(String(pmotor.get_current_rpm()), 7));
         SPACER;
-        SP("enco:" + padLeft(String(pmotor._e.read()), 6));
+        SP("enco:" + padLeft(String(pmotor._delta_ticks()), 4));
         SPACER;
 
+        SP("[ ");
         SP("s:" + padLeft(String(pmotor._pid.getSetPoint()), 7));
-        SPACER;
+        SP(" ");
         SP("i:" + padLeft(String(pmotor._pid.getInput()), 7));
-        SPACER;
+        SP(" ");
         SP("o:" + padLeft(String(pmotor._pid.getOutput()), 7));
+        SP(" ]");
         SPACER;
 
         SP("P%:" + padLeft(String(pmotor._m._last_power), 7));
