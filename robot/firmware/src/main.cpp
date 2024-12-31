@@ -138,11 +138,13 @@ void loop()
         SP("P%:" + padLeft(String(pmotor._m._last_power), 7));
         SPACER;
 
-        SP("p:" + padLeft(String(pmotor._pid.getKp(), 5), 7));
-        SPACER;
-        SP("i:" + padLeft(String(pmotor._pid.getKi(), 5), 7));
-        SPACER;
-        SP("d:" + padLeft(String(pmotor._pid.getKd(), 5), 7));
+        SP("[ K ");
+        SP(padLeft(String(pmotor._pid.getKp(), 5), 7));
+        SP(" ");
+        SP(padLeft(String(pmotor._pid.getKi(), 5), 7));
+        SP(" ");
+        SP(padLeft(String(pmotor._pid.getKd(), 5), 7));
+        SP(" ]");
         SPACER;
 
         Serial.println();
