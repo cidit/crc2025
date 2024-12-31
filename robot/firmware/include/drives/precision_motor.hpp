@@ -98,7 +98,7 @@ namespace drives
                 
                 //Compute using current "power"
                 _inputS = current_rpm * 127.0 / _max_rpm;
-                //Serial.print(" CurrentRPM: "+String(current_rpm)+" MaxRPM: "+String(_max_rpm)+" Ticks: "+String(delta_pos)+" MaxTicks: "+String(_ticks_turn));
+                Serial.print(" CurrentRPM: "+String(current_rpm)+" MaxRPM: "+String(_max_rpm)+" Ticks: "+String(delta_pos)+" MaxTicks: "+String(_ticks_turn));
                 
                 //Calculate the diff between current and target angle
                 _inputA = math::Angle::travel(_current_angle, _target_angle);
