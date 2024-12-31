@@ -60,10 +60,6 @@ namespace drives
                 _update_l2ev();
                 _m.set_power_ratio(_m._last_power + _pid_output_to_percentage());
             }
-
-            if (!_enabled) {
-                _m.set_power_ratio(0);
-            }
         }
 
         double get_current_rpm()
@@ -85,6 +81,7 @@ namespace drives
                 _pid.start();
             } else {
                 _pid.stop();
+                _m.set_power_ratio(0);
             }
         }
 
