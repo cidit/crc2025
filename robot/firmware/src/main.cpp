@@ -13,18 +13,14 @@ using math::cartesian::Vec2D;
 
 #define SP(things) Serial.print(things)
 
-#define ABS_ENC_A CRC_DIG_1
-#define ABS_ENC_B CRC_DIG_2
-#define SW_BH CRC_PWM_7
-
 Decodeur cmd(&Serial);
 bool read_mode = false;
 Timer print_timer(ONE_SECOND / 10);
 
-drives::Motor motorBH(SW_BH);
-Encoder encoBH(CRC_DIG_5, CRC_I2C_SCL);
+drives::Motor motor(CRC_PWM_1);
+Encoder enco(CRC_ENCO_B, CRC_DIG_3);
 PID_RT pid;
-drives::PrecisionMotor2 pmBH(motorBH, encoBH, pid, 145.1);
+drives::PrecisionMotor2 pmotor(motor, enco, pid, 145.1);
 
 void setup()
 {
@@ -38,7 +34,7 @@ void setup()
     pid.setPropOnError();
 
     read_mode = true;
-    pmBH.begin();
+    pmotor.begin();
 
     Serial.println("Setup Done");
 
@@ -59,7 +55,7 @@ void execute_commands()
     case 'T':
     {
         auto targetRPM = cmd.getArg(0);
-        pmBH.set_target_rpm(targetRPM);
+        pmotor.set_target_rpm(targetRPM);
         Serial.println("Target RPM: " + String(targetRPM));
         break;
     }
@@ -95,7 +91,7 @@ void execute_commands()
     }
     case 'M':
     {
-        pmBH.enable(!pmBH._enabled);
+        pmotor.enable(!pmotor._enabled);
         break;
     }
     case 'R':
@@ -112,17 +108,17 @@ void loop()
     CrcLib::Update();
     cmd.refresh();
     // execute_commands();
-    pmBH.loop();
+    pmotor.loop();
 
 
 
 
     if (read_mode && print_timer.is_time(now))
     {
-        double speed = pmBH.get_current_rpm();
+        double speed = pmotor.get_current_rpm();
         Serial.print("Current Speed: " + String(speed));
         Serial.print("\t");
-        Serial.print("enco: " + String(encoBH.read()));
+        Serial.print("enco: " + String(enco.read()));
         Serial.print("\t");
         Serial.print("s: " + String(pid.getSetPoint()));
         Serial.print("\t");
