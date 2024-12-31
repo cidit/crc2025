@@ -111,6 +111,14 @@ void execute_commands()
     }
 }
 
+// https://github.com/ElvisKremmen/Arduino-Code-Fragments/blob/main/Numeric%20string%20left-pad%20function
+String padLeft(String inString, int newLen) {    // Pad a numeric string with spaces for output
+    while (inString.length() < newLen) {
+    inString = String(" ") + inString; 
+  };
+  return inString;
+}
+
 void loop()
 {
     auto now = millis();
@@ -125,11 +133,25 @@ void loop()
         Serial.print("\t");
         Serial.print("enco: " + String(pmotor._e.read()));
         Serial.print("\t");
-        Serial.print("s: " + String(pmotor._pid.getSetPoint()));
+
+        Serial.print("(");
+        Serial.print("s: " + padLeft(String(pmotor._pid.getSetPoint()), 6));
+        Serial.print(",");
+        Serial.print("i: " + padLeft(String(pmotor._pid.getInput()), 6));
+        Serial.print(",");
+        Serial.print("o: " + padLeft(String(pmotor._pid.getOutput()), 6));
+        Serial.print(")");
         Serial.print("\t");
-        Serial.print("i: " + String(pmotor._pid.getInput()));
+
+        Serial.print("(");
+        Serial.print("p: " + padLeft(String(pmotor._pid.getKp()), 6));
+        Serial.print(",");
+        Serial.print("i: " + padLeft(String(pmotor._pid.getKi()), 6));
+        Serial.print(",");
+        Serial.print("d: " + padLeft(String(pmotor._pid.getKd()), 6));
+        Serial.print(")");
         Serial.print("\t");
-        Serial.print("o: " + String(pmotor._pid.getOutput()));
+
         Serial.println();
     }
 }
