@@ -41,13 +41,12 @@ void setup()
 
 void print_pid_vals()
 {
-    Serial.println("Kp: " + 
-        String(pmotor._pid.getKp(), 5) + 
-        " Ki: " + 
-        String(pmotor._pid.getKi(), 5) + 
-        " Kd: " + 
-        String(pmotor._pid.getKd(), 5)
-        );
+    Serial.println("Kp: " +
+                   String(pmotor._pid.getKp(), 5) +
+                   " Ki: " +
+                   String(pmotor._pid.getKi(), 5) +
+                   " Kd: " +
+                   String(pmotor._pid.getKd(), 5));
 }
 
 void execute_commands()
@@ -105,11 +104,13 @@ void execute_commands()
 }
 
 // https://github.com/ElvisKremmen/Arduino-Code-Fragments/blob/main/Numeric%20string%20left-pad%20function
-String padLeft(String inString, uint16_t newLen) {    // Pad a numeric string with spaces for output
-    while (inString.length() < newLen) {
-    inString = String(" ") + inString; 
-  };
-  return inString;
+String padLeft(String inString, uint16_t newLen)
+{ // Pad a numeric string with spaces for output
+    while (inString.length() < newLen)
+    {
+        inString = String(" ") + inString;
+    };
+    return inString;
 }
 
 void loop()
