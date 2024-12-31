@@ -58,9 +58,10 @@ void loop()
     {
     case 'T':
     {
-        const auto max_rpm = 1150.0;
-        const auto pow = cmd.getArg(0) / max_rpm;
-        auto targetRPM = constrain(pow, -128, 127);
+        // const auto max_rpm = 1150.0;
+        // const auto pow = cmd.getArg(0) / max_rpm;
+        // auto targetRPM = constrain(pow, -128, 127);
+        auto targetRPM = cmd.getArg(0);
         pmBH.set_target_rpm(targetRPM);
         Serial.println("Target RPM: " + String(targetRPM));
         break;
