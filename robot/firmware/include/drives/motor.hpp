@@ -9,6 +9,7 @@ namespace drives
     public:
         //-------------------------- CONST -----------------------------
         const int MAX_SPEED = 127;
+        double _last_power = 0;
 
         //---------------------- CONSTRUCTORS ---------------------------
         Motor(int pin, bool inverted = false):
@@ -29,14 +30,15 @@ namespace drives
         }
 
         /**
-         * sets the speed.
-         * @param ratio a double between -1 and 1. will immediatly modify the speed of the motor.
+         * sets the power.
+         * @param power a double between -1 and 1. will immediatly modify the power of the motor.
          */
-        void set_power_ratio(double ratio){
-            auto constrained_speed = constrain(ratio, -1.0, 1.0);
+        void set_power_ratio(double power){
+            auto constrained_power = constrain(power, -1.0, 1.0);
+            _last_power = constrained_power;
 
-            //Multiply the speed ratio by the max value
-            set_power(constrained_speed * MAX_SPEED);
+            // Multiply the power ratio by the max value PWM value.
+            set_power(constrained_power * MAX_SPEED);
         }
 
         /**

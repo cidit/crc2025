@@ -8,6 +8,10 @@ class Timer
     timestamp _last = 0;
 
 public:
+
+    /**
+     * this delay is in milliseconds
+     */
     timestamp _delay;
 
     Timer(timestamp delay) : _delay(delay) {}
