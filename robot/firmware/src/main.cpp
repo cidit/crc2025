@@ -31,6 +31,7 @@ void setup()
     pmotor._pid.setK(0, 0, 0);
     pmotor._pid.setPoint(0);
     pmotor._pid.setPropOnError();
+    pmotor._pid.setReverse(true);
 
     read_mode = true;
     pmotor.begin();
@@ -40,8 +41,8 @@ void setup()
 
 
     /** TIENS, GUILLAUME. JOUE A PARTIR DE ICI. */
-    pmotor._pid.setK(0, 0, 0);
-    pmotor._pid.setPoint(0);
+    pmotor._pid.setK(1, 0.1, 0.01);
+    pmotor._pid.setPoint(50);
     pmotor.enable(true);
 }
 
