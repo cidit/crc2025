@@ -36,13 +36,6 @@ void setup()
     pmotor.begin();
 
     Serial.println("Setup Done");
-
-
-
-    /** TIENS, GUILLAUME. JOUE A PARTIR DE ICI. */
-    pmotor._pid.setK(1, 0.1, 0.01);
-    pmotor._pid.setPoint(50);
-    pmotor.enable(true);
 }
 
 void print_pid_vals()
@@ -133,22 +126,18 @@ void loop()
         Serial.print("enco: " + padLeft(String(pmotor._e.read()), 6));
         Serial.print("\t");
 
-        Serial.print("(");
         Serial.print("s: " + padLeft(String(pmotor._pid.getSetPoint()), 7));
         Serial.print(",");
         Serial.print("i: " + padLeft(String(pmotor._pid.getInput()), 7));
         Serial.print(",");
         Serial.print("o: " + padLeft(String(pmotor._pid.getOutput()), 7));
-        Serial.print(")");
         Serial.print("\t");
 
-        Serial.print("(");
         Serial.print("p: " + padLeft(String(pmotor._pid.getKp(), 5), 7));
         Serial.print(",");
         Serial.print("i: " + padLeft(String(pmotor._pid.getKi(), 5), 7));
         Serial.print(",");
         Serial.print("d: " + padLeft(String(pmotor._pid.getKd(), 5), 7));
-        Serial.print(")");
         Serial.print("\t");
 
         Serial.println();
