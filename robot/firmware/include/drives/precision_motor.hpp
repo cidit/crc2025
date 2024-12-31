@@ -217,7 +217,7 @@ namespace drives
         double _ticks_turn;
 
         double _last_enco;
-        int _timer;
+        uint32_t _timer;
         int _delai = 10;
 
         math::Angle _current_angle;
