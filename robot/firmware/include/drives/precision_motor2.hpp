@@ -31,7 +31,8 @@ namespace drives
 
         double _tpt;
         int16_t _target_rpm;
-        int32_t _last_2_enco_vals[2];
+
+        int32_t _e_old1, _e_old2;  
         boolean _enabled;
 
         PrecisionMotor2(Motor m, Encoder e, PID_RT pid, double ticks_per_turn)
@@ -40,7 +41,8 @@ namespace drives
               _pid(pid),
               _tpt(ticks_per_turn),
               _target_rpm(0),
-              _last_2_enco_vals({0, 0}),
+              _e_old1(0),
+              _e_old2(0),
               _enabled(false)
         {
             _pid.setOutputRange(-1000, 1000);
@@ -85,17 +87,18 @@ namespace drives
             _enabled = enable;
         }
 
+        /**
+         * update last 2 encoder vals
+         */
         void _update_l2ev()
         {
-            auto ltev = _last_2_enco_vals;
-            ltev[1] = ltev[0];
-            ltev[0] = _e.read();
+            _e_old2 = _e_old1;
+            _e_old1 = _e.read();
         }
 
         int32_t _delta_ticks()
         {
-            auto ltev = _last_2_enco_vals;
-            return ltev[1] - ltev[0];
+            return _e_old1 - _e_old2;
         }
 
         double _pid_output_to_percentage()
