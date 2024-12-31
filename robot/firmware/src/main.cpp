@@ -121,23 +121,23 @@ void loop()
 
     if (read_mode && print_timer.is_time(now))
     {
-        Serial.print("speed: " + padLeft(String(pmotor.get_current_rpm()), 6));
+        Serial.print("speed:" + padLeft(String(pmotor.get_current_rpm()), 6));
         Serial.print("\t");
-        Serial.print("enco: " + padLeft(String(pmotor._e.read()), 6));
-        Serial.print("\t");
-
-        Serial.print("s: " + padLeft(String(pmotor._pid.getSetPoint()), 7));
-        Serial.print(",");
-        Serial.print("i: " + padLeft(String(pmotor._pid.getInput()), 7));
-        Serial.print(",");
-        Serial.print("o: " + padLeft(String(pmotor._pid.getOutput()), 7));
+        Serial.print("enco:" + padLeft(String(pmotor._e.read()), 6));
         Serial.print("\t");
 
-        Serial.print("p: " + padLeft(String(pmotor._pid.getKp(), 5), 7));
-        Serial.print(",");
-        Serial.print("i: " + padLeft(String(pmotor._pid.getKi(), 5), 7));
-        Serial.print(",");
-        Serial.print("d: " + padLeft(String(pmotor._pid.getKd(), 5), 7));
+        Serial.print("s:" + padLeft(String(pmotor._pid.getSetPoint()), 7));
+        Serial.print("\t");
+        Serial.print("i:" + padLeft(String(pmotor._pid.getInput()), 7));
+        Serial.print("\t");
+        Serial.print("o:" + padLeft(String(pmotor._pid.getOutput()), 7));
+        Serial.print("\t");
+
+        Serial.print("p:" + padLeft(String(pmotor._pid.getKp(), 5), 7));
+        Serial.print("\t");
+        Serial.print("i:" + padLeft(String(pmotor._pid.getKi(), 5), 7));
+        Serial.print("\t");
+        Serial.print("d:" + padLeft(String(pmotor._pid.getKd(), 5), 7));
         Serial.print("\t");
 
         Serial.println();
