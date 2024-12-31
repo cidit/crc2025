@@ -2,7 +2,6 @@
 #include <CrcLib.h>
 #include <Encoder.h>
 #include <drives/precision_motor2.hpp>
-// #include <drives/swerve_module.hpp>
 #include <controller.hpp>
 #include "util/looped.hpp"
 #include "math/vectors.hpp"
@@ -19,8 +18,8 @@ Timer print_timer(ONE_SECOND / 10);
 
 drives::Motor motor(CRC_PWM_1);
 Encoder enco(CRC_ENCO_B, CRC_DIG_3);
-PID_RT pid;
-drives::PrecisionMotor2 pmotor(motor, enco, pid, 145.1);
+// PID_RT pid; // TODO: or, take a reference!!!!
+drives::PrecisionMotor2 pmotor(motor, enco, PID_RT(), 145.1);
 
 void setup()
 {
@@ -28,10 +27,10 @@ void setup()
 
     CrcLib::Initialize();
 
-    pid.setInterval(20);
-    pid.setK(0, 0, 0);
-    pid.setPoint(0);
-    pid.setPropOnError();
+    pmotor._pid.setInterval(20);
+    pmotor._pid.setK(0, 0, 0);
+    pmotor._pid.setPoint(0);
+    pmotor._pid.setPropOnError();
 
     read_mode = true;
     pmotor.begin();
@@ -41,14 +40,20 @@ void setup()
 
 
     /** TIENS, GUILLAUME. JOUE A PARTIR DE ICI. */
-    pid.setK(0, 0, 0);
-    pid.setPoint(0);
-     pmotor.enable(true);
+    pmotor._pid.setK(0, 0, 0);
+    pmotor._pid.setPoint(0);
+    pmotor.enable(true);
 }
 
 void print_pid_vals()
 {
-    Serial.println("Kp: " + String(pid.getKp(), 5) + " Ki: " + String(pid.getKi(), 5) + " Kd: " + String(pid.getKd(), 5));
+    Serial.println("Kp: " + 
+        String(pmotor._pid.getKp(), 5) + 
+        " Ki: " + 
+        String(pmotor._pid.getKi(), 5) + 
+        " Kd: " + 
+        String(pmotor._pid.getKd(), 5)
+        );
 }
 
 void execute_commands()
@@ -67,28 +72,28 @@ void execute_commands()
         auto Kp = cmd.getArg(0);
         auto Ki = cmd.getArg(1);
         auto Kd = cmd.getArg(2);
-        pid.setK(Kp, Ki, Kd);
+        pmotor._pid.setK(Kp, Ki, Kd);
         print_pid_vals();
         break;
     }
     case 'P':
     {
         auto Kp = cmd.getArg(0);
-        pid.setKp(Kp);
+        pmotor._pid.setKp(Kp);
         print_pid_vals();
         break;
     }
     case 'I':
     {
         auto Ki = cmd.getArg(0);
-        pid.setKi(Ki);
+        pmotor._pid.setKi(Ki);
         print_pid_vals();
         break;
     }
     case 'D':
     {
         auto Kd = cmd.getArg(0);
-        pid.setKd(Kd);
+        pmotor._pid.setKd(Kd);
         print_pid_vals();
         break;
     }
@@ -113,21 +118,17 @@ void loop()
     // execute_commands();
     pmotor.loop();
 
-
-
-
     if (read_mode && print_timer.is_time(now))
     {
-        double speed = pmotor.get_current_rpm();
-        Serial.print("Current Speed: " + String(speed));
+        Serial.print("speed: " + String(pmotor.get_current_rpm()));
         Serial.print("\t");
-        Serial.print("enco: " + String(enco.read()));
+        Serial.print("enco: " + String(pmotor._e.read()));
         Serial.print("\t");
-        Serial.print("s: " + String(pid.getSetPoint()));
+        Serial.print("s: " + String(pmotor._pid.getSetPoint()));
         Serial.print("\t");
-        Serial.print("i: " + String(pid.getInput()));
+        Serial.print("i: " + String(pmotor._pid.getInput()));
         Serial.print("\t");
-        Serial.print("o: " + String(pid.getOutput()));
+        Serial.print("o: " + String(pmotor._pid.getOutput()));
         Serial.println();
     }
 }

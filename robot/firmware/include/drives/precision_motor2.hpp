@@ -58,10 +58,10 @@ namespace drives
             if (_pid.compute(get_current_rpm()))
             {
                 Serial.println("computing...");
-                _update_l2ev();
                 if (!_enabled) {
                     Serial.println("not enabled!!");
                 }
+                _update_l2ev();
                 _m.set_power_ratio(_m._last_power + _pid_output_to_percentage());
             }
 
