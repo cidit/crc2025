@@ -53,10 +53,10 @@ namespace drives
 
         void loop() override
         {
-            _update_l2ev();
             if (_pid.compute(get_current_rpm()))
             {
                 Serial.println("computing...");
+                _update_l2ev();
                 if (!_enabled) {
                     Serial.println("not enabled!!");
                 }
