@@ -35,6 +35,11 @@ void setup()
     Serial.println("Setup Done");
 }
 
+PID_RT& get_current_pid_to_tune() {
+    return pmotor._mode == drives::PrecisionMotor2::Mode::MATCH_ANGLE
+        ? pmotor._pid_angle : pmotor._pid_speed;
+}
+
 void print_pid_vals()
 {
     auto &tuning_pid =  get_current_pid_to_tune();
@@ -44,11 +49,6 @@ void print_pid_vals()
                    String(tuning_pid.getKi(), 5) +
                    " Kd: " +
                    String(tuning_pid.getKd(), 5));
-}
-
-PID_RT& get_current_pid_to_tune() {
-    return pmotor._mode == drives::PrecisionMotor2::Mode::MATCH_ANGLE
-        ? pmotor._pid_angle : pmotor._pid_speed;
 }
 
 void execute_commands()

@@ -170,7 +170,7 @@ namespace drives
             // numbers. makes the tuning easier for Guillaume.
             _pid_speed.setOutputRange(-1000, 1000);
 
-            auto old_kp = _pid_angle.getKp(),
+            old_kp = _pid_angle.getKp(),
                  old_ki = _pid_angle.getKi(),
                  old_kd = _pid_angle.getKd();
             _pid_angle.reset();
