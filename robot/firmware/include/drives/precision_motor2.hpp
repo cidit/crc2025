@@ -62,22 +62,8 @@ namespace drives
               _mode(Mode::MATCH_ANGLE),
               _enabled(false)
         {
-
-            _pid_speed.setInterval(20);
-            _pid_speed.setK(0, 0, 0);
-            _pid_speed.setPoint(0);
-            _pid_speed.setPropOnError();
-            _pid_speed.setReverse(true);
-            // we set the PID output to a big range to make KP,KI,KD bigger
-            // numbers. makes the tuning easier for Guillaume.
-            _pid_speed.setOutputRange(-1000, 1000);
-
-            _pid_angle.setInterval(20);
-            _pid_angle.setK(0, 0, 0);
-            _pid_angle.setPoint(0);
-            _pid_angle.setPropOnError();
-            _pid_angle.setReverse(false);
-            _pid_angle.setOutputRange(-1, 1);
+            // this function happens to set sane defaults for our pids.
+            _reset_PIDs();
         }
 
         void begin()
@@ -94,7 +80,8 @@ namespace drives
                 math::Angle::travel(get_current_angle(), _target_angle)
             );
 
-            if (speed_compute && angle_compute) {
+            if (speed_compute && angle_compute)
+            {
                 Serial.print("!!! invalid state error: both PIDs were computed");
                 return;
             }
@@ -126,9 +113,10 @@ namespace drives
             return delay_mins * (_delta_ticks() / _tpt);
         }
 
-        double get_current_angle() {
+        double get_current_angle()
+        {
             auto e_curr = _e.read();
-            return math::Angle::from_ratio(e_curr/_tpt)._radians;
+            return math::Angle::from_ratio(e_curr / _tpt)._radians;
         }
 
         void set_target_rpm(float rpm)
@@ -155,10 +143,45 @@ namespace drives
             }
             else
             {
-                _pid_speed.stop();
-                _pid_angle.stop();
+                _reset_PIDs();
                 _m.set_power_ratio(0);
             }
+        }
+
+        /**
+         * Resets pids to a sane state given their context. (Mainly the errorsum and and
+         * lasterror variables.)
+         *
+         * This fucking function is so fucking verbose because the couple of variables
+         * i need to reset in the pids are private so i need to call a function
+         * that resets absolutely everything instead and manually re-set the variables
+         * that were already sane.
+         */
+        void _reset_PIDs()
+        {
+            auto old_kp = _pid_speed.getKp(),
+                 old_ki = _pid_speed.getKi(),
+                 old_kd = _pid_speed.getKd();
+            _pid_speed.reset();
+            _pid_speed.setK(old_kp, old_ki, old_kd);
+            _pid_speed.setInterval(20);
+            _pid_speed.setPoint(0);
+            _pid_speed.setPropOnError();
+            _pid_speed.setReverse(true);
+            // we set the PID output to a big range to make KP,KI,KD bigger
+            // numbers. makes the tuning easier for Guillaume.
+            _pid_speed.setOutputRange(-1000, 1000);
+
+            auto old_kp = _pid_angle.getKp(),
+                 old_ki = _pid_angle.getKi(),
+                 old_kd = _pid_angle.getKd();
+            _pid_angle.reset();
+            _pid_angle.setK(old_kp, old_ki, old_kd);
+            _pid_angle.setInterval(20);
+            _pid_angle.setPoint(0);
+            _pid_angle.setPropOnError();
+            _pid_angle.setReverse(false);
+            _pid_angle.setOutputRange(-1, 1);
         }
 
         /**
@@ -177,17 +200,19 @@ namespace drives
 
         double _pid_output_to_percentage(PID_RT &pid)
         {
+            // FIXME: this is only useful for the speed pid since its the only
+            // one that benefits from the extended output range.
             return pid.getOutput() / 1000;
         }
 
         void _set_active_pid(Mode mode)
         {
             auto &to_start = mode == Mode::MATCH_ANGLE
-                                ? _pid_angle
-                                : _pid_speed;
+                                 ? _pid_angle
+                                 : _pid_speed;
             auto &to_stop = mode == Mode::MATCH_ANGLE
-                               ? _pid_speed
-                               : _pid_angle;
+                                ? _pid_speed
+                                : _pid_angle;
 
             to_stop.stop();
             if (!to_start.isRunning())
