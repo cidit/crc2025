@@ -69,8 +69,6 @@ namespace drives
         void begin()
         {
             _m.begin();
-            // we disable everything to make sure we are in a sane state.
-            enable(false);
         }
 
         void loop() override
