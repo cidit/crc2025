@@ -98,7 +98,6 @@ namespace drives
             }
             else if (angle_compute)
             {
-                Serial.println("computing angle...");
                 _m.set_power_ratio(_pid_output_to_percentage(_pid_angle));
             }
         }
