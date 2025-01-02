@@ -43,12 +43,13 @@ void setup()
 
 void print_pid_vals()
 {
+    auto &tuning_pid =  get_current_pid_to_tune();
     Serial.println("Kp: " +
-                   String(pmotor._pid_speed.getKp(), 5) +
+                   String(tuning_pid.getKp(), 5) +
                    " Ki: " +
-                   String(pmotor._pid_speed.getKi(), 5) +
+                   String(tuning_pid.getKi(), 5) +
                    " Kd: " +
-                   String(pmotor._pid_speed.getKd(), 5));
+                   String(tuning_pid.getKd(), 5));
 }
 
 PID_RT& get_current_pid_to_tune() {
