@@ -59,7 +59,7 @@ namespace drives
               _pid_angle(),
               _target_angle(0),
               _tpt(ticks_per_turn),
-              _mode(Mode::MATCH_ANGLE),
+              _mode(Mode::MATCH_ANGLE), // doesnt matter, pids are not started anyways
               _enabled(false)
         {
             // this function happens to set sane defaults for our pids.
@@ -120,7 +120,7 @@ namespace drives
         {
             _mode = Mode::MATCH_SPEED;
             _pid_speed.setPoint(rpm);
-            _set_active_pid(Mode::MATCH_SPEED);
+            _set_active_pid();
         }
 
         void set_target_angle(float angle)
@@ -128,7 +128,7 @@ namespace drives
             _mode = Mode::MATCH_ANGLE;
             // validate the angle before saving it
             _target_angle = math::Angle::from_rad(angle)._radians;
-            _set_active_pid(Mode::MATCH_ANGLE);
+            _set_active_pid();
         }
 
         void enable(bool enable)
@@ -136,7 +136,7 @@ namespace drives
             _enabled = enable;
             if (_enabled)
             {
-                _set_active_pid(_mode);
+                _set_active_pid();
             }
             else
             {
@@ -202,12 +202,12 @@ namespace drives
             return pid.getOutput() / 1000;
         }
 
-        void _set_active_pid(Mode mode)
+        void _set_active_pid()
         {
-            auto &to_start = mode == Mode::MATCH_ANGLE
+            auto &to_start = _mode == Mode::MATCH_ANGLE
                                  ? _pid_angle
                                  : _pid_speed;
-            auto &to_stop = mode == Mode::MATCH_ANGLE
+            auto &to_stop = _mode == Mode::MATCH_ANGLE
                                 ? _pid_speed
                                 : _pid_angle;
 
