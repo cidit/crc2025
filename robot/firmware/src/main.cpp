@@ -51,15 +51,30 @@ void print_pid_vals()
                    String(pmotor._pid_speed.getKd(), 5));
 }
 
+PID_RT& get_current_pid_to_tune() {
+    return pmotor._mode == drives::PrecisionMotor2::Mode::MATCH_ANGLE
+        ? pid_angle : pid_speed;
+}
+
 void execute_commands()
 {
+    auto &tuning_pid = get_current_pid_to_tune();
+
     switch (toupper(cmd.getCommand()))
     {
-    case 'T':
+    case 'S':
     {
         auto targetRPM = cmd.getArg(0);
         pmotor.set_target_rpm(targetRPM);
         Serial.println("Target RPM: " + String(targetRPM));
+        break;
+    }
+
+    case 'A':
+    {
+        auto target_angle = cmd.getArg(0);
+        pmotor.set_target_angle(target_angle);
+        Serial.println("Target angle: " + String(target_angle));
         break;
     }
     case 'K':
@@ -67,28 +82,28 @@ void execute_commands()
         auto Kp = cmd.getArg(0);
         auto Ki = cmd.getArg(1);
         auto Kd = cmd.getArg(2);
-        pmotor._pid_speed.setK(Kp, Ki, Kd);
+        tuning_pid.setK(Kp, Ki, Kd);
         print_pid_vals();
         break;
     }
     case 'P':
     {
         auto Kp = cmd.getArg(0);
-        pmotor._pid_speed.setKp(Kp);
+        tuning_pid.setKp(Kp);
         print_pid_vals();
         break;
     }
     case 'I':
     {
         auto Ki = cmd.getArg(0);
-        pmotor._pid_speed.setKi(Ki);
+        tuning_pid.setKi(Ki);
         print_pid_vals();
         break;
     }
     case 'D':
     {
         auto Kd = cmd.getArg(0);
-        pmotor._pid_speed.setKd(Kd);
+        tuning_pid.setKd(Kd);
         print_pid_vals();
         break;
     }
@@ -125,17 +140,23 @@ void loop()
 
     if (read_mode && print_timer.is_time(now))
     {
-        SPRINT("speed:" + padLeft(String(pmotor.get_current_rpm()), 7));
+        auto &tuning_pid = get_current_pid_to_tune();
+        
+        if (pmotor._mode == drives::PrecisionMotor2::Mode::MATCH_SPEED) {
+            SPRINT("speed:" + padLeft(String(pmotor.get_current_rpm()), 7));
+        } else {
+            SPRINT("angle:" + String(pmotor.get_current_angle(), 2));
+        }
         SPACER;
         SPRINT("enco:" + padLeft(String(pmotor._delta_ticks()), 4));
         SPACER;
 
         SPRINT("[ ");
-        SPRINT("s:" + padLeft(String(pmotor._pid_speed.getSetPoint()), 7));
+        SPRINT("s:" + padLeft(String(tuning_pid.getSetPoint()), 7));
         SPRINT(" ");
-        SPRINT("i:" + padLeft(String(pmotor._pid_speed.getInput()), 7));
+        SPRINT("i:" + padLeft(String(tuning_pid.getInput()), 7));
         SPRINT(" ");
-        SPRINT("o:" + padLeft(String(pmotor._pid_speed.getOutput()), 7));
+        SPRINT("o:" + padLeft(String(tuning_pid.getOutput()), 7));
         SPRINT(" ]");
         SPACER;
 
@@ -143,11 +164,11 @@ void loop()
         SPACER;
 
         SPRINT("[ K ");
-        SPRINT(padLeft(String(pmotor._pid_speed.getKp(), 5), 7));
+        SPRINT(padLeft(String(tuning_pid.getKp(), 5), 7));
         SPRINT(" ");
-        SPRINT(padLeft(String(pmotor._pid_speed.getKi(), 5), 7));
+        SPRINT(padLeft(String(tuning_pid.getKi(), 5), 7));
         SPRINT(" ");
-        SPRINT(padLeft(String(pmotor._pid_speed.getKd(), 5), 7));
+        SPRINT(padLeft(String(tuning_pid.getKd(), 5), 7));
         SPRINT(" ]");
         SPACER;
 
