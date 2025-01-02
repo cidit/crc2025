@@ -29,11 +29,17 @@ void setup()
 
     CrcLib::Initialize();
 
-    pmotor._pid_speed.setInterval(20);
-    pmotor._pid_speed.setK(0, 0, 0);
-    pmotor._pid_speed.setPoint(0);
-    pmotor._pid_speed.setPropOnError();
-    pmotor._pid_speed.setReverse(true);
+    pid_speed.setInterval(20);
+    pid_speed.setK(0, 0, 0);
+    pid_speed.setPoint(0);
+    pid_speed.setPropOnError();
+    pid_speed.setReverse(true);
+
+    pid_angle.setInterval(20);
+    pid_angle.setK(0, 0, 0);
+    pid_angle.setPoint(0);
+    pid_angle.setPropOnError();
+    pid_angle.setReverse(false);
 
     pmotor.begin();
     pmotor.enable(true);
