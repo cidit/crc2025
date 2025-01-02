@@ -36,12 +36,15 @@ namespace drives
         void set_power_ratio(double power){
             auto constrained_power = constrain(power, -1.0, 1.0);
             _last_power = constrained_power;
-
-            // Multiply the power ratio by the max value PWM value.
-            set_power(constrained_power * MAX_SPEED);
+            auto pwm = constrained_power * HALF_PWM_OUTPUT;
+            CrcLib::SetPwmOutput(_pin, _is_inverted? -pwm: pwm);
         }
 
         /**
+         * @deprecated kept around for backward compatibility. use `set_power_ratio`
+         * // TODO: once this function gets removed, rename `set_power_ratio` to `set_power`
+         * 
+         * 
          * Sets the speed.
          * @param power a double between -128 and 127. will immediatly modify the speed of the motor.
          */
