@@ -169,10 +169,10 @@ namespace drives
 
         void _set_active_pid(Mode mode)
         {
-            auto to_start = mode == Mode::MATCH_ANGLE
+            auto &to_start = mode == Mode::MATCH_ANGLE
                                 ? _pid_angle
                                 : _pid_speed;
-            auto to_stop = mode == Mode::MATCH_ANGLE
+            auto &to_stop = mode == Mode::MATCH_ANGLE
                                ? _pid_speed
                                : _pid_angle;
 

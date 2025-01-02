@@ -20,6 +20,7 @@ Timer print_timer(ONE_SECOND / 10);
 drives::Motor motor(CRC_PWM_1);
 Encoder enco(CRC_ENCO_B, CRC_DIG_3);
 PID_RT pid_speed, pid_angle;
+// TODO: more copy problems...
 drives::PrecisionMotor2 pmotor(motor, enco, pid_speed, pid_angle, 145.1 * 2.5);
 
 void setup()
@@ -35,6 +36,7 @@ void setup()
     pmotor._pid_speed.setReverse(true);
 
     pmotor.begin();
+    pmotor.enable(true);
 
     Serial.println("Setup Done");
 }
