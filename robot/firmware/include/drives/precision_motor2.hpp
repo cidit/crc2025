@@ -129,7 +129,8 @@ namespace drives
         void set_target_angle(float angle)
         {
             _mode = Mode::MATCH_ANGLE;
-            _target_angle = angle;
+            // validate the angle before saving it
+            _target_angle = math::Angle::from_rad(angle)._radians;
             _set_active_pid(Mode::MATCH_ANGLE);
         }
 
