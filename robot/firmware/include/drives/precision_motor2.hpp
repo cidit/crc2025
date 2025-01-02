@@ -31,7 +31,7 @@ namespace drives
          *
          * check constructor for additionnal base expectations
          */
-        PID_RT &_pid_speed;
+        PID_RT _pid_speed;
         int32_t _e_old1, _e_old2;
 
         /**
@@ -43,20 +43,20 @@ namespace drives
          *
          * check constructor for additionnal base expectations
          */
-        PID_RT &_pid_angle;
+        PID_RT _pid_angle;
         double _target_angle;
 
         double _tpt;
         Mode _mode;
         boolean _enabled;
 
-        PrecisionMotor2(Motor &m, Encoder &e, PID_RT &pid_speed, PID_RT &pid_angle, double ticks_per_turn)
+        PrecisionMotor2(Motor &m, Encoder &e, double ticks_per_turn)
             : _m(m),
               _e(e),
-              _pid_speed(pid_speed),
+              _pid_speed(),
               _e_old1(0),
               _e_old2(0),
-              _pid_angle(pid_angle),
+              _pid_angle(),
               _target_angle(0),
               _tpt(ticks_per_turn),
               _mode(Mode::MATCH_ANGLE),

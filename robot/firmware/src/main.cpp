@@ -19,8 +19,7 @@ Timer print_timer(ONE_SECOND / 10);
 
 drives::Motor motor(CRC_PWM_1);
 Encoder enco(CRC_ENCO_B, CRC_DIG_3);
-PID_RT pid_speed, pid_angle;
-drives::PrecisionMotor2 pmotor(motor, enco, pid_speed, pid_angle, 145.1 * 2.5);
+drives::PrecisionMotor2 pmotor(motor, enco, 145.1 * 2.5);
 
 
 
@@ -49,7 +48,7 @@ void print_pid_vals()
 
 PID_RT& get_current_pid_to_tune() {
     return pmotor._mode == drives::PrecisionMotor2::Mode::MATCH_ANGLE
-        ? pid_angle : pid_speed;
+        ? pmotor._pid_angle : pmotor._pid_speed;
 }
 
 void execute_commands()
