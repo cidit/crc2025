@@ -21,8 +21,6 @@ drives::Motor motor(CRC_PWM_1);
 Encoder enco(CRC_ENCO_B, CRC_DIG_3);
 drives::PrecisionMotor2 pmotor(motor, enco, 145.1 * 2.5);
 
-
-
 void setup()
 {
     Serial.begin(115200);
@@ -35,14 +33,16 @@ void setup()
     Serial.println("Setup Done");
 }
 
-PID_RT& get_current_pid_to_tune() {
+PID_RT &get_current_pid_to_tune()
+{
     return pmotor._mode == drives::PrecisionMotor2::Mode::MATCH_ANGLE
-        ? pmotor._pid_angle : pmotor._pid_speed;
+               ? pmotor._pid_angle
+               : pmotor._pid_speed;
 }
 
 void print_pid_vals()
 {
-    auto &tuning_pid =  get_current_pid_to_tune();
+    auto &tuning_pid = get_current_pid_to_tune();
     Serial.println("Kp: " +
                    String(tuning_pid.getKp(), 5) +
                    " Ki: " +
@@ -136,10 +136,13 @@ void loop()
     if (read_mode && print_timer.is_time(now))
     {
         auto &tuning_pid = get_current_pid_to_tune();
-        
-        if (pmotor._mode == drives::PrecisionMotor2::Mode::MATCH_SPEED) {
+
+        if (pmotor._mode == drives::PrecisionMotor2::Mode::MATCH_SPEED)
+        {
             SPRINT("speed:" + padLeft(String(pmotor.get_current_rpm()), 7));
-        } else {
+        }
+        else
+        {
             SPRINT("angle:" + String(pmotor.get_current_angle(), 2));
         }
         SPACER;

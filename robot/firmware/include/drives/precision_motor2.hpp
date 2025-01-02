@@ -75,8 +75,7 @@ namespace drives
         {
             auto speed_compute = _pid_speed.compute(get_current_rpm());
             auto angle_compute = _pid_angle.compute(
-                math::Angle::travel(get_current_angle(), _target_angle)
-            );
+                math::Angle::travel(get_current_angle(), _target_angle));
 
             if (speed_compute && angle_compute)
             {
@@ -171,8 +170,8 @@ namespace drives
             _pid_speed.setOutputRange(-1000, 1000);
 
             old_kp = _pid_angle.getKp(),
-                 old_ki = _pid_angle.getKi(),
-                 old_kd = _pid_angle.getKd();
+            old_ki = _pid_angle.getKi(),
+            old_kd = _pid_angle.getKd();
             _pid_angle.reset();
             _pid_angle.setK(old_kp, old_ki, old_kd);
             _pid_angle.setInterval(20);
