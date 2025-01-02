@@ -22,25 +22,13 @@ Encoder enco(CRC_ENCO_B, CRC_DIG_3);
 PID_RT pid_speed, pid_angle;
 drives::PrecisionMotor2 pmotor(motor, enco, pid_speed, pid_angle, 145.1 * 2.5);
 
+
+
 void setup()
 {
     Serial.begin(115200);
 
     CrcLib::Initialize();
-
-    pid_speed.setInterval(20);
-    pid_speed.setK(0, 0, 0);
-    pid_speed.setPoint(0);
-    pid_speed.setPropOnError();
-    pid_speed.setReverse(true);
-
-    pid_angle.setInterval(20);
-    pid_angle.setK(0, 0, 0);
-    pid_angle.setPoint(0);
-    pid_angle.setPropOnError();
-    pid_angle.setReverse(false);
-
-    // TODO: the reverse setting and proponerror setting might benefit from being set in the constructor
 
     pmotor.begin();
     pmotor.enable(true);

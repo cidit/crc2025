@@ -29,7 +29,7 @@ namespace drives
          * SETPOIT: target rpm
          * OUTPUT: power variation. expects between -1000 and 1000 to accomodate KP,KI,KD
          *
-         * DOES NOT ASSUME ANYTHING ELSE (should be configured externally)
+         * check constructor for additionnal base expectations
          */
         PID_RT &_pid_speed;
         int32_t _e_old1, _e_old2;
@@ -41,7 +41,7 @@ namespace drives
          * (can also be interpreted as the power needed to resist change, I.E. this is
          * not a variation of power like it is for the speed)
          *
-         * DOES NOT ASSUME ANYTHING ELSE (should be configured externally)
+         * check constructor for additionnal base expectations
          */
         PID_RT &_pid_angle;
         double _target_angle;
@@ -62,9 +62,21 @@ namespace drives
               _mode(Mode::MATCH_ANGLE),
               _enabled(false)
         {
+
+            _pid_speed.setInterval(20);
+            _pid_speed.setK(0, 0, 0);
+            _pid_speed.setPoint(0);
+            _pid_speed.setPropOnError();
+            _pid_speed.setReverse(true);
             // we set the PID output to a big range to make KP,KI,KD bigger
             // numbers. makes the tuning easier for Guillaume.
             _pid_speed.setOutputRange(-1000, 1000);
+
+            _pid_angle.setInterval(20);
+            _pid_angle.setK(0, 0, 0);
+            _pid_angle.setPoint(0);
+            _pid_angle.setPropOnError();
+            _pid_angle.setReverse(false);
             _pid_angle.setOutputRange(-1, 1);
         }
 
