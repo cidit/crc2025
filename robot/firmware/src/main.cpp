@@ -20,7 +20,6 @@ Timer print_timer(ONE_SECOND / 10);
 drives::Motor motor(CRC_PWM_1);
 Encoder enco(CRC_ENCO_B, CRC_DIG_3);
 PID_RT pid_speed, pid_angle;
-// TODO: more copy problems...
 drives::PrecisionMotor2 pmotor(motor, enco, pid_speed, pid_angle, 145.1 * 2.5);
 
 void setup()
@@ -40,6 +39,8 @@ void setup()
     pid_angle.setPoint(0);
     pid_angle.setPropOnError();
     pid_angle.setReverse(false);
+
+    // TODO: the reverse setting and proponerror setting might benefit from being set in the constructor
 
     pmotor.begin();
     pmotor.enable(true);
