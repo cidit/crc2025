@@ -65,7 +65,7 @@ namespace drives
             // we set the PID output to a big range to make KP,KI,KD bigger
             // numbers. makes the tuning easier for Guillaume.
             _pid_speed.setOutputRange(-1000, 1000);
-            _pid_angle.setOutputRange(-1000, 1000);
+            _pid_angle.setOutputRange(-1, 1);
         }
 
         void begin()
@@ -98,7 +98,7 @@ namespace drives
             }
             else if (angle_compute)
             {
-                _m.set_power_ratio(_pid_output_to_percentage(_pid_angle));
+                _m.set_power_ratio(_pid_angle.getOutput());
             }
         }
 
