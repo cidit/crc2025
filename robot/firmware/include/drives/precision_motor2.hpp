@@ -12,7 +12,7 @@
 
 namespace drives
 {
-    class PrecisionMotor2 : public Looped
+    class PrecisionMotor : public Looped
     {
     public:
         enum class Mode
@@ -50,7 +50,7 @@ namespace drives
         Mode _mode;
         boolean _enabled;
 
-        PrecisionMotor2(Motor &m, Encoder &e, double ticks_per_turn)
+        PrecisionMotor(Motor &m, Encoder &e, double ticks_per_turn)
             : _m(m),
               _e(e),
               _pid_speed(),
