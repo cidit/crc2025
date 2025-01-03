@@ -5,12 +5,12 @@
 #include "sensors/sensor.hpp"
 #include "drives/motor.hpp"
 #include "math/angles.hpp"
-#include "util/looped.hpp"
+#include "util/lifecycle.hpp"
 #include "util/timer.hpp"
 #include "util/misc.hpp"
 #include <Encoder.h>
 
-class PrecisionMotor : public Looped
+class PrecisionMotor : public Lifecycle
 {
 public:
     enum class Mode
@@ -64,12 +64,12 @@ public:
         _reset_PIDs();
     }
 
-    void begin()
+    void begin() override
     {
         _m.begin();
     }
 
-    void loop() override
+    void update() override
     {
         auto speed_compute = _pid_speed.compute(get_current_rpm());
         auto angle_compute = _pid_angle.compute(

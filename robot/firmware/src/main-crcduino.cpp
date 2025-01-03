@@ -131,7 +131,7 @@ void loop()
     CrcLib::Update();
     cmd.refresh();
     execute_commands();
-    pmotor.loop();
+    pmotor.update();
 
     if (read_mode && print_timer.is_time(now))
     {
