@@ -36,9 +36,9 @@ using math::cartesian::Vec2D;
 #define SW_BH CRC_PWM_7
 
 //----- OBJ -----
-drives::Motor motorBH(SW_BH);
+Motor motorBH(SW_BH);
 Encoder encoBH(CRC_DIG_5,CRC_I2C_SCL);
-drives::PrecisionMotor pmBH(motorBH, encoBH, 20, 1150.0, drives::PrecisionMotor::TICKS_1150);
+PrecisionMotor pmBH(motorBH, encoBH, 20, 1150.0, PrecisionMotor::TICKS_1150);
 
 // //----- Variables -----
 Controller ctrl;
@@ -143,22 +143,22 @@ void loop()
 }
 
 // //----- SWERVE A (gauche) -----
-// drives::Motor motorAH(CRC_PWM_4);
+// Motor motorAH(CRC_PWM_4);
 // // Encoder encoAH(CRC_ENCO_A, CRC_DIG_2);
-// // drives::PrecisionMotor pmAH(motorAH, encoAH, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
-// drives::Motor motorAB(CRC_PWM_3);
+// // PrecisionMotor pmAH(motorAH, encoAH, 10, 1150.0, PrecisionMotor::TICKS_1150);
+// Motor motorAB(CRC_PWM_3);
 // // Encoder encoAB(CRC_I2C_SDA, CRC_DIG_4);
-// // drives::PrecisionMotor pmAB(motorAB, encoAB, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
+// // PrecisionMotor pmAB(motorAB, encoAB, 10, 1150.0, PrecisionMotor::TICKS_1150);
 // // SwerveModule swerveA(pmAH, pmAB, CRC_PWM_12);
 // PID_RT pidSwerveA;
 
 // // //----- SWERVE B (droite) -----
-// drives::Motor motorBH(CRC_PWM_7);
+// Motor motorBH(CRC_PWM_7);
 // // Encoder encoBH(CRC_I2C_SCL, CRC_DIG_5);
-// // drives::PrecisionMotor pmBH(motorBH, encoBH, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
-// drives::Motor motorBB(CRC_PWM_1);
+// // PrecisionMotor pmBH(motorBH, encoBH, 10, 1150.0, PrecisionMotor::TICKS_1150);
+// Motor motorBB(CRC_PWM_1);
 // Encoder encoBB(CRC_ENCO_B, CRC_DIG_3);
-// drives::PrecisionMotor pmBB(motorBB, encoBB, 10, 1150.0, drives::PrecisionMotor::TICKS_1150);
+// PrecisionMotor pmBB(motorBB, encoBB, 10, 1150.0, PrecisionMotor::TICKS_1150);
 // // SwerveModule swerveB(pmBH, pmBB, CRC_DIG_1);
 // // PID_RT pidSwerveB;
 
@@ -466,8 +466,8 @@ void loop()
 // Controller ctrl;
 // Decodeur cmd(&Serial);
 
-// drives::Motor motorAH(CRC_PWM_4);
-// drives::Motor motorAB(CRC_PWM_3);
+// Motor motorAH(CRC_PWM_4);
+// Motor motorAB(CRC_PWM_3);
 // PID_RT pidSwerveA;
 
 // enum class Direct { CLOCKWISE, COUNTERCLOCKWISE };

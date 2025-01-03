@@ -28,7 +28,7 @@ class SwerveModule : public Looped
         const double MAX_MOTEUR_POWER = 127;
         
         //---------------------- CONSTRUCTORS ---------------------------
-        SwerveModule(drives::PrecisionMotor &motorH, drives::PrecisionMotor &motorB, double abs_enco_pin)
+        SwerveModule(PrecisionMotor &motorH, PrecisionMotor &motorB, double abs_enco_pin)
             : _motorH(motorH),
             _motorB(motorB),
             _abs_enco_pin(abs_enco_pin)
@@ -280,8 +280,8 @@ class SwerveModule : public Looped
     private:
         //-------------------------- VARIABLES ----------------------------
         PID_RT _pid;
-        drives::PrecisionMotor &_motorH;
-        drives::PrecisionMotor &_motorB;
+        PrecisionMotor &_motorH;
+        PrecisionMotor &_motorB;
 
         Vec2D _vecPower; //x=trans, y=angular
         TravelParam _moveParam;

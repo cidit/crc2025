@@ -17,9 +17,9 @@ Decodeur cmd(&Serial);
 bool read_mode = true;
 Timer print_timer(ONE_SECOND / 10);
 
-drives::Motor motor(CRC_PWM_1);
+Motor motor(CRC_PWM_1);
 Encoder enco(CRC_ENCO_B, CRC_DIG_3);
-drives::PrecisionMotor pmotor(motor, enco, 145.1 * 2.5);
+PrecisionMotor pmotor(motor, enco, 145.1 * 2.5);
 
 void setup()
 {
@@ -35,7 +35,7 @@ void setup()
 
 PID_RT &get_current_pid_to_tune()
 {
-    return pmotor._mode == drives::PrecisionMotor::Mode::MATCH_ANGLE
+    return pmotor._mode == PrecisionMotor::Mode::MATCH_ANGLE
                ? pmotor._pid_angle
                : pmotor._pid_speed;
 }
@@ -137,7 +137,7 @@ void loop()
     {
         auto &tuning_pid = get_current_pid_to_tune();
 
-        if (pmotor._mode == drives::PrecisionMotor::Mode::MATCH_SPEED)
+        if (pmotor._mode == PrecisionMotor::Mode::MATCH_SPEED)
         {
             SPRINT("speed:" + padLeft(String(pmotor.get_current_rpm()), 7));
         }

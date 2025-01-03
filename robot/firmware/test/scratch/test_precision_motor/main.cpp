@@ -7,7 +7,7 @@
 #include "sensors/gobuilda_rotary_enc.hpp"
 
 Decodeur cmdl(&Serial);
-drives::Motor motor({CRC_PWM_1, 0, 0}, false);
+Motor motor({CRC_PWM_1, 0, 0}, false);
 sensors::GobuildaRotaryEnco re(CRC_ENCO_A, CRC_ENCO_B, 538.4);
 float motor_speed;
 
