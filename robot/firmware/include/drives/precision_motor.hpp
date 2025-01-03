@@ -11,6 +11,9 @@
 
 namespace drives
 {
+    /**
+     * @deprecated for the new precision_motor2 implementation.
+     */
     class PrecisionMotor : public Looped
     {
 
