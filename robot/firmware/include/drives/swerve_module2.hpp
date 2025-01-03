@@ -17,14 +17,33 @@ public:
     pin_t _e_p;
     PID_RT _pid; // for angle of swerve
     Vec2D _target;
+    double _mtwr;
 
-    SwerveModule(PrecisionMotor &pma, PrecisionMotor &pmb, pin_t abs_enco_pin)
+    SwerveModule(
+        PrecisionMotor &pma,
+        PrecisionMotor &pmb,
+        pin_t abs_enco_pin,
+        /**
+         * the motor to wheel ratio is how many turns the wheel does
+         * for one turn of the ring gear. our ratio is 2/3 because the
+         * inner gear has a ratio of 1:2 with the ring gear and the
+         * bevel gear on the wheel has a ratio of 3:1 with the inner gear.
+         */
+        double motor_to_wheel_ratio = 2 / 3)
         : _pma(pma),
           _pmb(pmb),
           _e_p(abs_enco_pin),
           _pid(),
-          _target(0, 0)
+          _target(0, 0),
+          _mtwr(motor_to_wheel_ratio)
     {
+        // TODO: maybe make a function that resets the pid to a sane state like for the
+        // precision motor
+        _pid.setInterval(20);
+        _pid.setPoint(0);
+        _pid.setPropOnError();
+        _pid.setReverse(false);
+        _pid.setOutputRange(-1, 1);
     }
 
     void begin() override
@@ -48,7 +67,7 @@ public:
 
         auto t_speed = oprev.travel > STEERING_TOLERANCE
                            ? 0
-                           : _target.norm();
+                           : _target.norm() * _mtwr;
 
         /*
         FORWARD KINEMATICS
@@ -80,6 +99,20 @@ public:
         return (pulse / MAX_PULSE_LEN) * (2 * M_PI);
     }
 
+    void enable(bool enable)
+    {
+        _pma.enable(enable);
+        _pmb.enable(enable);
+        if (enable)
+        {
+            _pid.start();
+        }
+        else
+        {
+            _pid.stop();
+        }
+    }
+
     /**
      * immediately sets the speed of the motors.
      */
@@ -91,7 +124,7 @@ public:
 };
 
 /**
- * results of the travel optimisation thing
+ * results of the oposite & reverse optimisation
  */
 struct oprev_result
 {
@@ -102,7 +135,7 @@ struct oprev_result
 };
 
 /**
- * check if can do the travel optimisation thing
+ * check if can do the oposite & reverse optimisation
  * @param angle zeroed travel angle
  */
 oprev_result apply_oprev_optimisation(double angle)
@@ -110,9 +143,9 @@ oprev_result apply_oprev_optimisation(double angle)
     auto reversed = abs(angle) > M_PI_2;
     if (reversed)
     {
-        angle = angle > 0
-                    ? angle - M_PI
-                    : angle + M_PI;
+        angle += angle > 0
+                     ? -M_PI
+                     : +M_PI;
     }
     return (oprev_result){
         .reverse = reversed,
