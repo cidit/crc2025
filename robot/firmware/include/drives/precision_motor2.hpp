@@ -144,7 +144,7 @@ public:
 
     void set_target_rpm(const float rpm)
     {
-        // constraining to max rpm is important to stop accidental integral creep on the PID.
+        // constraining to max rpm is important to stop accidentally steep integral creep on the PID.
         const auto rpm = constrain(rpm, -_max_rpm, _max_rpm);
         _mode = Mode::MATCH_SPEED;
         _pid_speed.setPoint(rpm);
