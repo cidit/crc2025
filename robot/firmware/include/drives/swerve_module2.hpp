@@ -37,8 +37,6 @@ public:
           _target(0, 0),
           _mtwr(motor_to_wheel_ratio)
     {
-        // TODO: maybe make a function that resets the pid to a sane state like for the
-        // precision motor
         _pid.setInterval(ONE_SECOND/PrecisionMotor::DEFAULT_POLL_FREQ); // we use the same poll freq as the motor because why not
         _pid.setPoint(0);
         _pid.setPropOnError();
@@ -110,7 +108,6 @@ public:
         }
         else
         {
-            _pid.stop();
             pid_soft_reset(_pid);
         }
     }
