@@ -193,7 +193,7 @@ DONE (i think): the encoder does'nt need to handle direction changes as it is ab
 ### **5. Forward and Reverse Kinematics**
 - **Issue:** The reverse kinematics calculation in `_set_speeds` seems fine, but you are using `_pid.getOutput()` for angular velocity without clear units or normalization. This could result in motor commands being incorrectly scaled.
 - **Fix:** Ensure `_pid.getOutput()` is properly scaled to match the RPM range of the motors.
-
+DONE (i think): since we're working in angles here, this shouldn't pose any problems. the burden of having a correct output falls in the hands of the pid tunings.
 ---
 
 ### **6. `STEERING_TOLERANCE` Usage**
