@@ -111,6 +111,7 @@ public:
         else
         {
             _pid.stop();
+            pid_soft_reset(_pid);
         }
     }
 
@@ -161,10 +162,10 @@ Here is an analysis of your `SwerveModule` implementation. While the code looks 
 
 ---
 
-### **1. PID Initialization**
+### **1. PID Initialization** 
 - **Issue:** The `_pid` is initialized with default parameters that may not be suitable for your specific application. Additionally, no reset mechanism exists like in the `PrecisionMotor` implementation.
 - **Fix:** Implement a `_reset_PID()` method similar to the one in `PrecisionMotor2` to ensure sane defaults for `_pid`.
-
+- DONE: implemented a pid_soft_reset function in utils.
 ---
 
 ### **2. `pulseIn` Usage**
