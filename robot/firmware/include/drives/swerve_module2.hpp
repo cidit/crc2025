@@ -55,17 +55,17 @@ public:
     void update() override
     {
         // TODO: unimplemented
-        auto t_angle = _target.angle();
-        auto c_angle = get_current_angle();
-        auto travel = math::Angle::travel(c_angle, t_angle);
-        auto oprev = apply_oprev_optimisation(travel);
+        const auto t_angle = _target.angle();
+        const auto c_angle = get_current_angle();
+        const auto travel = math::Angle::travel(c_angle, t_angle);
+        const auto oprev = apply_oprev_optimisation(travel);
 
         if (!_pid.compute(oprev.travel))
         {
             return;
         }
 
-        auto t_lin_v = oprev.travel > STEERING_TOLERANCE
+        const auto t_lin_v = oprev.travel > STEERING_TOLERANCE
                            ? 0
                            : _target.norm() * _mtwr;
 
@@ -77,7 +77,7 @@ public:
         a=v+(Δω​/2)
         b=v−(Δω/2)
         */
-       auto angular_v = _pid.getOutput(); // rpms
+        const auto angular_v = _pid.getOutput(); // rpms
         _set_speeds(
             t_lin_v + _pid.getOutput() / 2,
             t_lin_v - _pid.getOutput() / 2);
@@ -87,7 +87,7 @@ public:
      * sets the target angle and speed we want to reach
      * @param target a vec that encodes a direction as an angle and a speed in RPMs
      */
-    void set_target(Vec2D target)
+    void set_target(const Vec2D target)
     {
         _target = target;
     }
@@ -95,12 +95,12 @@ public:
     double get_current_angle()
     {
         // TODO: handle the encoder externally so that the pulse length can be ajusted if need be.
-        const auto MAX_PULSE_LEN = 4160.0;
-        double pulse = pulseIn(_e_p, HIGH, MAX_PULSE_LEN * 2); // TODO: if there are issues later, check the pulseIn
+        const const auto MAX_PULSE_LEN = 4160.0;
+        const double pulse = pulseIn(_e_p, HIGH, MAX_PULSE_LEN * 2); // TODO: if there are issues later, check the pulseIn
         return (pulse / MAX_PULSE_LEN) * (2 * M_PI);
     }
 
-    void enable(bool enable)
+    void enable(const bool enable)
     {
         _pma.enable(enable);
         _pmb.enable(enable);
@@ -118,7 +118,7 @@ public:
     /**
      * immediately sets the speed of the motors.
      */
-    void _set_speeds(double rpma, double rpmb)
+    void _set_speeds(const double rpma, const double rpmb)
     {
         _pma.set_target_rpm(rpma);
         _pmb.set_target_rpm(rpmb);
@@ -142,7 +142,7 @@ struct oprev_result
  */
 oprev_result apply_oprev_optimisation(double angle)
 {
-    auto reversed = abs(angle) > M_PI_2;
+    const auto reversed = abs(angle) > M_PI_2;
     if (reversed)
     {
         angle += angle > 0
@@ -162,14 +162,14 @@ Here is an analysis of your `SwerveModule` implementation. While the code looks 
 
 ---
 
-### **1. PID Initialization** 
+### **1. PID Initialization**
 - **Issue:** The `_pid` is initialized with default parameters that may not be suitable for your specific application. Additionally, no reset mechanism exists like in the `PrecisionMotor` implementation.
 - **Fix:** Implement a `_reset_PID()` method similar to the one in `PrecisionMotor2` to ensure sane defaults for `_pid`.
 - DONE: implemented a pid_soft_reset function in utils.
 ---
 
 ### **2. `pulseIn` Usage**
-- **Issue:** 
+- **Issue:**
   - `pulseIn` can block for a significant amount of time if no pulse is detected, which could hinder real-time operation.
   - If the pulse length exceeds `MAX_PULSE_LEN * 2`, the code might fail to compute a valid angle.
 - **Fix:**
@@ -186,7 +186,7 @@ Here is an analysis of your `SwerveModule` implementation. While the code looks 
 ---
 
 ### **4. `apply_oprev_optimisation`**
-- **Issue:** 
+- **Issue:**
   - The optimization assumes an instantaneous response to reverse the motor, which might not be feasible due to mechanical inertia or PID delays.
   - No feedback loop ensures the optimization was successfully applied in real-world conditions.
 - **Fix:** Include a mechanism to verify if reversing the wheel results in the expected behavior during runtime.
@@ -200,7 +200,7 @@ Here is an analysis of your `SwerveModule` implementation. While the code looks 
 ---
 
 ### **6. `STEERING_TOLERANCE` Usage**
-- **Issue:** 
+- **Issue:**
   - Using a fixed tolerance (`STEERING_TOLERANCE = 0.1`) may not account for dynamic conditions, such as higher speeds requiring stricter tolerances.
   - No hysteresis is implemented to prevent oscillations when the angle error hovers around the tolerance boundary.
 - **Fix:** Dynamically adjust the tolerance based on speed or implement hysteresis to avoid oscillations.
@@ -208,7 +208,7 @@ Here is an analysis of your `SwerveModule` implementation. While the code looks 
 ---
 
 ### **7. Lack of Safety Checks**
-- **Issue:** 
+- **Issue:**
   - `_set_speeds` directly sets RPM values without bounds checking.
   - Overly high or low RPMs could cause damage to the motors or result in unintended behavior.
 - **Fix:** Add range validation for `rpma` and `rpmb` in `_set_speeds`.

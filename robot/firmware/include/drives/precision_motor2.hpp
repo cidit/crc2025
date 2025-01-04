@@ -63,7 +63,7 @@ public:
     {
         // setting sane defaults for our pids
 
-        auto poll_interval = ONE_SECOND / DEFAULT_POLL_FREQ;
+        const auto poll_interval = ONE_SECOND / DEFAULT_POLL_FREQ;
         {
             /* setting up speed pid */
             _pid_speed.setK(0, 0, 0);
@@ -93,8 +93,8 @@ public:
 
     void update() override
     {
-        auto speed_compute = _pid_speed.compute(get_current_rpm());
-        auto angle_compute = _pid_angle.compute(
+        const auto speed_compute = _pid_speed.compute(get_current_rpm());
+        const auto angle_compute = _pid_angle.compute(
             math::Angle::travel(get_current_angle(), _target_angle));
 
         if (speed_compute && angle_compute)
@@ -109,7 +109,7 @@ public:
         }
         if (speed_compute)
         {
-            auto new_power = _m._last_power + _pid_output_to_percentage(_pid_speed);
+            const auto new_power = _m._last_power + _pid_output_to_percentage(_pid_speed);
             _m.set_power_ratio(new_power);
         }
         else if (angle_compute)
@@ -122,17 +122,17 @@ public:
     {
         // FIXME: will not output correct values if PM is not enabled
         // because _update_l2ev() never gets called.
-        auto interval = _mode == Mode::MATCH_SPEED
+        const auto interval = _mode == Mode::MATCH_SPEED
                             ? _pid_speed.getInterval()
                             : _pid_angle.getInterval();
-        auto hz = ONE_SECOND / interval;
-        auto delay_mins = hz * 60;
+        const auto hz = ONE_SECOND / interval;
+        const auto delay_mins = hz * 60;
         return delay_mins * (_delta_ticks() / _tpt);
     }
 
     double get_current_angle()
     {
-        auto e_curr = _e.read();
+        const auto e_curr = _e.read();
         return math::Angle::from_ratio(e_curr / _tpt)._radians;
     }
 
