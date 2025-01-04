@@ -69,6 +69,7 @@ DONE (i think): since we're working in angles here, this shouldn't pose any prob
   - Overly high or low RPMs could cause damage to the motors or result in unintended behavior.
 - **Fix:** Add range validation for `rpma` and `rpmb` in `_set_speeds`.
 SUGGESTION: apply that fix in the PrecisionMotor class instead
+DONE: added a `_max_rmp` property in the `PrecisionMotor` class that limits the target speed in `set_target_rpm`
 
 ---
 

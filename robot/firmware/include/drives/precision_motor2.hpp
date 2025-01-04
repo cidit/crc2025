@@ -14,6 +14,7 @@ class PrecisionMotor : public Lifecycle
 {
 public:
     static const uint32_t DEFAULT_POLL_FREQ = 50; // hz
+
     enum class Mode
     {
         MATCH_ANGLE,
@@ -48,8 +49,9 @@ public:
     double _tpt;
     Mode _mode;
     bool _enabled;
+    bool _max_rpm;
 
-    PrecisionMotor(Motor &m, Encoder &e, double ticks_per_turn)
+    PrecisionMotor(Motor &m, Encoder &e, double ticks_per_turn, double max_rpm)
         : _m(m),
           _e(e),
           _pid_speed(),
@@ -59,7 +61,8 @@ public:
           _target_angle(0),
           _tpt(ticks_per_turn),
           _mode(Mode::MATCH_ANGLE), // doesnt matter, pids are not started anyways
-          _enabled(false)
+          _enabled(false),
+          _max_rpm(max_rpm)
     {
         // setting sane defaults for our pids
 
@@ -136,8 +139,10 @@ public:
         return math::Angle::from_ratio(e_curr / _tpt)._radians;
     }
 
-    void set_target_rpm(float rpm)
+    void set_target_rpm(const float rpm)
     {
+        // constraining to max rpm is important to stop accidental integral creep on the PID.
+        const auto rpm = constrain(rpm, -_max_rpm, _max_rpm);
         _mode = Mode::MATCH_SPEED;
         _pid_speed.setPoint(rpm);
         _set_active_pid();

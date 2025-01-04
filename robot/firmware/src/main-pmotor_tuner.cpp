@@ -19,7 +19,7 @@ Timer print_timer(ONE_SECOND / 10);
 
 Motor motor(CRC_PWM_1);
 Encoder enco(CRC_ENCO_B, CRC_DIG_3);
-PrecisionMotor pmotor(motor, enco, 145.1 * 2.5);
+PrecisionMotor pmotor(motor, enco, 145.1 * 2.5, 1150);
 
 void setup()
 {
