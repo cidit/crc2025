@@ -27,6 +27,7 @@ DONE: fixed it
 
 - **Potential Bug**: In `loop()`, if both PIDs compute at the same time (`speed_compute && angle_compute`), the code only logs an error but does not handle the invalid state properly.
 - **Fix**: Consider taking corrective action, such as disabling the motor or resetting the system, instead of just logging an error.
+DONE: duplicate of #14
 
 ---
 
