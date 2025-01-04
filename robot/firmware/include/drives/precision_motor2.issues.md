@@ -34,6 +34,7 @@ DONE: fixed it
 
 - **Bug**: If `interval` is `0` (e.g., due to a misconfigured PID interval), the division `ONE_SECOND / interval` will cause undefined behavior.
 - **Fix**: Add a check to ensure `interval` is non-zero before performing the division.
+DONE: added apropriate guard clause
 
 ---
 

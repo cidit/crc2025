@@ -128,6 +128,9 @@ public:
         const auto interval = _mode == Mode::MATCH_SPEED
                                   ? _pid_speed.getInterval()
                                   : _pid_angle.getInterval();
+        if (interval == 0) {
+            return 0;
+        }
         const auto hz = ONE_SECOND / interval;
         const auto delay_mins = hz * 60;
         return delay_mins * (_delta_ticks() / _tpt);
