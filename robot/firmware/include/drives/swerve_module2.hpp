@@ -176,13 +176,13 @@ Here is an analysis of your `SwerveModule` implementation. While the code looks 
   - Use non-blocking approaches or interrupts for reading the absolute encoder.
   - Handle cases where the pulse exceeds the timeout to avoid unpredictable behavior.
   - Validate the returned pulse value before computing the angle.
-
+SUGGESTION: make encoder external, make it poll on a regular timeframe and get the last value only
 ---
 
 ### **3. Encoder Direction Handling**
 - **Issue:** If the encoder is not handling direction changes, the reported angle could be invalid or incomplete.
 - **Fix:** Add logic to track the encoder's direction or rely on differential readings from the motors if supported.
-
+DONE (i think): the encoder does'nt need to handle direction changes as it is absolute.
 ---
 
 ### **4. `apply_oprev_optimisation`**
@@ -212,37 +212,37 @@ Here is an analysis of your `SwerveModule` implementation. While the code looks 
   - `_set_speeds` directly sets RPM values without bounds checking.
   - Overly high or low RPMs could cause damage to the motors or result in unintended behavior.
 - **Fix:** Add range validation for `rpma` and `rpmb` in `_set_speeds`.
-
+SUGGESTION: apply that fix in the PrecisionMotor class instead
 ---
 
 ### **8. Dependency on `Vec2D`**
 - **Issue:** The use of `Vec2D` assumes it has robust methods like `.angle()` and `.norm()` for polar conversions. If these methods are not implemented or tested thoroughly, they could introduce bugs.
 - **Fix:** Ensure `Vec2D` is implemented correctly and can handle edge cases like zero vectors.
-
+SUGGESTION: unit test
 ---
 
 ### **9. Missing Implementation for `update`**
 - **Issue:** The core `update` function lacks a concrete implementation for controlling the swerve module. This is marked as `TODO`.
 - **Fix:** Implement the logic to control the swerve module based on `_target`, current angle, and PID outputs.
-
+DONE: chatgpt hallucination. the implementation is there, but a todo was left hanging
 ---
 
 ### **10. Angle Normalization**
 - **Issue:** In `apply_oprev_optimisation`, angles are adjusted with `±M_PI` but are not explicitly normalized back into the range `[−π, π]` or `[0, 2π]`.
 - **Fix:** Explicitly normalize the angle after applying the optimization to avoid edge cases.
-
+SUGGESTION: not important given the context. either move the function, inline it or just ignore the issue.
 ---
 
 ### **11. Initialization Order**
 - **Issue:** `_mtwr` is initialized with `2 / 3` in the constructor. In integer division, this evaluates to `0`.
 - **Fix:** Use `2.0 / 3.0` for proper floating-point division.
-
+DONE: fixed that in an earlier commit
 ---
 
 ### **12. Target Angle Update**
 - **Issue:** The `set_target` method updates `_target` but doesn't validate or sanitize the input (e.g., ensuring the angle is within valid bounds).
 - **Fix:** Add input validation to `set_target`.
-
+SUGGESTION: normalize the vector depending on the theoretical max speed of the motors.
 ---
 
 ### **13. Handling of `_pid.start()` and `_pid.stop()`**

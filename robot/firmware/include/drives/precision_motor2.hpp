@@ -47,7 +47,7 @@ public:
 
     double _tpt;
     Mode _mode;
-    boolean _enabled;
+    bool _enabled;
 
     PrecisionMotor(Motor &m, Encoder &e, double ticks_per_turn)
         : _m(m),
@@ -214,19 +214,19 @@ This is a relatively complex piece of code, and there are several potential bugs
 ### 1. **Initialization of References (`Motor` and `Encoder`)**
    - **Potential Bug**: The `_m` and `_e` references are not checked for validity. If null references are passed to the constructor, it will lead to undefined behavior.
    - **Fix**: Consider adding assertions or checks in the constructor to ensure valid references are passed.
-
+SUGGESTION: look up online how to do that in cpp. probably involves nullptr
 ---
 
 ### 2. **Use of `boolean` Instead of `bool`**
    - **Issue**: `boolean` is a legacy Arduino type and not standard C++. Use `bool` instead for better portability and compliance with modern C++ standards.
    - **Fix**: Replace `boolean _enabled;` with `bool _enabled;`.
-
+DONE
 ---
 
 ### 3. **Encapsulation of Private Variables**
    - **Potential Bug**: Direct manipulation of `_m._last_power` in `loop()` breaks encapsulation. If the internal structure of `Motor` changes, this could lead to errors.
    - **Fix**: Use a getter or setter method from the `Motor` class to access or modify its state.
-
+SUGGESTION: implement that directly on the Motor class.
 ---
 
 ### 4. **Invalid State Error Handling**
@@ -268,13 +268,13 @@ DONE: no action needed because _tpt is already a double. gpt4 halucination.
 ### 10. **`get_current_rpm()` Behavior When Disabled**
    - **Bug**: As noted in the `FIXME` comment, `get_current_rpm()` does not produce correct results when the system is disabled because `_update_l2ev()` is not called.
    - **Fix**: Either return a default or invalid value (e.g., `NaN`) when the system is disabled, or call `_update_l2ev()` conditionally.
-
+SUGGESTION: if and when we start using .readAndReset() on the encoder to fix the overflow issue, this function will need to work differently (if at all in angle mode)
 ---
 
 ### 11. **Unhandled Encoder Overflows**
    - **Potential Bug**: The encoder readings `_e.read()` are stored in 32-bit integers (`_e_old1`, `_e_old2`). If the encoder overflows, the `_delta_ticks()` calculation may produce incorrect results.
    - **Fix**: Use modular arithmetic to handle encoder overflows correctly.
-
+SUGGESTION: use readAndReset() on the encoder. THIS WILL BREAK ANGLE! 0 must be tracked inteligently.
 ---
 
 ### 12. **Non-Synchronous `begin()` and `loop()`**
@@ -286,7 +286,7 @@ DONE: no action needed, the encoder doesnt need to be begun.
 ### 13. **Potential Memory Usage Problems**
    - **Issue**: The code uses `Serial.print()` for debugging, which can increase memory usage on constrained Arduino devices.
    - **Fix**: Use lightweight debugging mechanisms or conditionally compile debug logs.
-
+SUGGESTION: introduce a logger?
 ---
 
 ### 14. **Lack of Error Recovery Mechanisms**
