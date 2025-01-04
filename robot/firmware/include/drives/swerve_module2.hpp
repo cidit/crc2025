@@ -39,7 +39,7 @@ public:
     {
         // TODO: maybe make a function that resets the pid to a sane state like for the
         // precision motor
-        _pid.setInterval(20);
+        _pid.setInterval(ONE_SECOND/PrecisionMotor::DEFAULT_POLL_FREQ); // we use the same poll freq as the motor because why not
         _pid.setPoint(0);
         _pid.setPropOnError();
         _pid.setReverse(false);
