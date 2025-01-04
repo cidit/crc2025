@@ -83,6 +83,7 @@ SUGGESTION: normalize the vector depending on the theoretical max speed of the m
 
 - **Issue:** If `_pid` is started or stopped frequently, it could lead to abrupt behavior in the system.
 - **Fix:** Smooth transitions when enabling or disabling the PID controller.
+DONE: taken care of in a previous commit
 
 ---
 
