@@ -13,6 +13,7 @@
 class PrecisionMotor : public Lifecycle
 {
 public:
+    static const uint32_t DEFAULT_POLL_FREQ = 50; // hz
     enum class Mode
     {
         MATCH_ANGLE,
@@ -62,21 +63,27 @@ public:
     {
         // setting sane defaults for our pids
 
-        _pid_speed.setK(0, 0, 0);
-        _pid_speed.setInterval(20);
-        _pid_speed.setPoint(0);
-        _pid_speed.setPropOnError();
-        _pid_speed.setReverse(true);
-        // we set the PID output to a big range to make KP,KI,KD bigger
-        // numbers. makes the tuning easier for Guillaume.
-        _pid_speed.setOutputRange(-1000, 1000);
-
-        _pid_angle.setK(0, 0, 0);
-        _pid_angle.setInterval(20);
-        _pid_angle.setPoint(0);
-        _pid_angle.setPropOnError();
-        _pid_angle.setReverse(false);
-        _pid_angle.setOutputRange(-1, 1);
+        auto poll_interval = ONE_SECOND / DEFAULT_POLL_FREQ;
+        {
+            /* setting up speed pid */
+            _pid_speed.setK(0, 0, 0);
+            _pid_speed.setInterval(poll_interval);
+            _pid_speed.setPoint(0);
+            _pid_speed.setPropOnError();
+            _pid_speed.setReverse(true);
+            // we set the PID output to a big range to make KP,KI,KD bigger
+            // numbers. makes the tuning easier for Guillaume.
+            _pid_speed.setOutputRange(-1000, 1000);
+        }
+        {
+            /* setting up angle pid */
+            _pid_angle.setK(0, 0, 0);
+            _pid_angle.setInterval(poll_interval);
+            _pid_angle.setPoint(0);
+            _pid_angle.setPropOnError();
+            _pid_angle.setReverse(false);
+            _pid_angle.setOutputRange(-1, 1);
+        }
     }
 
     void begin() override
@@ -249,7 +256,7 @@ DONE: replaced `to_stop.stop()` with a call to `pid_soft_reset`
 ### 8. **Magic Numbers for PID Intervals**
    - **Issue**: The interval `20` is hardcoded in `_reset_PIDs()`. This could make the code less maintainable.
    - **Fix**: Use a named constant or configurable parameter for the PID interval.
-
+DONE: created a few constants and shit
 ---
 
 ### 9. **Incorrect Use of `get_current_angle()`**
