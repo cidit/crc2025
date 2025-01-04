@@ -4,6 +4,7 @@
         "cmath": "cpp",
         "iterator_base": "cpp",
         "list": "cpp",
-        "limits": "cpp"
+        "limits": "cpp",
+        "istream": "cpp"
     }
 }
