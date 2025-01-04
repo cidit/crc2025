@@ -19,6 +19,7 @@ SUGGESTION: look up online how to do that in cpp. probably involves nullptr
 - **Potential Bug**: Direct manipulation of `_m._last_power` in `loop()` breaks encapsulation. If the internal structure of `Motor` changes, this could lead to errors.
 - **Fix**: Use a getter or setter method from the `Motor` class to access or modify its state.
 SUGGESTION: implement that directly on the Motor class.
+DONE: fixed it
 
 ---
 

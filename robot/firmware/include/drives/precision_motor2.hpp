@@ -112,7 +112,7 @@ public:
         }
         if (speed_compute)
         {
-            const auto new_power = _m._last_power + _pid_output_to_percentage(_pid_speed);
+            const auto new_power = _m.get_power() + _pid_output_to_percentage(_pid_speed);
             _m.set_power_ratio(new_power);
         }
         else if (angle_compute)

@@ -57,6 +57,10 @@ public:
         CrcLib::SetPwmOutput(_pin, power);
     }
 
+    double get_power() {
+        return _last_power;
+    }
+
 private:
     int _pin;
     bool _is_inverted;
