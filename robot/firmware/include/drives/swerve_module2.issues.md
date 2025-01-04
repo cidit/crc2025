@@ -35,6 +35,7 @@ SUGGESTION: ignore this issue
 - **Fix:** Ensure `_pid.getOutput()` is properly scaled to match the RPM range of the motors.
 DONE (i think): since we're working in angles here, this shouldn't pose any problems. the burden of having a correct output falls in the hands of the pid tunings.
 NOT DONE: i just properly understood the question: the output of the PID is a signed percentage [-1, 1] but the `_set_speeds(...)` function takes RPMs, not a percentage of power. the PIDs should accomodate that. (make the pid output infinite? initialize it to some math involving the theoretical max speed of each motor?)
+DONE: According to Guillaume, 400rpms is fine. usually pids go between 150 and 200rpms in terms of angular speeds.
 
 ---
 
@@ -44,6 +45,7 @@ NOT DONE: i just properly understood the question: the output of the PID is a si
   - Using a fixed tolerance (`STEERING_TOLERANCE = 0.1`) may not account for dynamic conditions, such as higher speeds requiring stricter tolerances.
   - No hysteresis is implemented to prevent oscillations when the angle error hovers around the tolerance boundary.
 - **Fix:** Dynamically adjust the tolerance based on speed or implement hysteresis to avoid oscillations.
+DONE: We ruled it out with Guillaume.
 
 ---
 

@@ -15,7 +15,7 @@ public:
 
     PrecisionMotor &_pma, &_pmb;
     pin_t _e_p;
-    PID_RT _pid; // for angle of swerve
+    PID_RT _pid; // for angular velocity of swerve
     Vec2D _target;
     double _mtwr;
 
@@ -41,7 +41,7 @@ public:
         _pid.setPoint(0);
         _pid.setPropOnError();
         _pid.setReverse(false);
-        _pid.setOutputRange(-1, 1);
+        _pid.setOutputRange(-400, 400); // rpms
     }
 
     void begin() override
@@ -52,7 +52,6 @@ public:
 
     void update() override
     {
-        // TODO: unimplemented
         const auto t_angle = _target.angle();
         const auto c_angle = get_current_angle();
         const auto travel = math::Angle::travel(c_angle, t_angle);
