@@ -19,14 +19,6 @@ SUGGESTION: make encoder external, make it poll on a regular timeframe and get t
 
 ---
 
-### **3. Encoder Direction Handling**
-
-- **Issue:** If the encoder is not handling direction changes, the reported angle could be invalid or incomplete.
-- **Fix:** Add logic to track the encoder's direction or rely on differential readings from the motors if supported.
-DONE (i think): the encoder does'nt need to handle direction changes as it is absolute.
-
----
-
 ### **4. `apply_oprev_optimisation`**
 
 - **Issue:**
@@ -76,14 +68,6 @@ SUGGESTION: not important given the context. either move the function, inline it
 - **Issue:** The `set_target` method updates `_target` but doesn't validate or sanitize the input (e.g., ensuring the angle is within valid bounds).
 - **Fix:** Add input validation to `set_target`.
 SUGGESTION: normalize the vector depending on the theoretical max speed of the motors.
-
----
-
-### **13. Handling of `_pid.start()` and `_pid.stop()`**
-
-- **Issue:** If `_pid` is started or stopped frequently, it could lead to abrupt behavior in the system.
-- **Fix:** Smooth transitions when enabling or disabling the PID controller.
-DONE: taken care of in a previous commit
 
 ---
 
