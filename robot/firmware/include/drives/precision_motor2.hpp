@@ -60,8 +60,23 @@ public:
           _mode(Mode::MATCH_ANGLE), // doesnt matter, pids are not started anyways
           _enabled(false)
     {
-        // this function happens to set sane defaults for our pids.
-        _reset_PIDs();
+        // setting sane defaults for our pids
+
+        _pid_speed.setK(0, 0, 0);
+        _pid_speed.setInterval(20);
+        _pid_speed.setPoint(0);
+        _pid_speed.setPropOnError();
+        _pid_speed.setReverse(true);
+        // we set the PID output to a big range to make KP,KI,KD bigger
+        // numbers. makes the tuning easier for Guillaume.
+        _pid_speed.setOutputRange(-1000, 1000);
+
+        _pid_angle.setK(0, 0, 0);
+        _pid_angle.setInterval(20);
+        _pid_angle.setPoint(0);
+        _pid_angle.setPropOnError();
+        _pid_angle.setReverse(false);
+        _pid_angle.setOutputRange(-1, 1);
     }
 
     void begin() override
@@ -138,45 +153,10 @@ public:
         }
         else
         {
-            _reset_PIDs();
+            pid_soft_reset(_pid_angle);
+            pid_soft_reset(_pid_speed);
             _m.set_power_ratio(0);
         }
-    }
-
-    /**
-     * Resets pids to a sane state given their context. (Mainly the errorsum and and
-     * lasterror variables.)
-     *
-     * This fucking function is so fucking verbose because the couple of variables
-     * i need to reset in the pids are private so i need to call a function
-     * that resets absolutely everything instead and manually re-set the variables
-     * that were already sane.
-     */
-    void _reset_PIDs()
-    {
-        auto old_kp = _pid_speed.getKp(),
-             old_ki = _pid_speed.getKi(),
-             old_kd = _pid_speed.getKd();
-        _pid_speed.reset();
-        _pid_speed.setK(old_kp, old_ki, old_kd);
-        _pid_speed.setInterval(20);
-        _pid_speed.setPoint(0);
-        _pid_speed.setPropOnError();
-        _pid_speed.setReverse(true);
-        // we set the PID output to a big range to make KP,KI,KD bigger
-        // numbers. makes the tuning easier for Guillaume.
-        _pid_speed.setOutputRange(-1000, 1000);
-
-        old_kp = _pid_angle.getKp(),
-        old_ki = _pid_angle.getKi(),
-        old_kd = _pid_angle.getKd();
-        _pid_angle.reset();
-        _pid_angle.setK(old_kp, old_ki, old_kd);
-        _pid_angle.setInterval(20);
-        _pid_angle.setPoint(0);
-        _pid_angle.setPropOnError();
-        _pid_angle.setReverse(false);
-        _pid_angle.setOutputRange(-1, 1);
     }
 
     /**
@@ -209,7 +189,7 @@ public:
                             ? _pid_speed
                             : _pid_angle;
 
-        to_stop.stop();
+        pid_soft_reset(to_stop);
         if (!to_start.isRunning())
         {
             to_start.start();
@@ -263,7 +243,7 @@ This is a relatively complex piece of code, and there are several potential bugs
 ### 7. **Incorrect Behavior When `MATCH_ANGLE` or `MATCH_SPEED` Mode is Switched**
    - **Issue**: `_set_active_pid()` starts the new PID but does not reset or reinitialize relevant state variables. This could cause erratic behavior when switching modes.
    - **Fix**: Add logic to reset or reinitialize state variables (e.g., `_e_old1`, `_e_old2`) when switching between modes.
-
+DONE: replaced `to_stop.stop()` with a call to `pid_soft_reset`
 ---
 
 ### 8. **Magic Numbers for PID Intervals**
@@ -311,7 +291,7 @@ This is a relatively complex piece of code, and there are several potential bugs
 ### 15. **General Code Readability and Maintainability**
    - **Observation**: The `_reset_PIDs()` function is verbose and difficult to maintain due to the repeated logic for resetting PIDs.
    - **Fix**: Refactor the logic to avoid duplication, possibly by creating a helper function to reset a single PID.
-
+DONE: created helper function pid_soft_reset
 ---
 
 ### Summary of Key Fixes:
