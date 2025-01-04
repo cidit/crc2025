@@ -18,6 +18,7 @@ public:
     PID_RT _pid; // for angular velocity of swerve
     Vec2D _target;
     double _mtwr;
+    bool _enabled;
 
     SwerveModule(
         PrecisionMotor &pma,
@@ -35,7 +36,8 @@ public:
           _e_p(abs_enco_pin),
           _pid(),
           _target(0, 0),
-          _mtwr(motor_to_wheel_ratio)
+          _mtwr(motor_to_wheel_ratio),
+          _enabled(false)
     {
         _pid.setInterval(ONE_SECOND / PrecisionMotor::DEFAULT_POLL_FREQ); // we use the same poll freq as the motor because why not
         _pid.setPoint(0);
@@ -99,6 +101,7 @@ public:
 
     void enable(const bool enable)
     {
+        _enabled = enable;
         _pma.enable(enable);
         _pmb.enable(enable);
         if (enable)
