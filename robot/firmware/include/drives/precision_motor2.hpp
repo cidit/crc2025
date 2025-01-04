@@ -255,7 +255,7 @@ DONE: replaced `to_stop.stop()` with a call to `pid_soft_reset`
 ### 9. **Incorrect Use of `get_current_angle()`**
    - **Bug**: In `get_current_angle()`, the division `e_curr / _tpt` performs integer division if `_tpt` is an integer, which may lead to incorrect results.
    - **Fix**: Ensure `_tpt` is a floating-point value, or cast it to `double` before performing the division.
-
+DONE: no action needed because _tpt is already a double. gpt4 halucination.
 ---
 
 ### 10. **`get_current_rpm()` Behavior When Disabled**
