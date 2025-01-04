@@ -42,6 +42,7 @@ SUGGESTION: ignore this issue
 - **Issue:** The reverse kinematics calculation in `_set_speeds` seems fine, but you are using `_pid.getOutput()` for angular velocity without clear units or normalization. This could result in motor commands being incorrectly scaled.
 - **Fix:** Ensure `_pid.getOutput()` is properly scaled to match the RPM range of the motors.
 DONE (i think): since we're working in angles here, this shouldn't pose any problems. the burden of having a correct output falls in the hands of the pid tunings.
+NOT DONE: i just properly understood the question: the output of the PID is a signed percentage [-1, 1] but the `_set_speeds(...)` function takes RPMs, not a percentage of power. the PIDs should accomodate that. (make the pid output infinite? initialize it to some math involving the theoretical max speed of each motor?)
 
 ---
 
