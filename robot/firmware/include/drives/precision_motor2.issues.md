@@ -68,6 +68,7 @@ SUGGESTION: use readAndReset() on the encoder. THIS WILL BREAK ANGLE! 0rad must 
 - **Issue**: The code uses `Serial.print()` for debugging, which can increase memory usage on constrained Arduino devices.
 - **Fix**: Use lightweight debugging mechanisms or conditionally compile debug logs.
 SUGGESTION: introduce a logger?
+DONE: temporary fix behind a build flag
 
 ---
 
@@ -75,6 +76,7 @@ SUGGESTION: introduce a logger?
 
 - **Issue**: Errors like invalid states (e.g., both PIDs computed simultaneously) or motor/encoder malfunctions are not recoverable.
 - **Fix**: Add error recovery mechanisms (e.g., resetting PIDs, reinitializing the motor/encoder).
+DONE: disabled the pmotor when encountering an invalid state.
 
 ---
 

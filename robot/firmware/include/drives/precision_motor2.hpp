@@ -102,7 +102,11 @@ public:
 
         if (speed_compute && angle_compute)
         {
+            #ifdef DEBUG
+            // TODO: introduce some sort of logger instead?
             Serial.print("!!! invalid state error: both PIDs were computed");
+            #endif DEBUG
+            enable(false);
             return;
         }
 
