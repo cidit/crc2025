@@ -192,7 +192,9 @@ public:
     {
         // FIXME: this is only useful for the speed pid since its the only
         // one that benefits from the extended output range.
-        return pid.getOutput() / 1000;
+        // also, assumes the output range is centered on zero which will always 
+        // be the case in a precision motor setting.
+        return pid.getOutput() / pid.getOutputMax();
     }
 
     void _set_active_pid()

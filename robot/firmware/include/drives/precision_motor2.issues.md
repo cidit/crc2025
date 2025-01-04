@@ -42,6 +42,7 @@ DONE: added apropriate guard clause
 
 - **Issue**: `_pid_output_to_percentage()` assumes that the output range of `_pid_speed` is always `[-1000, 1000]`. If the range changes, this logic will break.
 - **Fix**: Use `getOutputRange()` from the PID class (if available) to dynamically calculate the scaling factor.
+DONE: fixed it. still assumes that the output range is centered on zero tho
 
 ---
 
