@@ -41,6 +41,7 @@ DONE (i think): the encoder does'nt need to handle direction changes as it is ab
   - The optimization assumes an instantaneous response to reverse the motor, which might not be feasible due to mechanical inertia or PID delays.
   - No feedback loop ensures the optimization was successfully applied in real-world conditions.
 - **Fix:** Include a mechanism to verify if reversing the wheel results in the expected behavior during runtime.
+SUGGESTION: ignore this issue
 
 ---
 
