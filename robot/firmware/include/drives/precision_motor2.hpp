@@ -273,7 +273,7 @@ DONE: replaced `to_stop.stop()` with a call to `pid_soft_reset`
 ### 12. **Non-Synchronous `begin()` and `loop()`**
    - **Issue**: The `begin()` function initializes the motor, but the encoder (`_e`) is not initialized. If the encoder requires initialization, it must be done explicitly.
    - **Fix**: Add a call to an encoder initialization function (if required).
-
+DONE: no action needed, the encoder doesnt need to be begun.
 ---
 
 ### 13. **Potential Memory Usage Problems**
