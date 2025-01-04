@@ -51,6 +51,7 @@ DONE: fixed it. still assumes that the output range is centered on zero tho
 - **Bug**: As noted in the `FIXME` comment, `get_current_rpm()` does not produce correct results when the system is disabled because `_update_l2ev()` is not called.
 - **Fix**: Either return a default or invalid value (e.g., `NaN`) when the system is disabled, or call `_update_l2ev()` conditionally.
 SUGGESTION: if and when we start using .readAndReset() on the encoder to fix the overflow issue, this function will need to work differently (if at all in angle mode)
+SUGGESTION: make a separate PrecisionMotor::Encoder class that uses the regular encoder under the hood.
 
 ---
 
@@ -58,7 +59,7 @@ SUGGESTION: if and when we start using .readAndReset() on the encoder to fix the
 
 - **Potential Bug**: The encoder readings `_e.read()` are stored in 32-bit integers (`_e_old1`, `_e_old2`). If the encoder overflows, the `_delta_ticks()` calculation may produce incorrect results.
 - **Fix**: Use modular arithmetic to handle encoder overflows correctly.
-SUGGESTION: use readAndReset() on the encoder. THIS WILL BREAK ANGLE! 0 must be tracked inteligently.
+SUGGESTION: use readAndReset() on the encoder. THIS WILL BREAK ANGLE! 0rad must be tracked inteligently.
 
 ---
 
