@@ -6,14 +6,6 @@ Here is an analysis of your `SwerveModule` implementation. While the code looks 
 
 ---
 
-### **1. PID Initialization**
-
-- **Issue:** The `_pid` is initialized with default parameters that may not be suitable for your specific application. Additionally, no reset mechanism exists like in the `PrecisionMotor` implementation.
-- **Fix:** Implement a `_reset_PID()` method similar to the one in `PrecisionMotor2` to ensure sane defaults for `_pid`.
-- DONE: implemented a pid_soft_reset function in utils.
-
----
-
 ### **2. `pulseIn` Usage**
 
 - **Issue:**
@@ -62,17 +54,6 @@ DONE (i think): since we're working in angles here, this shouldn't pose any prob
 
 ---
 
-### **7. Lack of Safety Checks**
-
-- **Issue:**
-  - `_set_speeds` directly sets RPM values without bounds checking.
-  - Overly high or low RPMs could cause damage to the motors or result in unintended behavior.
-- **Fix:** Add range validation for `rpma` and `rpmb` in `_set_speeds`.
-SUGGESTION: apply that fix in the PrecisionMotor class instead
-DONE: added a `_max_rmp` property in the `PrecisionMotor` class that limits the target speed in `set_target_rpm`
-
----
-
 ### **8. Dependency on `Vec2D`**
 
 - **Issue:** The use of `Vec2D` assumes it has robust methods like `.angle()` and `.norm()` for polar conversions. If these methods are not implemented or tested thoroughly, they could introduce bugs.
@@ -81,27 +62,11 @@ SUGGESTION: unit test
 
 ---
 
-### **9. Missing Implementation for `update`**
-
-- **Issue:** The core `update` function lacks a concrete implementation for controlling the swerve module. This is marked as `TODO`.
-- **Fix:** Implement the logic to control the swerve module based on `_target`, current angle, and PID outputs.
-DONE: chatgpt hallucination. the implementation is there, but a todo was left hanging
-
----
-
 ### **10. Angle Normalization**
 
 - **Issue:** In `apply_oprev_optimisation`, angles are adjusted with `±M_PI` but are not explicitly normalized back into the range `[−π, π]` or `[0, 2π]`.
 - **Fix:** Explicitly normalize the angle after applying the optimization to avoid edge cases.
 SUGGESTION: not important given the context. either move the function, inline it or just ignore the issue.
-
----
-
-### **11. Initialization Order**
-
-- **Issue:** `_mtwr` is initialized with `2 / 3` in the constructor. In integer division, this evaluates to `0`.
-- **Fix:** Use `2.0 / 3.0` for proper floating-point division.
-DONE: fixed that in an earlier commit
 
 ---
 
