@@ -2,7 +2,7 @@
 #include "drives/precision_motor2.hpp"
 #include "math/vectors.hpp"
 
-using math::cartesian::Vec2D;
+using cartesian::Vec2D;
 
 class SwerveModule : public Lifecycle
 {
@@ -56,7 +56,7 @@ public:
     {
         const auto t_angle = _target.angle();
         const auto c_angle = get_current_angle();
-        const auto travel = math::Angle::travel(c_angle, t_angle);
+        const auto travel = Angle::travel(c_angle, t_angle);
         const auto oprev = apply_oprev_optimisation(travel);
 
         if (!_pid.compute(oprev.travel))

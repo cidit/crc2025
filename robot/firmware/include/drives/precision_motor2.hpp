@@ -98,7 +98,7 @@ public:
     {
         const auto speed_compute = _pid_speed.compute(get_current_rpm());
         const auto angle_compute = _pid_angle.compute(
-            math::Angle::travel(get_current_angle(), _target_angle));
+            Angle::travel(get_current_angle(), _target_angle));
 
         if (speed_compute && angle_compute)
         {
@@ -143,7 +143,7 @@ public:
     double get_current_angle()
     {
         const auto e_curr = _e.read();
-        return math::Angle::from_ratio(e_curr / _tpt)._radians;
+        return Angle::from_ratio(e_curr / _tpt)._radians;
     }
 
     void set_target_rpm(const float target_rpm)
@@ -159,7 +159,7 @@ public:
     {
         _mode = Mode::MATCH_ANGLE;
         // validate the angle before saving it
-        _target_angle = math::Angle::from_rad(angle)._radians;
+        _target_angle = Angle::from_rad(angle)._radians;
         _set_active_pid();
     }
 

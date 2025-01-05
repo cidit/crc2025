@@ -8,7 +8,8 @@
 #include <Servo.h>
 #include <Decodeur.h>
 #include <PID_RT.h>
-using math::cartesian::Vec2D;
+#include <sensors/gobuilda_rotary_enc.hpp>
+
 
 #define SPRINT(things) Serial.print(things)
 #define SPACER Serial.print("    ")

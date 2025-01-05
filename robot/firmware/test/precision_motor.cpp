@@ -58,9 +58,9 @@ void PrecisionMotor::setTunings(PIDTunings tunings) {
 
 //-------------------------- Utils -----------------------------
 
-math::Angle ticks_to_angle(float ticks, float ticks_per_rotation)
+Angle ticks_to_angle(float ticks, float ticks_per_rotation)
 {
     auto wrapped = fmod(ticks, ticks_per_rotation);
     auto ratio = wrapped / ticks_per_rotation;
-    return math::Angle::from_ratio(ratio);
+    return Angle::from_ratio(ratio);
 }

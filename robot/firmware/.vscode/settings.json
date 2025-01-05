@@ -5,6 +5,7 @@
         "iterator_base": "cpp",
         "list": "cpp",
         "limits": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "ios": "cpp"
     }
 }

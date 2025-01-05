@@ -3,7 +3,6 @@
 #include "math.h"
 #include "math/vectors.hpp"
 #include <PID_RT.h>
-using math::cartesian::Vec2D;
 #include "drives/precision_motor.hpp"
 #include "util/looped.hpp"
 #include <CrcLib.h>

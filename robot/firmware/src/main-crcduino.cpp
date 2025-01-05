@@ -8,7 +8,6 @@
 #include <Servo.h>
 #include <Decodeur.h>
 #include <PID_RT.h>
-using math::cartesian::Vec2D;
 
 #define SPRINT(things) Serial.print(things)
 #define SPACER Serial.print("    ")

@@ -26,7 +26,7 @@
 #include <Servo.h>
 #include <Decodeur.h>
 #include <PID_RT.h>
-using math::cartesian::Vec2D;
+using cartesian::Vec2D;
 
 #define SP(things) Serial.print(things)
 
@@ -456,7 +456,7 @@ void loop()
 // #include <Servo.h>
 // #include <Decodeur.h>
 // #include <PID_RT.h>
-// using math::cartesian::Vec2D;
+// using cartesian::Vec2D;
 
 // //----- Pin Defines -----
 // #define ABS_ENC_A CRC_DIG_12

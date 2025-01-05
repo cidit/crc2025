@@ -82,7 +82,7 @@ public:
             auto delta_pos = _last_enco - enco_out;
 
             // Calculate current Angle
-            _current_angle = math::Angle::from_ratio(fmod(enco_out, _ticks_turn) / _ticks_turn);
+            _current_angle = Angle::from_ratio(fmod(enco_out, _ticks_turn) / _ticks_turn);
 
             // Calculate current speed of motor
             double speed = (double)delta_pos / delta_time * 1000.0; // In ticks per sec
@@ -105,7 +105,7 @@ public:
             // Serial.println(" CurrentRPM: "+String(current_rpm) /*+" MaxRPM: "+String(_max_rpm)+" Ticks: "+String(delta_pos)*/+" MaxTicks: "+String(_ticks_turn));
 
             // Calculate the diff between current and target angle
-            _inputA = math::Angle::travel(_current_angle, _target_angle);
+            _inputA = Angle::travel(_current_angle, _target_angle);
             // Serial.print(" CurrentAngle: "+String(_current_angle._radians)+" TarAngle: "+String(_target_angle._radians)+" Travel: "+String(_inputA));
         }
 
@@ -140,7 +140,7 @@ public:
      * Set the mode to MATCH_ANGLE
      * @param angle Angle Object
      */
-    void set_target_angle(math::Angle angle)
+    void set_target_angle(Angle angle)
     {
         _mode = Mode::MATCH_ANGLE;
         _target_angle = angle;
@@ -236,6 +236,6 @@ public:
     uint32_t _timer;
     int _delai = 10;
 
-    math::Angle _current_angle;
-    math::Angle _target_angle = math::Angle::zero();
+    Angle _current_angle;
+    Angle _target_angle = Angle::zero();
 };

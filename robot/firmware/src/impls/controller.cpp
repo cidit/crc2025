@@ -2,7 +2,7 @@
 // #include <CrcLib.h>
 // #include "math/vectors.hpp"
 // #include "math.h"
-// using math::cartesian::Vec2D;
+// using cartesian::Vec2D;
 
 // /**
 //  * Constructeur
