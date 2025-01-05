@@ -1,13 +1,16 @@
 #pragma once
-#include "util/looped.hpp"
+#include "util/lifecycle.hpp"
+#include "util/timer.hpp"
 
 template <typename Measure>
-class Sensor : public Looped
+class Sensor : public Lifecycle
 {
-
 protected:
     Measure _last;
-    Sensor(Measure last_default_val) : _last(last_default_val) {}
+    const Timer &_polling_timer;
+    Sensor(Measure last_default_val, const Timer &polling_timer)
+        : _last(last_default_val),
+          _polling_timer(polling_timer) {}
 
 public:
     virtual void begin() = 0;
@@ -16,6 +19,11 @@ public:
 
     void poll()
     {
+        if (!_polling_timer.is_time())
+        {
+            return;
+        }
+
         Measure measure;
         auto success = sample(measure);
         if (success)
