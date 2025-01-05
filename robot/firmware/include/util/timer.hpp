@@ -26,7 +26,17 @@ public:
         return _now - _last > _delay;
     }
 
-    void update_now(timestamp now) {
+    /**
+     * should be called once every loop.
+     * 
+     * ```cpp
+     * auto now = millis();
+     * timer.update(now);
+     * ```
+     * 
+     * @param now the new current time.
+     */
+    void update(timestamp now) {
         if (is_time()) {
             // before we update the current now, we must update last if it was triggered last time.
             _last = _now;
