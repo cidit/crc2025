@@ -23,7 +23,7 @@ public:
         Encoder &internal_encoder,
         double ticks_per_TURN,
         const Timer &polling_timer)
-        : Sensor((GobuildaRotaryEncoderData){
+        : Sensor({
                      .rads = 0,
                      .rpm = 0,
                  },
@@ -37,6 +37,12 @@ public:
         _ie.write(0);
     }
 
+    void reset()
+    {
+        _ie.write(0);
+        _last = {0, 0};
+    }
+
     bool sample(GobuildaRotaryEncoderData &out) override
     {
         int32_t internal_counter = _ie.read();
@@ -44,7 +50,7 @@ public:
         const auto freq = ONE_SECOND / _polling_timer._delay;
         const auto freq_per_minute = freq * 60;
         const auto num_rotations = (angle._radians - getLast().rads) / M_2_PI;
-        out = (GobuildaRotaryEncoderData){
+        out = {
             .rads = angle._radians,
             .rpm = num_rotations / freq_per_minute};
         return true;
@@ -57,7 +63,6 @@ public:
     {
         auto wrapped = fmod(ticks, _tpt);
         auto ratio = wrapped / _tpt;
-        // Serial.println("w: r:" +  String(wrapped) + " " + String(ratio));
         return Angle::from_ratio(ratio);
     }
 };
