@@ -21,7 +21,7 @@ public:
     Timer(timestamp delay, timestamp now = 0) 
     : _delay(delay), _last(0), _now(now) {}
 
-    bool is_time()
+    bool is_time() const
     {
         return _now - _last > _delay;
     }
