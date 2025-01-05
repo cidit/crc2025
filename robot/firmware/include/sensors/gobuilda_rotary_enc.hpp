@@ -17,8 +17,6 @@ class GobuildaRotaryEncoder : public Sensor<GobuildaRotaryEncoderData>
 {
 public:
     Encoder &_ie;
-
-    int32_t _old_e;
     const double _tpt;
 
     GobuildaRotaryEncoder(
