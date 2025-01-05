@@ -6,6 +6,7 @@
         "list": "cpp",
         "limits": "cpp",
         "istream": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "algorithm": "cpp"
     }
 }

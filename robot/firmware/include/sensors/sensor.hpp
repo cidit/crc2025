@@ -37,7 +37,7 @@ public:
         return _last;
     }
 
-    void loop() override
+    void update() override
     {
         this->poll();
     }
