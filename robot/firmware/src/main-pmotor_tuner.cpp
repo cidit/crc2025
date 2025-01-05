@@ -129,12 +129,13 @@ String padLeft(String inString, uint16_t newLen)
 void loop()
 {
     auto now = millis();
+    print_timer.update(now);
     CrcLib::Update();
     cmd.refresh();
     execute_commands();
     pmotor.update();
 
-    if (read_mode && print_timer.is_time(now))
+    if (read_mode && print_timer.is_time())
     {
         auto &tuning_pid = get_current_pid_to_tune();
 
