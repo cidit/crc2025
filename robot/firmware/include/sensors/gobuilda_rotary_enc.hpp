@@ -7,44 +7,59 @@
 #include "math/angles.hpp"
 #include "sensors/sensor.hpp"
 
-class GobuildaRotaryEnco : public Sensor<Angle>
+struct GobuildaRotaryEncoderData
+{
+    double rads;
+    double rpm;
+};
+
+class GobuildaRotaryEncoder : public Sensor<GobuildaRotaryEncoderData>
 {
 public:
-    //---------------------- CONSTRUCTORS ---------------------------
-    GobuildaRotaryEnco(Encoder internal_encoder, double ticks_per_rotation)
-        : Sensor(Angle::zero()),
-          _internal_encoder(internal_encoder),
-          _ticks_per_rotation(ticks_per_rotation) {}
+    Encoder &_ie;
 
-    GobuildaRotaryEnco(pin_t clock, pin_t clock_offset, double ticks_per_rotation)
-        : GobuildaRotaryEnco(Encoder(clock, clock_offset), ticks_per_rotation) {}
+    int32_t _old_e;
+    const double _tpt;
 
-    //-------------------------- FUNCTIONS -----------------------------
-    void begin() override
+    GobuildaRotaryEncoder(
+        Encoder &internal_encoder,
+        double ticks_per_TURN,
+        const Timer &polling_timer)
+        : Sensor((GobuildaRotaryEncoderData){
+                     .rads = 0,
+                     .rpm = 0,
+                 },
+                 polling_timer),
+          _ie(internal_encoder), _tpt(ticks_per_TURN)
     {
-        // no-op
     }
 
-    bool sample(Angle &out) override
+    void begin() override
     {
-        int internal_counter = _internal_encoder.read();
-        out = ticks_to_angle(internal_counter);
+        _ie.write(0);
+    }
+
+    bool sample(GobuildaRotaryEncoderData &out) override
+    {
+        int32_t internal_counter = _ie.read();
+        const auto angle = _ticks_to_angle(internal_counter);
+        const auto freq = ONE_SECOND / _polling_timer._delay;
+        const auto freq_per_minute = freq * 60;
+        const auto num_rotations = (angle._radians - getLast().rads) / M_2_PI;
+        out = (GobuildaRotaryEncoderData){
+            .rads = angle._radians,
+            .rpm = num_rotations / freq_per_minute};
         return true;
     }
 
     /**
      * Convert the number of tick of the encoder to an angle
      */
-    Angle ticks_to_angle(float ticks)
+    Angle _ticks_to_angle(float ticks)
     {
-        auto wrapped = fmod(ticks, _ticks_per_rotation);
-        auto ratio = wrapped / _ticks_per_rotation;
+        auto wrapped = fmod(ticks, _tpt);
+        auto ratio = wrapped / _tpt;
         // Serial.println("w: r:" +  String(wrapped) + " " + String(ratio));
         return Angle::from_ratio(ratio);
     }
-
-private:
-    //-------------------------- VARIABLES -----------------------------
-    Encoder &_internal_encoder;
-    const double _ticks_per_rotation;
 };
