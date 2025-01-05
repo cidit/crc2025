@@ -105,7 +105,7 @@ public:
             #ifdef DEBUG
             // TODO: introduce some sort of logger instead?
             Serial.print("!!! invalid state error: both PIDs were computed");
-            #endif DEBUG
+            #endif
             enable(false);
             return;
         }
@@ -146,10 +146,10 @@ public:
         return math::Angle::from_ratio(e_curr / _tpt)._radians;
     }
 
-    void set_target_rpm(const float rpm)
+    void set_target_rpm(const float target_rpm)
     {
         // constraining to max rpm is important to stop accidentally steep integral creep on the PID.
-        const auto rpm = constrain(rpm, -_max_rpm, _max_rpm);
+        const auto rpm = constrain(target_rpm, -_max_rpm, _max_rpm);
         _mode = Mode::MATCH_SPEED;
         _pid_speed.setPoint(rpm);
         _set_active_pid();

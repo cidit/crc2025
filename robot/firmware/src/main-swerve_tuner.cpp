@@ -24,7 +24,7 @@ PrecisionMotor pmotor1(motor1, enco1, 145.1 * 2.5, 400);
 
 Motor motor2(0);
 Encoder enco2(0, 0);
-PrecisionMotor pmotor2(motor2, enco2, 145.1*2.5, 400);
+PrecisionMotor pmotor2(motor2, enco2, 145.1 * 2.5, 400);
 
 SwerveModule swerve1(pmotor1, pmotor2, 0);
 
@@ -141,11 +141,10 @@ void loop()
     {
         auto &tuning_pid = get_current_pid_to_tune();
 
-        
         // SPRINT("speed:" + padLeft(String(swerve1.g.get_current_rpm()), 7));
         SPACER;
         SPRINT("angle:" + String(swerve1.get_current_angle(), 2));
-        
+
         // SPACER;
         // SPRINT("enco:" + padLeft(String(pmotor._delta_ticks()), 4));
         // SPACER;
