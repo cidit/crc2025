@@ -54,7 +54,7 @@ public:
         out = {
             .rads = angle._radians,
             .rpm = num_rotations / freq_per_minute};
-        Serial.println(out.rads);
+        Serial.println(internal_counter);
         return true;
     }
 
