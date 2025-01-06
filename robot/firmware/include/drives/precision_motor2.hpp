@@ -51,7 +51,7 @@ public:
     // double _tpt;
     Mode _mode;
     bool _enabled;
-    bool _max_rpm;
+    double _max_rpm;
 
     PrecisionMotor(
         Motor &m,
