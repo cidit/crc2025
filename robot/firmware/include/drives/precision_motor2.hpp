@@ -73,7 +73,6 @@ public:
           _max_rpm(max_rpm)
     {
         // setting sane defaults for our pids
-        Serial.print("rpm " + String(max_rpm) + " ");
 
         const auto poll_interval = ONE_SECOND / DEFAULT_POLL_FREQ;
         {
