@@ -164,6 +164,7 @@ public:
     {
         // constraining to max rpm is important to stop accidentally steep integral creep on the PID.
         const auto rpm = constrain(target_rpm, -_max_rpm, _max_rpm);
+        Serial.print("rpm " + String(rpm) + " ");
         _mode = Mode::MATCH_SPEED;
         _pid_speed.setPoint(rpm);
         _set_active_pid();
