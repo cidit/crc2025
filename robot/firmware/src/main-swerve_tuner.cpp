@@ -19,11 +19,13 @@ Timer print_timer(ONE_SECOND / 10), polling_timer(ONE_SECOND/50);
 
 Motor motor1(CRC_PWM_1);
 Encoder enco1(CRC_ENCO_B, CRC_DIG_3);
-PrecisionMotor pmotor1(motor1, enco1, 145.1 * 2.5, 400);
+GobuildaRotaryEncoder goenco1(enco1, 145.1 * 2.5, polling_timer);
+PrecisionMotor pmotor1(motor1, goenco1, 400);
 
 Motor motor2(0);
 Encoder enco2(0, 0);
-PrecisionMotor pmotor2(motor2, enco2, 145.1 * 2.5, 400);
+GobuildaRotaryEncoder goenco2(enco2, 145.1 * 2.5, polling_timer);
+PrecisionMotor pmotor2(motor2, goenco2, 400);
 
 SwerveModule swerve1(pmotor1, pmotor2, 0);
 
