@@ -2,8 +2,6 @@
 #include "drives/precision_motor2.hpp"
 #include "math/vectors.hpp"
 
-using cartesian::Vec2D;
-
 class SwerveModule : public Lifecycle
 {
 public:
