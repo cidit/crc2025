@@ -2,13 +2,14 @@
 
 #include <Arduino.h>
 #include <PID_RT.h>
+#include <Encoder.h>
 #include "sensors/sensor.hpp"
+#include "sensors/gobuilda_rotary_enc.hpp"
 #include "drives/motor.hpp"
 #include "math/angles.hpp"
 #include "util/lifecycle.hpp"
 #include "util/timer.hpp"
 #include "util/misc.hpp"
-#include <Encoder.h>
 
 class PrecisionMotor : public Lifecycle
 {
@@ -22,7 +23,7 @@ public:
     };
 
     Motor &_m;
-    Encoder &_e;
+    GobuildaRotaryEncoder &_e;
 
     /**
      * INPUT: current rpm
@@ -51,7 +52,7 @@ public:
     bool _enabled;
     bool _max_rpm;
 
-    PrecisionMotor(Motor &m, Encoder &e, double ticks_per_turn, double max_rpm)
+    PrecisionMotor(Motor &m, GobuildaRotaryEncoder &e, double ticks_per_turn, double max_rpm)
         : _m(m),
           _e(e),
           _pid_speed(),
@@ -92,28 +93,32 @@ public:
     void begin() override
     {
         _m.begin();
+        _e.begin();
     }
 
     void update() override
     {
-        const auto speed_compute = _pid_speed.compute(get_current_rpm());
+        _e.update();
+
+        const auto speed_compute = _pid_speed.compute(_e.getLast().rpm);
         const auto angle_compute = _pid_angle.compute(
-            Angle::travel(get_current_angle(), _target_angle));
+            Angle::travel(_e.getLast().rads, _target_angle));
 
         if (speed_compute && angle_compute)
         {
-            #ifdef DEBUG
+#ifdef DEBUG
             // TODO: introduce some sort of logger instead?
             Serial.print("!!! invalid state error: both PIDs were computed");
-            #endif
+#endif
             enable(false);
             return;
         }
 
-        if (speed_compute || angle_compute)
-        {
-            _update_l2ev();
-        }
+        // TODO: remove if integration with externally polled encoder works
+        // if (speed_compute || angle_compute)
+        // {
+        //     _update_l2ev();
+        // }
         if (speed_compute)
         {
             const auto new_power = _m.get_power() + _pid_output_to_percentage(_pid_speed);
@@ -125,26 +130,28 @@ public:
         }
     }
 
-    double get_current_rpm()
-    {
-        // FIXME: will not output correct values if PM is not enabled
-        // because _update_l2ev() never gets called.
-        const auto interval = _mode == Mode::MATCH_SPEED
-                                  ? _pid_speed.getInterval()
-                                  : _pid_angle.getInterval();
-        if (interval == 0) {
-            return 0;
-        }
-        const auto hz = ONE_SECOND / interval;
-        const auto delay_mins = hz * 60;
-        return delay_mins * (_delta_ticks() / _tpt);
-    }
+    // TODO: remove if integration with externally polled encoder works
+    // double get_current_rpm()
+    // {
+    //     // FIXME: will not output correct values if PM is not enabled
+    //     // because _update_l2ev() never gets called.
+    //     const auto interval = _mode == Mode::MATCH_SPEED
+    //                               ? _pid_speed.getInterval()
+    //                               : _pid_angle.getInterval();
+    //     if (interval == 0) {
+    //         return 0;
+    //     }
+    //     const auto hz = ONE_SECOND / interval;
+    //     const auto delay_mins = hz * 60;
+    //     return delay_mins * (_delta_ticks() / _tpt);
+    // }
 
-    double get_current_angle()
-    {
-        const auto e_curr = _e.read();
-        return Angle::from_ratio(e_curr / _tpt)._radians;
-    }
+    // TODO: remove if integration with externally polled encoder works
+    // double get_current_angle()
+    // {
+    //     const auto e_curr = _e.read();
+    //     return Angle::from_ratio(e_curr / _tpt)._radians;
+    // }
 
     void set_target_rpm(const float target_rpm)
     {
@@ -178,25 +185,27 @@ public:
         }
     }
 
-    /**
-     * update last 2 encoder vals
-     */
-    void _update_l2ev()
-    {
-        _e_old2 = _e_old1;
-        _e_old1 = _e.read();
-    }
+    // TODO: remove if integration with externally polled encoder works
+    // /**
+    //  * update last 2 encoder vals
+    //  */
+    // void _update_l2ev()
+    // {
+    //     _e_old2 = _e_old1;
+    //     _e_old1 = _e.read();
+    // }
 
-    int32_t _delta_ticks()
-    {
-        return _e_old1 - _e_old2;
-    }
+    // TODO: remove if integration with externally polled encoder works
+    // int32_t _delta_ticks()
+    // {
+    //     return _e_old1 - _e_old2;
+    // }
 
     double _pid_output_to_percentage(PID_RT &pid)
     {
         // FIXME: this is only useful for the speed pid since its the only
         // one that benefits from the extended output range.
-        // also, assumes the output range is centered on zero which will always 
+        // also, assumes the output range is centered on zero which will always
         // be the case in a precision motor setting.
         return pid.getOutput() / pid.getOutputMax();
     }
