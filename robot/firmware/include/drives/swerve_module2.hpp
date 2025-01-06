@@ -1,6 +1,7 @@
 #pragma once
 #include "drives/precision_motor2.hpp"
 #include "math/vectors.hpp"
+#include "util/constants.hpp"
 
 class SwerveModule : public Lifecycle
 {
@@ -9,7 +10,6 @@ public:
      * the the angle error (in radians, plus or minus) at which the translation speed
      * will be taken into account
      */
-    static const auto STEERING_TOLERANCE = .1;
 
     PrecisionMotor &_pma, &_pmb;
     pin_t _e_p;
@@ -62,7 +62,7 @@ public:
             return;
         }
 
-        const auto t_lin_v = oprev.travel > STEERING_TOLERANCE
+        const auto t_lin_v = oprev.travel > constants::STEERING_TOLERANCE
                                  ? 0
                                  : _target.norm() * _mtwr;
 

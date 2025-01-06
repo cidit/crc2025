@@ -15,7 +15,7 @@
 
 Decodeur cmd(&Serial);
 bool read_mode = true;
-Timer print_timer(ONE_SECOND / 10);
+Timer print_timer(ONE_SECOND / 10), polling_timer(ONE_SECOND/50);
 
 Motor motor1(CRC_PWM_1);
 Encoder enco1(CRC_ENCO_B, CRC_DIG_3);
