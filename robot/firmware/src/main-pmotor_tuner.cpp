@@ -151,6 +151,13 @@ void loop()
         }
         SPACER;
 
+        SPRINT("now:" + String(polling_timer._now));
+        SPACER;
+        SPRINT("t.last:"+String(polling_timer._last));
+        SPACER;
+        SPRINT("t." +String(polling_timer.is_time()? "yes": "no "));
+        SPACER
+
         // static auto enco_old1 = 0, enco_old2 = 0;
         // if (polling_timer.is_time())
         // {
