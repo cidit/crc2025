@@ -45,6 +45,7 @@ public:
 
     bool sample(GobuildaRotaryEncoderData &out) override
     {
+        Serial.println("sampling");
         int32_t internal_counter = _ie.read();
         const auto angle = _ticks_to_angle(internal_counter);
         const auto freq = ONE_SECOND / _polling_timer._delay;
@@ -53,6 +54,7 @@ public:
         out = {
             .rads = angle._radians,
             .rpm = num_rotations / freq_per_minute};
+        Serial.println(out.rads);
         return true;
     }
 
