@@ -151,6 +151,9 @@ void loop()
         }
         SPACER;
 
+
+        SPRINT("enco:" + String(enco.read()));
+        SPACER;
         // SPRINT("now:" + String(polling_timer._now));
         // SPACER;
         // SPRINT("t.last:"+String(polling_timer._last));
