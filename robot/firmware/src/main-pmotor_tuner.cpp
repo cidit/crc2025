@@ -150,24 +150,7 @@ void loop()
             SPRINT("angle:" + String(pmotor._e.getLast().rads, 2));
         }
         SPACER;
-
-
-        SPRINT("enco:" + String(enco.read()));
-        SPACER;
-        // SPRINT("now:" + String(polling_timer._now));
-        // SPACER;
-        // SPRINT("t.last:"+String(polling_timer._last));
-        // SPACER;
-        // SPRINT("t." +String(polling_timer.is_time()? "yes": "no "));
-        // SPACER;
-
-        // static auto enco_old1 = 0, enco_old2 = 0;
-        // if (polling_timer.is_time())
-        // {
-        //     enco_old2 = enco_old1;
-        //     enco_old1 = enco.read();
-        // }
-        
+ 
         // SPRINT("enco:" + padLeft(String(enco...), 4));
         // SPACER;
 
