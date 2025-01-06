@@ -47,12 +47,18 @@ public:
     PID_RT _pid_angle;
     double _target_angle;
 
-    double _tpt;
+    // TODO: remove if integration with externally polled encoder works
+    // double _tpt;
     Mode _mode;
     bool _enabled;
     bool _max_rpm;
 
-    PrecisionMotor(Motor &m, GobuildaRotaryEncoder &e, double ticks_per_turn, double max_rpm)
+    PrecisionMotor(
+        Motor &m,
+        GobuildaRotaryEncoder &e,
+        // TODO: remove if integration with externally polled encoder works
+        // double ticks_per_turn,
+        double max_rpm)
         : _m(m),
           _e(e),
           _pid_speed(),
@@ -60,7 +66,8 @@ public:
           _e_old2(0),
           _pid_angle(),
           _target_angle(0),
-          _tpt(ticks_per_turn),
+          // TODO: remove if integration with externally polled encoder works
+          //   _tpt(ticks_per_turn),
           _mode(Mode::MATCH_ANGLE), // doesnt matter, pids are not started anyways
           _enabled(false),
           _max_rpm(max_rpm)
