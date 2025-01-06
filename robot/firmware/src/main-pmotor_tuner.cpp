@@ -10,7 +10,6 @@
 #include <PID_RT.h>
 #include <sensors/gobuilda_rotary_enc.hpp>
 
-
 #define SPRINT(things) Serial.print(things)
 #define SPACER Serial.print("    ")
 
@@ -20,7 +19,9 @@ Timer print_timer(ONE_SECOND / 10);
 
 Motor motor(CRC_PWM_1);
 Encoder enco(CRC_ENCO_B, CRC_DIG_3);
-PrecisionMotor pmotor(motor, enco, 145.1 * 2.5, 400);
+Timer polling_timer(ONE_SECOND / 50);
+GobuildaRotaryEncoder roenco(enco, 145.1 * 2.5, polling_timer);
+PrecisionMotor pmotor(motor, roenco, 400);
 
 void setup()
 {
@@ -130,6 +131,7 @@ void loop()
 {
     auto now = millis();
     print_timer.update(now);
+    polling_timer.update(now);
     CrcLib::Update();
     cmd.refresh();
     execute_commands();
@@ -141,15 +143,23 @@ void loop()
 
         if (pmotor._mode == PrecisionMotor::Mode::MATCH_SPEED)
         {
-            SPRINT("speed:" + padLeft(String(pmotor.get_current_rpm()), 7));
+            SPRINT("speed:" + padLeft(String(pmotor._e.getLast().rpm), 7));
         }
         else
         {
-            SPRINT("angle:" + String(pmotor.get_current_angle(), 2));
+            SPRINT("angle:" + String(pmotor._e.getLast().rads, 2));
         }
         SPACER;
-        SPRINT("enco:" + padLeft(String(pmotor._delta_ticks()), 4));
-        SPACER;
+
+        // static auto enco_old1 = 0, enco_old2 = 0;
+        // if (polling_timer.is_time())
+        // {
+        //     enco_old2 = enco_old1;
+        //     enco_old1 = enco.read();
+        // }
+        
+        // SPRINT("enco:" + padLeft(String(enco...), 4));
+        // SPACER;
 
         SPRINT("[ ");
         SPRINT("s:" + padLeft(String(tuning_pid.getSetPoint()), 7));
