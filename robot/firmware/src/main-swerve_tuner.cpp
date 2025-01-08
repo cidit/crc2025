@@ -62,9 +62,9 @@ void execute_commands()
         /**
          * donne le target en coordonnes polaires
          */
-        // auto target_angle = cmd.getArg(0);
-        // pmotor.set_target_angle(target_angle);
-        // Serial.println("Target angle: " + String(target_angle));
+        auto target_angle = cmd.getArg(0), target_speed = cmd.getArg(1);
+        swerve1.set_target(Vec2D::from_polar(target_angle, target_speed));
+        Serial.println("Target (@" + String(target_angle) + ")|(s" + String(target_speed)+")");
         break;
     }
     case 'K':
