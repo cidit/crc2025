@@ -7,11 +7,6 @@
 class SwerveModule : public Lifecycle
 {
 public:
-    /**
-     * the the angle error (in radians, plus or minus) at which the translation speed
-     * will be taken into account
-     */
-
     PrecisionMotor &_pma, &_pmb;
 
     // TODO: remove if externally polled absolute encoder works
@@ -61,7 +56,7 @@ public:
     void update() override
     {
         _e.update();
-        
+
         const auto t_angle = _target.angle();
         // TODO: remove if externally polled absolute encoder works
         // const auto c_angle = get_current_angle();
