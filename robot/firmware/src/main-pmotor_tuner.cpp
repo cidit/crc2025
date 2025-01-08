@@ -124,7 +124,16 @@ String padLeft(String inString, uint16_t newLen)
 { // Pad a numeric string with spaces for output
     while (inString.length() < newLen)
     {
-        inString = String("0") + inString;
+        inString = String(" ") + inString;
+    };
+    return inString;
+}
+
+String padRight(String inString, uint16_t newLen)
+{ // Pad a numeric string with spaces for output
+    while (inString.length() < newLen)
+    {
+        inString = String(" ") + inString;
     };
     return inString;
 }
@@ -148,32 +157,32 @@ void loop()
         SPRINT("]");
         SPACER;
 
-        SPRINT("speed:" + padLeft(String(pmotor._e.getLast().rpm), 7));
+        SPRINT("speed:" + padRight(String(pmotor._e.getLast().rpm), 7));
         SPACER;
         SPRINT("angle:" + String(pmotor._e.getLast().rads, 2));
         SPACER;
 
-        SPRINT("enco:" + padLeft(String(enco.read()), 4));
+        SPRINT("enco:" + padRight(String(enco.read()), 4));
         SPACER;
 
         SPRINT("[ ");
-        SPRINT("s:" + padLeft(String(tuning_pid.getSetPoint()), 7));
+        SPRINT("s:" + padRight(String(tuning_pid.getSetPoint()), 7));
         SPRINT(" ");
-        SPRINT("i:" + padLeft(String(tuning_pid.getInput()), 7));
+        SPRINT("i:" + padRight(String(tuning_pid.getInput()), 7));
         SPRINT(" ");
-        SPRINT("o:" + padLeft(String(tuning_pid.getOutput()), 7));
+        SPRINT("o:" + padRight(String(tuning_pid.getOutput()), 7));
         SPRINT(" ]");
         SPACER;
 
-        SPRINT("P%:" + padLeft(String(pmotor._m._last_power), 7));
+        SPRINT("P%:" + String(pmotor._m._last_power, 4));
         SPACER;
 
         SPRINT("[ K ");
-        SPRINT(padLeft(String(tuning_pid.getKp(), 5), 7));
+        SPRINT(padRight(String(tuning_pid.getKp(), 5), 7));
         SPRINT(" ");
-        SPRINT(padLeft(String(tuning_pid.getKi(), 5), 7));
+        SPRINT(padRight(String(tuning_pid.getKi(), 5), 7));
         SPRINT(" ");
-        SPRINT(padLeft(String(tuning_pid.getKd(), 5), 7));
+        SPRINT(padRight(String(tuning_pid.getKd(), 5), 7));
         SPRINT(" ]");
         SPACER;
 
