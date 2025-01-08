@@ -20,6 +20,7 @@ SUGGESTION: look up online how to do that in cpp. probably involves nullptr
 - **Fix**: Either return a default or invalid value (e.g., `NaN`) when the system is disabled, or call `_update_l2ev()` conditionally.
 SUGGESTION: if and when we start using .readAndReset() on the encoder to fix the overflow issue, this function will need to work differently (if at all in angle mode)
 SUGGESTION: make a separate PrecisionMotor::Encoder class that uses the regular encoder under the hood.
+DONE: caviat: for the speed to always work, the encoder needs to be polled regularly via it's update method. which kinda makes sense.
 
 ---
 
@@ -28,6 +29,7 @@ SUGGESTION: make a separate PrecisionMotor::Encoder class that uses the regular 
 - **Potential Bug**: The encoder readings `_e.read()` are stored in 32-bit integers (`_e_old1`, `_e_old2`). If the encoder overflows, the `_delta_ticks()` calculation may produce incorrect results.
 - **Fix**: Use modular arithmetic to handle encoder overflows correctly.
 SUGGESTION: use readAndReset() on the encoder. THIS WILL BREAK ANGLE! 0rad must be tracked inteligently.
+DONE: ruled out because after some quick maths, the way we use our encoders and stuff, the encoder will overflow in 90 hours if the motor turns at max speed in the same direction.
 
 ---
 
