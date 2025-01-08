@@ -47,12 +47,12 @@ public:
     {
         int32_t internal_counter = _ie.read();
         const auto angle = _ticks_to_angle(internal_counter);
-        Serial.println("ic:" + String(internal_counter));
-        Serial.println("an:" + String(angle._radians));
+        // Serial.println("ic:" + String(internal_counter));
+        // Serial.println("an:" + String(angle._radians));
         const auto freq = _polling_timer._delay == 0? 0 : ONE_SECOND / _polling_timer._delay;
         const auto freq_per_minute = freq * 60;
         // TODO: will be wrong if `sample` is called between `poll`
-        const auto num_rotations = (angle._radians - getLast().rads) / M_2_PI;
+        const auto num_rotations = (getLast().rads-angle._radians) / M_2_PI;
         Serial.println("nr:" + String(num_rotations));
         Serial.println("fm:" + String(freq_per_minute));
         out = {
