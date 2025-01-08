@@ -27,7 +27,10 @@ Encoder enco2(0, 0);
 GobuildaRotaryEncoder goenco2(enco2, 145.1 * 2.5, polling_timer);
 PrecisionMotor pmotor2(motor2, goenco2, 400);
 
-SwerveModule swerve1(pmotor1, pmotor2, 0);
+const auto MAX_PULSE_LEN = 4160.0;
+PwmRotaryEncoder pwm_enco(0, MAX_PULSE_LEN, polling_timer);
+
+SwerveModule swerve1(pmotor1, pmotor2, pwm_enco);
 
 void setup()
 {
@@ -62,19 +65,24 @@ void execute_commands()
 
     switch (toupper(cmd.getCommand()))
     {
-    case 'S':
+    case 'Z':
     {
-        auto targetRPM = cmd.getArg(0);
-        pmotor.set_target_rpm(targetRPM);
-        Serial.println("Target RPM: " + String(targetRPM));
+        /**
+         * donne le target en coordonnees vectorielles
+         */
+        // auto targetRPM = cmd.getArg(0);
+        // pmotor.set_target_rpm(targetRPM);
+        // Serial.println("Target RPM: " + String(targetRPM));
         break;
     }
-
-    case 'A':
+    case 'X':
     {
-        auto target_angle = cmd.getArg(0);
-        pmotor.set_target_angle(target_angle);
-        Serial.println("Target angle: " + String(target_angle));
+        /**
+         * donne le target en coordonnes polaires
+         */
+        // auto target_angle = cmd.getArg(0);
+        // pmotor.set_target_angle(target_angle);
+        // Serial.println("Target angle: " + String(target_angle));
         break;
     }
     case 'K':
@@ -133,22 +141,27 @@ String padLeft(String inString, uint16_t newLen)
 void loop()
 {
     auto now = millis();
+    print_timer.update(now);
+    polling_timer.update(now);
     CrcLib::Update();
     cmd.refresh();
     execute_commands();
     swerve1.update();
 
-    if (read_mode && print_timer.is_time(now))
+    if (read_mode && print_timer.is_time())
     {
         auto &tuning_pid = get_current_pid_to_tune();
 
-        // SPRINT("speed:" + padLeft(String(swerve1.g.get_current_rpm()), 7));
+        SPRINT("angle:" + String(pwm_enco.getLast().rads, 2));
         SPACER;
-        SPRINT("angle:" + String(swerve1.get_current_angle(), 2));
 
-        // SPACER;
-        // SPRINT("enco:" + padLeft(String(pmotor._delta_ticks()), 4));
-        // SPACER;
+        SPRINT("wspeed:" + String(swerve1.get_wheel_rpm(), 2));
+        SPACER;
+
+        SPRINT("aspeed:" + String(swerve1._pma._e.getLast().rpm, 2));
+        SPACER;
+        SPRINT("bspeed:" + String(swerve1._pmb._e.getLast().rpm, 2));
+        SPACER;
 
         SPRINT("[ ");
         SPRINT("s:" + padLeft(String(tuning_pid.getSetPoint()), 7));
@@ -158,9 +171,6 @@ void loop()
         SPRINT("o:" + padLeft(String(tuning_pid.getOutput()), 7));
         SPRINT(" ]");
         SPACER;
-
-        // SPRINT("P%:" + padLeft(String(pmotor._m._last_power), 7));
-        // SPACER;
 
         SPRINT("[ K ");
         SPRINT(padLeft(String(tuning_pid.getKp(), 5), 7));
