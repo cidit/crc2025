@@ -52,10 +52,6 @@ public:
                               : ONE_SECOND / _polling_timer._delay;
         const auto freq_per_minute = freq * 60; // hz * 60seconds
         const auto num_rotations = double(_ie_current - _ie_old) / _tpt;
-        Serial.print("|");
-        Serial.print("dt:" + String(_ie_current - _ie_old) + "|");
-        Serial.print("nr:" + String(num_rotations, 5) + "|");
-        Serial.print("fm:" + String(freq_per_minute, 5) + "|");
         out = {
             .rads = angle._radians,
             .rpm = num_rotations * freq_per_minute};
