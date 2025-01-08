@@ -9,9 +9,7 @@
 #include <Servo.h>
 #include <Decodeur.h>
 #include <PID_RT.h>
-
-#define SPRINT(things) Serial.print(things)
-#define SPACER Serial.print("    ")
+#include "util/print.hpp"
 
 Decodeur cmd(&Serial);
 bool read_mode = true;
@@ -43,25 +41,9 @@ void setup()
     Serial.println("Setup Done");
 }
 
-PID_RT &get_current_pid_to_tune()
-{
-    return swerve1._pid;
-}
-
-void print_pid_vals()
-{
-    auto &tuning_pid = get_current_pid_to_tune();
-    Serial.println("Kp: " +
-                   String(tuning_pid.getKp(), 5) +
-                   " Ki: " +
-                   String(tuning_pid.getKi(), 5) +
-                   " Kd: " +
-                   String(tuning_pid.getKd(), 5));
-}
 
 void execute_commands()
 {
-    auto &tuning_pid = get_current_pid_to_tune();
 
     switch (toupper(cmd.getCommand()))
     {
@@ -70,9 +52,9 @@ void execute_commands()
         /**
          * donne le target en coordonnees vectorielles
          */
-        // auto targetRPM = cmd.getArg(0);
-        // pmotor.set_target_rpm(targetRPM);
-        // Serial.println("Target RPM: " + String(targetRPM));
+        auto target_x_rpm = cmd.getArg(0), target_y_rpm = cmd.getArg(1);
+        swerve1.set_target(Vec2D(target_x_rpm, target_y_rpm));
+        Serial.println("Target RPM: (vx:" + String(target_x_rpm) + ")|(vy:"+ String(target_y_rpm) + ")");
         break;
     }
     case 'X':
@@ -90,29 +72,29 @@ void execute_commands()
         auto Kp = cmd.getArg(0);
         auto Ki = cmd.getArg(1);
         auto Kd = cmd.getArg(2);
-        tuning_pid.setK(Kp, Ki, Kd);
-        print_pid_vals();
+        swerve1._pid.setK(Kp, Ki, Kd);
+        print_pid_vals(swerve1._pid);
         break;
     }
     case 'P':
     {
         auto Kp = cmd.getArg(0);
-        tuning_pid.setKp(Kp);
-        print_pid_vals();
+        swerve1._pid.setKp(Kp);
+        print_pid_vals(swerve1._pid);
         break;
     }
     case 'I':
     {
         auto Ki = cmd.getArg(0);
-        tuning_pid.setKi(Ki);
-        print_pid_vals();
+        swerve1._pid.setKi(Ki);
+        print_pid_vals(swerve1._pid);
         break;
     }
     case 'D':
     {
         auto Kd = cmd.getArg(0);
-        tuning_pid.setKd(Kd);
-        print_pid_vals();
+        swerve1._pid.setKd(Kd);
+        print_pid_vals(swerve1._pid);
         break;
     }
     case 'M':
@@ -128,15 +110,6 @@ void execute_commands()
     }
 }
 
-// https://github.com/ElvisKremmen/Arduino-Code-Fragments/blob/main/Numeric%20string%20left-pad%20function
-String padLeft(String inString, uint16_t newLen)
-{ // Pad a numeric string with spaces for output
-    while (inString.length() < newLen)
-    {
-        inString = String(" ") + inString;
-    };
-    return inString;
-}
 
 void loop()
 {
@@ -150,34 +123,32 @@ void loop()
 
     if (read_mode && print_timer.is_time())
     {
-        auto &tuning_pid = get_current_pid_to_tune();
 
         SPRINT("angle:" + String(pwm_enco.getLast().rads, 2));
         SPACER;
 
         SPRINT("wspeed:" + String(swerve1.get_wheel_rpm(), 2));
         SPACER;
-
         SPRINT("aspeed:" + String(swerve1._pma._e.getLast().rpm, 2));
         SPACER;
         SPRINT("bspeed:" + String(swerve1._pmb._e.getLast().rpm, 2));
         SPACER;
 
         SPRINT("[ ");
-        SPRINT("s:" + padLeft(String(tuning_pid.getSetPoint()), 7));
+        SPRINT("s:" + padLeft(String(swerve1._pid.getSetPoint()), 7));
         SPRINT(" ");
-        SPRINT("i:" + padLeft(String(tuning_pid.getInput()), 7));
+        SPRINT("i:" + padLeft(String(swerve1._pid.getInput()), 7));
         SPRINT(" ");
-        SPRINT("o:" + padLeft(String(tuning_pid.getOutput()), 7));
+        SPRINT("o:" + padLeft(String(swerve1._pid.getOutput()), 7));
         SPRINT(" ]");
         SPACER;
 
         SPRINT("[ K ");
-        SPRINT(padLeft(String(tuning_pid.getKp(), 5), 7));
+        SPRINT(padLeft(String(swerve1._pid.getKp(), 5), 7));
         SPRINT(" ");
-        SPRINT(padLeft(String(tuning_pid.getKi(), 5), 7));
+        SPRINT(padLeft(String(swerve1._pid.getKi(), 5), 7));
         SPRINT(" ");
-        SPRINT(padLeft(String(tuning_pid.getKd(), 5), 7));
+        SPRINT(padLeft(String(swerve1._pid.getKd(), 5), 7));
         SPRINT(" ]");
         SPACER;
 

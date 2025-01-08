@@ -9,6 +9,7 @@
 #include <Decodeur.h>
 #include <PID_RT.h>
 #include <sensors/gobuilda_rotary_enc.hpp>
+#include "util/print.hpp"
 
 #define SPRINT(things) Serial.print(things)
 #define SPACER Serial.print("    ")
@@ -44,17 +45,6 @@ PID_RT &get_current_pid_to_tune()
                : pmotor._pid_speed;
 }
 
-void print_pid_vals()
-{
-    auto &tuning_pid = get_current_pid_to_tune();
-    Serial.println("Kp: " +
-                   String(tuning_pid.getKp(), 5) +
-                   " Ki: " +
-                   String(tuning_pid.getKi(), 5) +
-                   " Kd: " +
-                   String(tuning_pid.getKd(), 5));
-}
-
 void execute_commands()
 {
     auto &tuning_pid = get_current_pid_to_tune();
@@ -82,28 +72,28 @@ void execute_commands()
         auto Ki = cmd.getArg(1);
         auto Kd = cmd.getArg(2);
         tuning_pid.setK(Kp, Ki, Kd);
-        print_pid_vals();
+        print_pid_vals(tuning_pid);
         break;
     }
     case 'P':
     {
         auto Kp = cmd.getArg(0);
         tuning_pid.setKp(Kp);
-        print_pid_vals();
+        print_pid_vals(tuning_pid);
         break;
     }
     case 'I':
     {
         auto Ki = cmd.getArg(0);
         tuning_pid.setKi(Ki);
-        print_pid_vals();
+        print_pid_vals(tuning_pid);
         break;
     }
     case 'D':
     {
         auto Kd = cmd.getArg(0);
         tuning_pid.setKd(Kd);
-        print_pid_vals();
+        print_pid_vals(tuning_pid);
         break;
     }
     case 'M':
@@ -117,25 +107,6 @@ void execute_commands()
         break;
     }
     }
-}
-
-// https://github.com/ElvisKremmen/Arduino-Code-Fragments/blob/main/Numeric%20string%20left-pad%20function
-String padLeft(String inString, uint16_t newLen)
-{ // Pad a numeric string with spaces for output
-    while (inString.length() < newLen)
-    {
-        inString = String(" ") + inString;
-    };
-    return inString;
-}
-
-String padRight(String inString, uint16_t newLen)
-{ // Pad a numeric string with spaces for output
-    while (inString.length() < newLen)
-    {
-        inString = inString + String(" ");
-    };
-    return inString;
 }
 
 void loop()
