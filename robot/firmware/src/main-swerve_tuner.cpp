@@ -12,8 +12,8 @@
 #include "util/print.hpp"
 
 Decodeur cmd(&Serial);
-bool read_mode = true;
-Timer print_timer(ONE_SECOND / 10), polling_timer(ONE_SECOND/50);
+bool read_mode = true, controller_mode = true;
+Timer print_timer(ONE_SECOND / 10), polling_timer(ONE_SECOND / 50);
 
 Motor motor1(CRC_PWM_1);
 Encoder enco1(CRC_ENCO_B, CRC_DIG_3);
@@ -41,7 +41,6 @@ void setup()
     Serial.println("Setup Done");
 }
 
-
 void execute_commands()
 {
 
@@ -54,7 +53,7 @@ void execute_commands()
          */
         auto target_x_rpm = cmd.getArg(0), target_y_rpm = cmd.getArg(1);
         swerve1.set_target(Vec2D(target_x_rpm, target_y_rpm));
-        Serial.println("Target RPM: (vx:" + String(target_x_rpm) + ")|(vy:"+ String(target_y_rpm) + ")");
+        Serial.println("Target RPM: (vx:" + String(target_x_rpm) + ")|(vy:" + String(target_y_rpm) + ")");
         break;
     }
     case 'X':
@@ -64,7 +63,7 @@ void execute_commands()
          */
         auto target_angle = cmd.getArg(0), target_speed = cmd.getArg(1);
         swerve1.set_target(Vec2D::from_polar(target_angle, target_speed));
-        Serial.println("Target (@" + String(target_angle) + ")|(s" + String(target_speed)+")");
+        Serial.println("Target (@" + String(target_angle) + ")|(s" + String(target_speed) + ")");
         break;
     }
     case 'K':
@@ -107,9 +106,36 @@ void execute_commands()
         read_mode = !read_mode;
         break;
     }
+    case 'C':
+    {
+        controller_mode = !controller_mode;
+        break;
+    }
     }
 }
 
+struct controller
+{
+    Vec2D right, left;
+};
+controller read_controller()
+{
+    return (controller){
+        .right = Vec2D(
+            CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X) / HALF_PWM_OUTPUT,
+            CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y) / HALF_PWM_OUTPUT),
+        .left = Vec2D(
+            CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X) / HALF_PWM_OUTPUT,
+            CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y) / HALF_PWM_OUTPUT)};
+}
+
+void apply_controller_input()
+{
+    controller c = !CrcLib::IsCommValid()
+                       ? (controller){.right = Vec2D(0, 0), .left = Vec2D(0, 0)}
+                       : read_controller();
+    swerve1.set_target(Vec2D(c.left.x() * 500, c.left.y() * 500));
+}
 
 void loop()
 {
@@ -118,6 +144,10 @@ void loop()
     polling_timer.update(now);
     CrcLib::Update();
     cmd.refresh();
+    if (controller_mode)
+    {
+        apply_controller_input();
+    }
     execute_commands();
     swerve1.update();
 
