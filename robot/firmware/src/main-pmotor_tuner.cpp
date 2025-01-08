@@ -143,16 +143,11 @@ void loop()
     {
         auto &tuning_pid = get_current_pid_to_tune();
 
-        if (pmotor._mode == PrecisionMotor::Mode::MATCH_SPEED)
-        {
-            SPRINT("speed:" + padLeft(String(pmotor._e.getLast().rpm), 7));
-        }
-        else
-        {
-            SPRINT("angle:" + String(pmotor._e.getLast().rads, 2));
-        }
+        SPRINT("speed:" + padLeft(String(pmotor._e.getLast().rpm), 7));
         SPACER;
- 
+        SPRINT("angle:" + String(pmotor._e.getLast().rads, 2));
+        SPACER;
+
         SPRINT("enco:" + padLeft(String(enco.read()), 4));
         SPACER;
 
