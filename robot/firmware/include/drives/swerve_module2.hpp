@@ -103,6 +103,11 @@ public:
         _target = target;
     }
 
+    double get_wheel_rpm() {
+        // TODO: implement
+        return 0;
+    }
+
 
         // TODO: remove if externally polled absolute encoder works
     // double get_current_angle()
