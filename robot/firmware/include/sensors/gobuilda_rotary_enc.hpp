@@ -51,12 +51,13 @@ public:
         Serial.println("an:" + String(angle._radians));
         const auto freq = _polling_timer._delay == 0? 0 : ONE_SECOND / _polling_timer._delay;
         const auto freq_per_minute = freq * 60;
+        // TODO: will be wrong if `sample` is called between `poll`
         const auto num_rotations = (angle._radians - getLast().rads) / M_2_PI;
         Serial.println("nr:" + String(num_rotations));
         Serial.println("fm:" + String(freq_per_minute));
         out = {
             .rads = angle._radians,
-            .rpm = num_rotations / freq_per_minute};
+            .rpm = num_rotations * freq_per_minute};
         return true;
     }
 
