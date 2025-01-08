@@ -133,7 +133,7 @@ String padRight(String inString, uint16_t newLen)
 { // Pad a numeric string with spaces for output
     while (inString.length() < newLen)
     {
-        inString = String(" ") + inString;
+        inString = inString + String(" ");
     };
     return inString;
 }
