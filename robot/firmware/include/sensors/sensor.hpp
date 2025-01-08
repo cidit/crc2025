@@ -17,7 +17,7 @@ public:
     virtual bool sample(Measure &out) = 0;
     virtual ~Sensor() = default;
 
-    void poll()
+    virtual void poll()
     {
         if (!_polling_timer.is_time())
         {
