@@ -83,4 +83,11 @@ public:
         return components[0] < 0 ? 180 + angle : components[1] > 0 ? angle
                                                                    : 360 + angle;
     }
+
+    static Vec2D from_polar(double rads, double length) {
+        return Vec2D(
+            length*cos(rads),
+            length*sin(rads)
+        );
+    }
 };
