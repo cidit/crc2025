@@ -7,6 +7,12 @@
 class SwerveModule : public Lifecycle
 {
 public:
+    /**
+     * the the angle error (in radians, plus or minus) at which the translation speed
+     * will be taken into account in the swerve.
+     */
+    static const auto STEERING_TOLERANCE = .1;
+
     PrecisionMotor &_pma, &_pmb;
 
     // TODO: remove if externally polled absolute encoder works
@@ -69,7 +75,7 @@ public:
             return;
         }
 
-        const auto t_lin_v = oprev.travel > constants::STEERING_TOLERANCE
+        const auto t_lin_v = oprev.travel > STEERING_TOLERANCE
                                  ? 0
                                  : _target.norm() * _mtwr;
 
@@ -90,6 +96,7 @@ public:
     /**
      * sets the target angle and speed we want to reach
      * @param target a vec that encodes a direction as an angle and a speed in RPMs
+     * // TODO: scale the target with some algebric formula to the limit of pmotors?
      */
     void set_target(const Vec2D target)
     {
