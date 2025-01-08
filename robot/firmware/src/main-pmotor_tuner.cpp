@@ -124,7 +124,7 @@ String padLeft(String inString, uint16_t newLen)
 { // Pad a numeric string with spaces for output
     while (inString.length() < newLen)
     {
-        inString = String(" ") + inString;
+        inString = String("0") + inString;
     };
     return inString;
 }
