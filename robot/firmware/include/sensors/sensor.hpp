@@ -19,11 +19,6 @@ public:
 
     virtual void poll()
     {
-        if (!_polling_timer.is_time())
-        {
-            return;
-        }
-
         Measure measure;
         auto success = sample(measure);
         if (success)
@@ -39,6 +34,9 @@ public:
 
     void update() override
     {
+        if (_polling_timer.is_time()) {
         this->poll();
+
+        }
     }
 };
