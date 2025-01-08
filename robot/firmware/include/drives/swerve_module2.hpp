@@ -1,5 +1,6 @@
 #pragma once
 #include "drives/precision_motor2.hpp"
+#include "sensors/pwm_rotary_enc.hpp"
 #include "math/vectors.hpp"
 #include "util/constants.hpp"
 
@@ -12,7 +13,10 @@ public:
      */
 
     PrecisionMotor &_pma, &_pmb;
-    pin_t _e_p;
+
+    // TODO: remove if externally polled absolute encoder works
+    // pin_t _e_p;
+    PwmRotaryEncoder _e;
     PID_RT _pid; // for angular velocity of swerve
     Vec2D _target;
     double _mtwr;
@@ -21,7 +25,9 @@ public:
     SwerveModule(
         PrecisionMotor &pma,
         PrecisionMotor &pmb,
-        pin_t abs_enco_pin,
+        // TODO: remove if externally polled absolute encoder works
+        // pwm abs_enco_pin,
+        PwmRotaryEncoder enco,
         /**
          * the motor to wheel ratio is how many turns the wheel does
          * for one turn of the ring gear. our ratio is 2/3 because the
@@ -31,7 +37,9 @@ public:
         double motor_to_wheel_ratio = 2. / 3.)
         : _pma(pma),
           _pmb(pmb),
-          _e_p(abs_enco_pin),
+          // TODO: remove if externally polled absolute encoder works
+          //   _e_p(abs_enco_pin),
+          _e(enco),
           _pid(),
           _target(0, 0),
           _mtwr(motor_to_wheel_ratio),
@@ -52,8 +60,12 @@ public:
 
     void update() override
     {
+        _e.update();
+        
         const auto t_angle = _target.angle();
-        const auto c_angle = get_current_angle();
+        // TODO: remove if externally polled absolute encoder works
+        // const auto c_angle = get_current_angle();
+        const auto c_angle = _e.getLast().rads;
         const auto travel = Angle::travel(c_angle, t_angle);
         const auto oprev = apply_oprev_optimisation(travel);
 
@@ -89,13 +101,15 @@ public:
         _target = target;
     }
 
-    double get_current_angle()
-    {
-        // TODO: handle the encoder externally so that the pulse length can be ajusted if need be.
-        const const auto MAX_PULSE_LEN = 4160.0;
-        const double pulse = pulseIn(_e_p, HIGH, MAX_PULSE_LEN * 2); // TODO: if there are issues later, check the pulseIn
-        return (pulse / MAX_PULSE_LEN) * (2 * M_PI);
-    }
+
+        // TODO: remove if externally polled absolute encoder works
+    // double get_current_angle()
+    // {
+    //     // TODO: handle the encoder externally so that the pulse length can be ajusted if need be.
+    //     const const auto MAX_PULSE_LEN = 4160.0;
+    //     const double pulse = pulseIn(_e_p, HIGH, MAX_PULSE_LEN * 2); // TODO: if there are issues later, check the pulseIn
+    //     return (pulse / MAX_PULSE_LEN) * (2 * M_PI);
+    // }
 
     void enable(const bool enable)
     {
