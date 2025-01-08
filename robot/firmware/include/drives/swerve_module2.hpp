@@ -4,6 +4,36 @@
 #include "math/vectors.hpp"
 #include "util/constants.hpp"
 
+/**
+ * results of the oposite & reverse optimisation
+ */
+struct oprev_result
+{
+    // reversed tells you if the wheel should be reversed or not. (if true, the optimisation was done)
+    bool reverse;
+    // travel is in angles, gets optimised if reverse is true
+    double travel;
+};
+
+/**
+ * check if can do the oposite & reverse optimisation
+ * @param angle zeroed travel angle
+ */
+oprev_result apply_oprev_optimisation(double angle)
+{
+    const auto reversed = abs(angle) > M_PI_2;
+    if (reversed)
+    {
+        angle += angle > 0
+                     ? -M_PI
+                     : +M_PI;
+    }
+    return (oprev_result){
+        .reverse = reversed,
+        .travel = angle,
+    };
+}
+
 class SwerveModule : public Lifecycle
 {
 public:
@@ -11,7 +41,7 @@ public:
      * the the angle error (in radians, plus or minus) at which the translation speed
      * will be taken into account in the swerve.
      */
-    static const auto STEERING_TOLERANCE = .1;
+    static constexpr auto STEERING_TOLERANCE = .1;
 
     PrecisionMotor &_pma, &_pmb;
 
@@ -89,8 +119,8 @@ public:
         */
         const auto angular_v = _pid.getOutput(); // rpms
         _set_speeds(
-            t_lin_v + _pid.getOutput() / 2,
-            t_lin_v - _pid.getOutput() / 2);
+            t_lin_v + angular_v / 2,
+            t_lin_v - angular_v / 2);
     }
 
     /**
@@ -142,33 +172,3 @@ public:
         _pmb.set_target_rpm(rpmb);
     }
 };
-
-/**
- * results of the oposite & reverse optimisation
- */
-struct oprev_result
-{
-    // reversed tells you if the wheel should be reversed or not. (if true, the optimisation was done)
-    bool reverse;
-    // travel is in angles, gets optimised if reverse is true
-    double travel;
-};
-
-/**
- * check if can do the oposite & reverse optimisation
- * @param angle zeroed travel angle
- */
-oprev_result apply_oprev_optimisation(double angle)
-{
-    const auto reversed = abs(angle) > M_PI_2;
-    if (reversed)
-    {
-        angle += angle > 0
-                     ? -M_PI
-                     : +M_PI;
-    }
-    return (oprev_result){
-        .reverse = reversed,
-        .travel = angle,
-    };
-}
