@@ -107,7 +107,7 @@ public:
             return;
         }
 
-        const auto t_lin_v = oprev.travel > STEERING_TOLERANCE
+        const auto t_lin_v = abs(oprev.travel) > STEERING_TOLERANCE
                                  ? 0
                                  : _target.norm() * _mtwr;
 
@@ -126,8 +126,9 @@ public:
         Serial.print("|");
 
         _set_speeds(
-            (angular_v / 2) - t_lin_v,
-            (angular_v / 2) - t_lin_v);
+            (angular_v / 2) + t_lin_v,
+            (angular_v / 2) - t_lin_v
+            );
     }
 
     /**
