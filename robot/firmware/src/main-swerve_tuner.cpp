@@ -28,15 +28,15 @@ PrecisionMotor pmotor2(motor2, goenco2, 400);
 const auto MAX_PULSE_LEN = 4160.0;
 PwmRotaryEncoder pwm_enco(0, MAX_PULSE_LEN, polling_timer);
 
-SwerveModule swerve1(pmotor1, pmotor2, pwm_enco);
+// SwerveModule swerve1(pmotor1, pmotor2, pwm_enco);
 
 void setup()
 {
     Serial.begin(115200);
     CrcLib::Initialize();
 
-    swerve1.begin();
-    swerve1.enable(true);
+    // swerve1.begin();
+    // swerve1.enable(true);
 
     Serial.println("Setup Done");
 }
@@ -52,7 +52,7 @@ void execute_commands()
          * donne le target en coordonnees vectorielles
          */
         auto target_x_rpm = cmd.getArg(0), target_y_rpm = cmd.getArg(1);
-        swerve1.set_target(Vec2D(target_x_rpm, target_y_rpm));
+        // swerve1.set_target(Vec2D(target_x_rpm, target_y_rpm));
         Serial.println("Target RPM: (vx:" + String(target_x_rpm) + ")|(vy:" + String(target_y_rpm) + ")");
         break;
     }
@@ -62,7 +62,7 @@ void execute_commands()
          * donne le target en coordonnes polaires
          */
         auto target_angle = cmd.getArg(0), target_speed = cmd.getArg(1);
-        swerve1.set_target(Vec2D::from_polar(target_angle, target_speed));
+        // swerve1.set_target(Vec2D::from_polar(target_angle, target_speed));
         Serial.println("Target (@" + String(target_angle) + ")|(s" + String(target_speed) + ")");
         break;
     }
@@ -72,33 +72,33 @@ void execute_commands()
         auto Ki = cmd.getArg(1);
         auto Kd = cmd.getArg(2);
         swerve1._pid.setK(Kp, Ki, Kd);
-        print_pid_vals(swerve1._pid);
+        // print_pid_vals(swerve1._pid);
         break;
     }
     case 'P':
     {
         auto Kp = cmd.getArg(0);
         swerve1._pid.setKp(Kp);
-        print_pid_vals(swerve1._pid);
+        // print_pid_vals(swerve1._pid);
         break;
     }
     case 'I':
     {
         auto Ki = cmd.getArg(0);
         swerve1._pid.setKi(Ki);
-        print_pid_vals(swerve1._pid);
+        // print_pid_vals(swerve1._pid);
         break;
     }
     case 'D':
     {
         auto Kd = cmd.getArg(0);
-        swerve1._pid.setKd(Kd);
-        print_pid_vals(swerve1._pid);
+        // swerve1._pid.setKd(Kd);
+        // print_pid_vals(swerve1._pid);
         break;
     }
     case 'M':
     {
-        swerve1.enable(!swerve1._enabled);
+        // swerve1.enable(!swerve1._enabled);
         break;
     }
     case 'R':
@@ -134,7 +134,7 @@ void apply_controller_input()
     controller c = !CrcLib::IsCommValid()
                        ? (controller){.right = Vec2D(0, 0), .left = Vec2D(0, 0)}
                        : read_controller();
-    swerve1.set_target(Vec2D(c.left.x() * 500, c.left.y() * 500));
+    // swerve1.set_target(Vec2D(c.left.x() * 500, c.left.y() * 500));
 }
 
 void loop()
@@ -149,7 +149,7 @@ void loop()
     //     apply_controller_input();
     // }
     execute_commands();
-    swerve1.update();
+    // swerve1.update();
 
     if (read_mode && print_timer.is_time())
     {
@@ -157,30 +157,30 @@ void loop()
         SPRINT("angle:" + String(pwm_enco.getLast().rads, 2));
         SPACER;
 
-        SPRINT("wspeed:" + String(swerve1.get_wheel_rpm(), 2));
-        SPACER;
-        SPRINT("aspeed:" + String(swerve1._pma._e.getLast().rpm, 2));
-        SPACER;
-        SPRINT("bspeed:" + String(swerve1._pmb._e.getLast().rpm, 2));
-        SPACER;
+        // SPRINT("wspeed:" + String(swerve1.get_wheel_rpm(), 2));
+        // SPACER;
+        // SPRINT("aspeed:" + String(swerve1._pma._e.getLast().rpm, 2));
+        // SPACER;
+        // SPRINT("bspeed:" + String(swerve1._pmb._e.getLast().rpm, 2));
+        // SPACER;
 
-        SPRINT("[ ");
-        SPRINT("s:" + padLeft(String(swerve1._pid.getSetPoint()), 7));
-        SPRINT(" ");
-        SPRINT("i:" + padLeft(String(swerve1._pid.getInput()), 7));
-        SPRINT(" ");
-        SPRINT("o:" + padLeft(String(swerve1._pid.getOutput()), 7));
-        SPRINT(" ]");
-        SPACER;
+        // SPRINT("[ ");
+        // SPRINT("s:" + padLeft(String(swerve1._pid.getSetPoint()), 7));
+        // SPRINT(" ");
+        // SPRINT("i:" + padLeft(String(swerve1._pid.getInput()), 7));
+        // SPRINT(" ");
+        // SPRINT("o:" + padLeft(String(swerve1._pid.getOutput()), 7));
+        // SPRINT(" ]");
+        // SPACER;
 
-        SPRINT("[ K ");
-        SPRINT(padLeft(String(swerve1._pid.getKp(), 5), 7));
-        SPRINT(" ");
-        SPRINT(padLeft(String(swerve1._pid.getKi(), 5), 7));
-        SPRINT(" ");
-        SPRINT(padLeft(String(swerve1._pid.getKd(), 5), 7));
-        SPRINT(" ]");
-        SPACER;
+        // SPRINT("[ K ");
+        // SPRINT(padLeft(String(swerve1._pid.getKp(), 5), 7));
+        // SPRINT(" ");
+        // SPRINT(padLeft(String(swerve1._pid.getKi(), 5), 7));
+        // SPRINT(" ");
+        // SPRINT(padLeft(String(swerve1._pid.getKd(), 5), 7));
+        // SPRINT(" ]");
+        // SPACER;
 
         Serial.println();
     }
