@@ -94,6 +94,7 @@ public:
         _e.update();
 
         const auto t_angle = _target.angle();
+        Serial.println(t_angle);
         // TODO: remove if externally polled absolute encoder works
         // const auto c_angle = get_current_angle();
         const auto c_angle = _e.getLast().rads;
