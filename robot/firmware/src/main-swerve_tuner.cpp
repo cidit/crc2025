@@ -154,7 +154,7 @@ void loop()
     if (read_mode && print_timer.is_time())
     {
 
-        SPRINT("angle:" + String(pwm_enco.getLast().rads, 2));
+        SPRINT("angle:" + String(swerve1._e.getLast().rads, 2));
         SPACER;
 
         SPRINT("wspeed:" + String(swerve1.get_wheel_rpm(), 2));
