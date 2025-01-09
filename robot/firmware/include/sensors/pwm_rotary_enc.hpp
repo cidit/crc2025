@@ -5,13 +5,8 @@
 #include "util/timer.hpp"
 #include "sensors/sensor.hpp"
 
-struct PwmRotaryEncoderData: public Printable {
+struct PwmRotaryEncoderData {
     double rads;
-
-    virtual size_t printTo(Print &p) const override
-    {
-        return p.print("[@"+String(rads)+"]");
-    }
 };
 
 class PwmRotaryEncoder : public Sensor<PwmRotaryEncoderData>

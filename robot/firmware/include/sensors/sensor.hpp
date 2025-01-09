@@ -24,7 +24,7 @@ public:
         if (success)
         {
             _last = measure;
-            Serial.print("post-sample" + String(_last))
+            Serial.print("post-sample");
         }
     }
 
