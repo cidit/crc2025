@@ -35,9 +35,4 @@ public:
         return true;
     }
 
-    void poll() override {
-        Sensor::poll();
-        Serial.print("post-sample" + String(_last.rads));
-    }
-
 };
