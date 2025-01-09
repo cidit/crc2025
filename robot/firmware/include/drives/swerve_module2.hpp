@@ -47,7 +47,7 @@ public:
 
     // TODO: remove if externally polled absolute encoder works
     // pin_t _e_p;
-    PwmRotaryEncoder _e;
+    PwmRotaryEncoder &_e;
     PID_RT _pid; // for angular velocity of swerve
     Vec2D _target;
     double _mtwr;
@@ -58,7 +58,7 @@ public:
         PrecisionMotor &pmb,
         // TODO: remove if externally polled absolute encoder works
         // pwm abs_enco_pin,
-        PwmRotaryEncoder enco,
+        PwmRotaryEncoder &enco,
         /**
          * the motor to wheel ratio is how many turns the wheel does
          * for one turn of the ring gear. our ratio is 2/3 because the
