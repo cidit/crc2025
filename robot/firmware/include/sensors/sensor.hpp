@@ -36,7 +36,7 @@ public:
     {
         if (_polling_timer.is_time())
         {
-            Serial.print("update")
+            Serial.print("update");
             this->poll();
         }
     }
