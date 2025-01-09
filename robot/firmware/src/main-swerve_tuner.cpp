@@ -149,7 +149,7 @@ void loop()
     //     apply_controller_input();
     // }
     execute_commands();
-    // swerve1.update();
+    swerve1.update();
 
     if (read_mode && print_timer.is_time())
     {
