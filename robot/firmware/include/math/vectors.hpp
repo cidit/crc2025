@@ -77,11 +77,20 @@ public:
         components[1] = y;
     }
 
+    /**
+     * gets the angle value of the vec between 0 and 2pi
+     */
     double angle()
     {
-        double angle = atan(components[1] / components[0]);
-        return components[0] < 0 ? 180 + angle : components[1] > 0 ? angle
-                                                                   : 360 + angle;
+        // double angle = atan(components[1] / components[0]);
+        // return components[0] < 0 ? 180 + angle : components[1] > 0 ? angle
+        //                                                            : 360 + angle;
+
+        const auto angle_on_zero = atan2(components[1], components[2]);
+        if (angle_on_zero >= 0) {
+            return angle_on_zero;
+        }
+        return (2* M_PI) + angle_on_zero;
     }
 
     static Vec2D from_polar(double rads, double length) {
