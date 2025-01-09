@@ -92,6 +92,8 @@ public:
     void update() override
     {
         _e.update();
+        _pma.update();
+        _pmb.update();
 
         const auto t_angle = _target.angle();
         // TODO: remove if externally polled absolute encoder works
