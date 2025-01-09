@@ -20,13 +20,13 @@ Encoder enco1(CRC_ENCO_B, CRC_DIG_3);
 GobuildaRotaryEncoder goenco1(enco1, 145.1 * 2.5, polling_timer);
 PrecisionMotor pmotor1(motor1, goenco1, 400);
 
-Motor motor2(0);
-Encoder enco2(0, 0);
+Motor motor2(CRC_PWM_7);
+Encoder enco2(CRC_I2C_SCL, CRC_DIG_5);
 GobuildaRotaryEncoder goenco2(enco2, 145.1 * 2.5, polling_timer);
 PrecisionMotor pmotor2(motor2, goenco2, 400);
 
 const auto MAX_PULSE_LEN = 4160.0;
-PwmRotaryEncoder pwm_enco(0, MAX_PULSE_LEN, polling_timer);
+PwmRotaryEncoder pwm_enco(CRC_DIG_1, MAX_PULSE_LEN, polling_timer);
 
 SwerveModule swerve1(pmotor1, pmotor2, pwm_enco);
 
