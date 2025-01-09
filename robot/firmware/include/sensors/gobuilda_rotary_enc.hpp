@@ -7,10 +7,15 @@
 #include "math/angles.hpp"
 #include "sensors/sensor.hpp"
 
-struct GobuildaRotaryEncoderData
+struct GobuildaRotaryEncoderData: public Printable
 {
     double rads;
     double rpm;
+
+    virtual size_t printTo(Print &p) const override
+    {
+        return p.print("[@"+String(rads) +";s"+String(rpm)+"]");
+    }
 };
 
 class GobuildaRotaryEncoder : public Sensor<GobuildaRotaryEncoderData>
