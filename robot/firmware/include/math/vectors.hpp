@@ -93,6 +93,9 @@ public:
         return (2* M_PI) + angle_on_zero;
     }
 
+    /**
+     * TODO: this function is a shitshow. entirely rewrite.
+     */
     Vec2D normalize()
     {
         auto norm = this->norm();
@@ -101,6 +104,8 @@ public:
         {
             components[i] = components[i] / norm;
         }
+
+        return Vec2D(components[0], components[1]);
     }
 
     static Vec2D from_polar(double rads, double length) {
