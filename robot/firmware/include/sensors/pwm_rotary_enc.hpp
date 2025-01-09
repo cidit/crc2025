@@ -32,7 +32,6 @@ public:
         out = {
             .rads = angle
         };
-        Serial.print("sampling" + String(angle));
         return true;
     }
 
