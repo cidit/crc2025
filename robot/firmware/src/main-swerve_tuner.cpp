@@ -35,7 +35,7 @@ void setup()
     Serial.begin(115200);
     CrcLib::Initialize();
 
-    // swerve1.begin();
+    swerve1.begin();
     // swerve1.enable(true);
 
     Serial.println("Setup Done");
