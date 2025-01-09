@@ -120,9 +120,11 @@ public:
         b=v−(Δω/2)
         */
         const auto angular_v = _pid.getOutput(); // rpms
+        Serial.println(angular_v);
+        Serial.println(t_lin_v);
         _set_speeds(
-            t_lin_v + angular_v / 2,
-            t_lin_v - angular_v / 2);
+            (angular_v / 2) - t_lin_v,
+            (angular_v / 2) - t_lin_v);
     }
 
     /**
@@ -135,13 +137,13 @@ public:
         _target = target;
     }
 
-    double get_wheel_rpm() {
+    double get_wheel_rpm()
+    {
         // TODO: implement
         return 0;
     }
 
-
-        // TODO: remove if externally polled absolute encoder works
+    // TODO: remove if externally polled absolute encoder works
     // double get_current_angle()
     // {
     //     // TODO: handle the encoder externally so that the pulse length can be ajusted if need be.
