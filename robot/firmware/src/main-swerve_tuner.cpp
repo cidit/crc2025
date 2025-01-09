@@ -122,11 +122,11 @@ controller read_controller()
 {
     return (controller){
         .right = Vec2D(
-            CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X) / HALF_PWM_OUTPUT,
-            CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y) / HALF_PWM_OUTPUT),
+            double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X)) / HALF_PWM_OUTPUT,
+            double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)) / HALF_PWM_OUTPUT),
         .left = Vec2D(
-            CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X) / HALF_PWM_OUTPUT,
-            CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y) / HALF_PWM_OUTPUT)};
+            double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X)) / HALF_PWM_OUTPUT,
+            double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y)) / HALF_PWM_OUTPUT)};
 }
 
 void apply_controller_input()
