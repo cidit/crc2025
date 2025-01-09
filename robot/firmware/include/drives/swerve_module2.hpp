@@ -120,8 +120,8 @@ public:
         b=v−(Δω/2)
         */
         const auto angular_v = _pid.getOutput(); // rpms
-        Serial.println(angular_v);
-        Serial.println(t_lin_v);
+        Serial.println("a" + String(angular_v));
+        Serial.println("v" + String(t_lin_v));
         _set_speeds(
             (angular_v / 2) - t_lin_v,
             (angular_v / 2) - t_lin_v);
