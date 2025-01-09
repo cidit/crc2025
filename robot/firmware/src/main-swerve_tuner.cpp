@@ -71,21 +71,21 @@ void execute_commands()
         auto Kp = cmd.getArg(0);
         auto Ki = cmd.getArg(1);
         auto Kd = cmd.getArg(2);
-        swerve1._pid.setK(Kp, Ki, Kd);
+        // swerve1._pid.setK(Kp, Ki, Kd);
         // print_pid_vals(swerve1._pid);
         break;
     }
     case 'P':
     {
         auto Kp = cmd.getArg(0);
-        swerve1._pid.setKp(Kp);
+        // swerve1._pid.setKp(Kp);
         // print_pid_vals(swerve1._pid);
         break;
     }
     case 'I':
     {
         auto Ki = cmd.getArg(0);
-        swerve1._pid.setKi(Ki);
+        // swerve1._pid.setKi(Ki);
         // print_pid_vals(swerve1._pid);
         break;
     }
