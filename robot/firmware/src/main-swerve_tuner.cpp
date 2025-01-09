@@ -144,10 +144,10 @@ void loop()
     polling_timer.update(now);
     CrcLib::Update();
     cmd.refresh();
-    if (controller_mode)
-    {
-        apply_controller_input();
-    }
+    // if (controller_mode)
+    // {
+    //     apply_controller_input();
+    // }
     execute_commands();
     swerve1.update();
 
