@@ -34,9 +34,10 @@ public:
 
     void update() override
     {
-        if (_polling_timer.is_time()) {
-        this->poll();
-
+        if (_polling_timer.is_time())
+        {
+            Serial.print("update")
+            this->poll();
         }
     }
 };
