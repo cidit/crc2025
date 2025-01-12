@@ -12,7 +12,7 @@ from game_logic import view_stations
 from game_logic import view_solution
 
 def benchmark():
-    test_with_one_size = 0 ### put the value of n you want to try your algorithm with or use 0 for a full benchmark
+    test_with_one_size = 25 ### put the value of n you want to try your algorithm with or use 0 for a full benchmark
 
 
 

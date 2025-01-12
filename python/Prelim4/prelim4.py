@@ -44,20 +44,60 @@ def get_customers(map: list[list[int]], n: int) -> list[tuple[int, int]]:
 def solve(map: list[list[int]], n: int) -> list[list[tuple[int, int]]]:
     solution = []
     
-    #Optimization ideas
+    #----- Optimization ideas -----
     #
     # Iterate only once for stations and customers 
     #
+
+    #----- Algorithm Priority -----
+    #   1. Nb customer per station
+    #       - Even distribution is better: 444 > 552
+    #
+    #   2. Dist between customer and station
+    #       - 
     
-    stations = get_stations(map, n)
+    stations = []
+    customers = []
+
+    #Find stations and customers
+    for x in range(n):
+        for y in range(n):
+            if map[x][y] == 1:
+                stations.append((x, y))
+            elif map[x][y] == 2:
+                customers.append((x, y))
+
+    #Sort stations
+    stations.sort()
+
+    #Determine best nb of customer per station
     nb_station = len(stations)
-    customers = get_customers(map, n)
+    nb_customer = len(customers)
+    cust_per_stat = int(nb_customer/nb_station) #Best nb cust per station
+    remainder = nb_customer % nb_station #Station in extra
+
+    print("Stations:", stations)
+    print("Customers:", customers)
+    print("Cust/Stat: ", cust_per_stat, " Remainder: ", remainder)
 
     #Create empty list for every station
     for _ in stations:
         cust_list = list() 
         solution.append(cust_list)
 
+
+    # #Find the best customers for each station
+    # for stat in stations:
+    #     #Sort customers based on distance and take the first ones
+    #     customers.sort(key=lambda cust: distance_manhattan(stat, cust))
+    #     solution.append(list(customers[:cust_per_stat]))
+
+    #     #Remove used customers from list
+    #     customers = customers[cust_per_stat:]
+    #     print("Remaining Cust: ", customers)
+
+    # #Do we have extras
+    # if not len(customers) == 0:
     #Assign every customer to a station
     for cust in customers:
         #Find the best station for this customer, only dist
@@ -70,5 +110,7 @@ def solve(map: list[list[int]], n: int) -> list[list[tuple[int, int]]]:
     
         #Add customer to station
         solution[best_stat_index].append(cust)
+    
+    #print("solution: ", solution)
 
     return solution
