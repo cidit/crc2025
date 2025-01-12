@@ -54,8 +54,9 @@ void execute_commands()
          * donne le target en coordonnees vectorielles
          */
         auto target_x_rpm = cmd.getArg(0), target_y_rpm = cmd.getArg(1);
-        swerve.set_target(Vec2D(target_x_rpm, target_y_rpm));
-        Serial.println("Target RPM: (vx:" + String(target_x_rpm) + ")|(vy:" + String(target_y_rpm) + ")");
+        auto target = Vec2D(target_x_rpm, target_y_rpm);
+        swerve.set_target(target);
+        Serial.println("Target RPM: (vx:" + String(target.angle()) + ")|(vy:" + String(target.norm()) + ")");
         break;
     }
     case 'X':
@@ -64,8 +65,9 @@ void execute_commands()
          * donne le target en coordonnes polaires
          */
         auto target_angle = cmd.getArg(0), target_speed = cmd.getArg(1);
-        swerve.set_target(Vec2D::from_polar(target_angle, target_speed));
-        Serial.println("Target (@" + String(target_angle) + ")|(s" + String(target_speed) + ")");
+        auto target = Vec2D::from_polar(target_angle, target_speed);
+        swerve.set_target(target);
+        Serial.println("Target (@" + String(target.angle()) + ")|(s" + String(target.norm()) + ")");
         break;
     }
     case 'K':
