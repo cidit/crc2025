@@ -136,7 +136,7 @@ public:
      * @param target a vec that encodes a direction as an angle and a speed in RPMs
      * // TODO: scale the target with some algebric formula to the limit of pmotors?
      */
-    void set_target(const Vec2D target)
+    void set_target(Vec2D target)
     {
         Serial.println(_target.angle());
         _target = target;
