@@ -101,10 +101,10 @@ public:
             return;
         }
 
-        // const auto t_lin_v = abs(oprev.travel) > STEERING_TOLERANCE
+        // const auto wheel_velocity = abs(oprev.travel) > STEERING_TOLERANCE
         //                          ? 0
         //                          : get_linear_velocity();
-        const auto t_lin_v = 0; // TODO: dbg test
+        const auto wheel_velocity = 0; // TODO: dbg test
 
 
         // TODO: this doesnt deal with oprev
@@ -116,17 +116,17 @@ public:
         a=v+(Δω​/2)
         b=v−(Δω/2)
         */
-        const auto angular_v = get_angular_velocity(); // rpms
+        const auto angular_velocity = get_angular_velocity(); // rpms
 
         if (!oprev.reverse) {
             _set_speeds(
-                t_lin_v + (angular_v / 2), // in fw, clockwise
-                -t_lin_v + (angular_v / 2) // counter clockwise
+                wheel_velocity + (angular_velocity / 2), // in fw, clockwise
+                -wheel_velocity + (angular_velocity / 2) // counter clockwise
             );
         } else {
             _set_speeds(
-                -t_lin_v - (angular_v / 2), // in bckw, counter clockwise
-                t_lin_v - (angular_v / 2) // clockwise
+                -wheel_velocity - (angular_velocity / 2), // in bckw, counter clockwise
+                wheel_velocity - (angular_velocity / 2) // clockwise
             );
         }
     }
