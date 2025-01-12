@@ -36,6 +36,8 @@ void setup()
     CrcLib::Initialize();
 
     swerve1.begin();
+    pmotor1._pid_speed.setK(0.60000, 0.00001, 0.12000);
+    pmotor2._pid_speed.setK(0.60000, 0.00001, 0.15500);
     swerve1.enable(true);
 
     Serial.println("Setup Done");
