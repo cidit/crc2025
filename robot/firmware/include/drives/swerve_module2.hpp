@@ -114,10 +114,6 @@ public:
         b=v−(Δω/2)
         */
         const auto angular_v = get_angular_velocity(); // rpms
-        Serial.print("|");
-        Serial.print("a" + String(angular_v));
-        Serial.print(" v" + String(t_lin_v));
-        Serial.print("|");
 
         _set_speeds(
             (angular_v / 2) + t_lin_v,

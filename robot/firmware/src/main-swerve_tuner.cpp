@@ -157,11 +157,25 @@ void loop()
         SPRINT("angle:" + String(swerve1._e.getLast().rads, 2));
         SPACER;
 
-        SPRINT("wspeed:" + String(swerve1.get_wheel_rpm(), 2));
+        auto oprev = swerve1.get_oprev_result();
+        SPRINT("[ OPREV ");
+        SPRINT(oprev.reverse? "Y": "N");
+        SPRINT(" ");
+        SPRINT(oprev.travel);
+        SPRINT(" ]");
         SPACER;
-        SPRINT("aspeed:" + String(swerve1._pma._e.getLast().rpm, 2));
+
+        SPRINT("[ SPEED ");
+        SPRINT("lin: " + String(swerve1.get_linear_velocity()));
         SPACER;
-        SPRINT("bspeed:" + String(swerve1._pmb._e.getLast().rpm, 2));
+        SPRINT("ang: " + String(swerve1.get_angular_velocity()));
+        SPACER;
+        SPRINT("w:" + String(swerve1.get_wheel_rpm(), 2));
+        SPACER;
+        SPRINT("a:" + String(swerve1._pma._e.getLast().rpm, 2));
+        SPACER;
+        SPRINT("b:" + String(swerve1._pmb._e.getLast().rpm, 2));
+        SPRINT(" ]");
         SPACER;
 
         SPRINT("[ ");
