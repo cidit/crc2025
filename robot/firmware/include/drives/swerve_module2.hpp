@@ -120,13 +120,13 @@ public:
 
         if (!oprev.reverse) {
             _set_speeds(
-                t_lin_v + (angular_v / 2),
-                t_lin_v - (angular_v / 2)
+                t_lin_v + (angular_v / 2), // in fw, clockwise
+                -t_lin_v + (angular_v / 2) // counter clockwise
             );
         } else {
             _set_speeds(
-                -(t_lin_v - (angular_v / 2)),
-                -(t_lin_v + (angular_v / 2))
+                -t_lin_v - (angular_v / 2), // in bckw, counter clockwise
+                t_lin_v - (angular_v / 2) // clockwise
             );
         }
     }
