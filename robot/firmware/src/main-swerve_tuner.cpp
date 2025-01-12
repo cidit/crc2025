@@ -161,9 +161,9 @@ void loop()
     {
 
         SPRINT("[ ANGLE ");
-        SPRINT("c" +  padRight(String(swerve._e.getLast().rads, 2), 4));
+        SPRINT("c:" +  padRight(String(swerve._e.getLast().rads, 2), 5));
         SPRINT(" ");
-        SPRINT("t" +  padRight(String(swerve._target.angle(), 2), 4));
+        SPRINT("t:" +  padRight(String(swerve._target.angle(), 2), 5));
         SPRINT(" ]");
         SPACER;
 
