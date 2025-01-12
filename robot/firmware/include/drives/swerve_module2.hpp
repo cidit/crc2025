@@ -101,9 +101,10 @@ public:
             return;
         }
 
-        const auto t_lin_v = abs(oprev.travel) > STEERING_TOLERANCE
-                                 ? 0
-                                 : get_linear_velocity();
+        // const auto t_lin_v = abs(oprev.travel) > STEERING_TOLERANCE
+        //                          ? 0
+        //                          : get_linear_velocity();
+        const auto t_lin_v = 0; // TODO: dbg test
 
 
         // TODO: this doesnt deal with oprev
