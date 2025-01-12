@@ -160,7 +160,11 @@ void loop()
     if (read_mode && print_timer.is_time())
     {
 
-        SPRINT("angle:" + String(swerve._e.getLast().rads, 2));
+        SPRINT("[ ANGLE ");
+        SPRINT("c" +  padRight(String(swerve._e.getLast().rads, 2), 4));
+        SPRINT(" ");
+        SPRINT("t" +  padRight(String(swerve._target.angle(), 2), 4));
+        SPRINT(" ]");
         SPACER;
 
         auto oprev = swerve.get_oprev_result();
