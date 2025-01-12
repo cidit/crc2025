@@ -105,6 +105,8 @@ public:
                                  ? 0
                                  : get_linear_velocity();
 
+
+        // TODO: this doesnt deal with oprev
         /*
         FORWARD KINEMATICS
         linear velocity: v=(a+b)/2
@@ -116,8 +118,8 @@ public:
         const auto angular_v = get_angular_velocity(); // rpms
 
         _set_speeds(
-            (angular_v / 2) + t_lin_v,
-            (angular_v / 2) - t_lin_v
+            t_lin_v + (angular_v / 2),
+            t_lin_v - (angular_v / 2)
             );
     }
 
