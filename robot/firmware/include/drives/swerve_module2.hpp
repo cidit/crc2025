@@ -94,13 +94,7 @@ public:
         _e.update();
         _pma.update();
         _pmb.update();
-
-        const auto t_angle = _target.angle();
-        // TODO: remove if externally polled absolute encoder works
-        // const auto c_angle = get_current_angle();
-        const auto c_angle = _e.getLast().rads;
-        const auto travel = Angle::travel(c_angle, t_angle);
-        const auto oprev = apply_oprev_optimisation(travel);
+        const auto oprev = get_oprev_result();
 
         if (!_pid.compute(oprev.travel))
         {
@@ -109,7 +103,7 @@ public:
 
         const auto t_lin_v = abs(oprev.travel) > STEERING_TOLERANCE
                                  ? 0
-                                 : _target.norm() * _mtwr;
+                                 : get_linear_velocity();
 
         /*
         FORWARD KINEMATICS
@@ -119,7 +113,7 @@ public:
         a=v+(Δω​/2)
         b=v−(Δω/2)
         */
-        const auto angular_v = _pid.getOutput(); // rpms
+        const auto angular_v = get_angular_velocity(); // rpms
         Serial.print("|");
         Serial.print("a" + String(angular_v));
         Serial.print(" v" + String(t_lin_v));
@@ -145,6 +139,30 @@ public:
     {
         // TODO: implement
         return 0;
+    }
+
+    oprev_result get_oprev_result() {
+        const auto t_angle = _target.angle();
+        // TODO: remove if externally polled absolute encoder works
+        // const auto c_angle = get_current_angle();
+        const auto c_angle = _e.getLast().rads;
+        const auto travel = Angle::travel(c_angle, t_angle);
+        return apply_oprev_optimisation(travel);
+    }
+
+    /**
+     * inspection function for individual motor speed calculation
+     */
+    double get_angular_velocity() {
+        return _pid.getOutput();
+    }
+
+    /**
+     * inspection functions for individual motor speed calculation
+     */
+    double get_linear_velocity() {
+        // TODO: should be calculated according to angular distance
+        return _target.norm() * _mtwr;
     }
 
     // TODO: remove if externally polled absolute encoder works
