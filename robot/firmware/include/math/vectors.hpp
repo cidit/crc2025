@@ -47,34 +47,34 @@ public:
 
 using Vec3D = Vector<double, 3>;
 
-class Vec2D : public Vector<double, 2>
+class Vec2D
 {
 public:
+    double _x, _y;
     Vec2D()
     {
-        components[0] = 0;
-        components[1] = 0;
+        _x = _y = 0;
     }
     Vec2D(double x, double y)
     {
-        components[0] = x;
-        components[1] = y;
+        _x = x;
+        _y = y;
     }
     double x() const 
     {
-        return components[0];
+        return _x;
     }
     void set_x(double x)
     {
-        components[0] = x;
+        _x = x;
     }
     double y() const
     {
-        return components[1];
+        return _y;
     }
     void set_y(double y)
     {
-        components[1] = y;
+        _y = y;
     }
 
     /**
@@ -86,11 +86,15 @@ public:
         // return components[0] < 0 ? 180 + angle : components[1] > 0 ? angle
         //                                                            : 360 + angle;
 
-        const auto angle_on_zero = atan2(components[1], components[0]);
+        const auto angle_on_zero = atan2(_y, _x);
         if (angle_on_zero >= 0) {
             return angle_on_zero;
         }
         return (2* M_PI) + angle_on_zero;
+    }
+
+    double norm() {
+        return sqrt(pow(_x, 2) + pow(_y, 2));
     }
 
     /**
@@ -99,13 +103,7 @@ public:
     Vec2D normalize()
     {
         auto norm = this->norm();
-
-        for (auto i = 0; i < 2; i++)
-        {
-            components[i] = components[i] / norm;
-        }
-
-        return Vec2D(components[0], components[1]);
+        return Vec2D(_x/norm, _y/norm);
     }
 
     static Vec2D from_polar(double rads, double length) {
