@@ -138,7 +138,10 @@ public:
      */
     void set_target(const Vec2D target)
     {
+        Serial.println(_target.angle());
         _target = target;
+        Serial.println(target.angle());
+        Serial.println(_target.angle());
     }
 
     double get_wheel_rpm()
