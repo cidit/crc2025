@@ -15,18 +15,18 @@ Decodeur cmd(&Serial);
 bool read_mode = true, controller_mode = true;
 Timer print_timer(ONE_SECOND / 10), polling_timer(ONE_SECOND / 50);
 
-Motor motorA(CRC_PWM_1);
-Encoder encoA(CRC_ENCO_B, CRC_DIG_3);
+Motor motorA(CRC_PWM_3);
+Encoder encoA(CRC_I2C_SDA, CRC_DIG_4);
 GobuildaRotaryEncoder goencoA(encoA, 145.1 * 2.5, polling_timer);
 PrecisionMotor pmotorA(motorA, goencoA, 400);
 
-Motor motorB(CRC_PWM_7);
-Encoder encoB(CRC_I2C_SCL, CRC_DIG_5);
+Motor motorB(CRC_PWM_4);
+Encoder encoB(CRC_ENCO_A, CRC_DIG_2);
 GobuildaRotaryEncoder goencoB(encoB, 145.1 * 2.5, polling_timer);
 PrecisionMotor pmotorB(motorB, goencoB, 400);
 
 const auto MAX_PULSE_LEN = 4160.0;
-PwmRotaryEncoder pwm_enco(CRC_DIG_1, MAX_PULSE_LEN, polling_timer);
+PwmRotaryEncoder pwm_enco(CRC_DIG_12, MAX_PULSE_LEN, polling_timer);
 
 SwerveModule swerve(pmotorA, pmotorB, pwm_enco);
 

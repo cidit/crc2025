@@ -18,7 +18,7 @@ precision motor AB:
         angle: ???
 
 abs enco:
-    pins: ???
+    pins: CRC_DIG_12
     pid:
         angle: ???
 
