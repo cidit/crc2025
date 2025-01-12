@@ -13,7 +13,7 @@ public:
     // Vector(): components {0, 0} {}
     // Vector(T components[D]): components(components) {}
 
-    T norm()
+    const T norm()
     {
         T total = 0;
         for (T t : components)
@@ -60,7 +60,7 @@ public:
         components[0] = x;
         components[1] = y;
     }
-    double x()
+    double x() const 
     {
         return components[0];
     }
@@ -68,7 +68,7 @@ public:
     {
         components[0] = x;
     }
-    double y()
+    double y() const
     {
         return components[1];
     }
@@ -80,7 +80,7 @@ public:
     /**
      * gets the angle value of the vec between 0 and 2pi
      */
-    double angle()
+    double angle() const
     {
         // double angle = atan(components[1] / components[0]);
         // return components[0] < 0 ? 180 + angle : components[1] > 0 ? angle
