@@ -86,7 +86,7 @@ public:
         // return components[0] < 0 ? 180 + angle : components[1] > 0 ? angle
         //                                                            : 360 + angle;
 
-        const auto angle_on_zero = atan2(components[1], components[2]);
+        const auto angle_on_zero = atan2(components[1], components[0]);
         if (angle_on_zero >= 0) {
             return angle_on_zero;
         }
