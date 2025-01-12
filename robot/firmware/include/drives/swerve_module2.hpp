@@ -118,10 +118,17 @@ public:
         */
         const auto angular_v = get_angular_velocity(); // rpms
 
-        _set_speeds(
-            t_lin_v + (angular_v / 2),
-            t_lin_v - (angular_v / 2)
+        if (!oprev.reverse) {
+            _set_speeds(
+                t_lin_v + (angular_v / 2),
+                t_lin_v - (angular_v / 2)
             );
+        } else {
+            _set_speeds(
+                -(t_lin_v - (angular_v / 2)),
+                -(t_lin_v + (angular_v / 2))
+            );
+        }
     }
 
     /**
