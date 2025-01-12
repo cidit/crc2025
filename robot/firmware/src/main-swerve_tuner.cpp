@@ -51,7 +51,7 @@ void execute_commands()
     case 'Z':
     {
         /**
-         * donne le target en coordonnees vectorielles
+         * donne le target en coordonnees cartesiennes
          */
         auto target_x_rpm = cmd.getArg(0), target_y_rpm = cmd.getArg(1);
         auto target = Vec2D(target_x_rpm, target_y_rpm);
