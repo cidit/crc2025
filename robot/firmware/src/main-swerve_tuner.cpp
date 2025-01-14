@@ -12,10 +12,8 @@
 #include "util/print.hpp"
 
 Decodeur cmd(&Serial);
-bool read_mode = true, 
-    // TODO: fix controller, if no input and x-y is 0, 
-    // angle is automatically 0
-    controller_mode = false;
+bool read_mode = true;
+
 Timer print_timer(ONE_SECOND / 10), polling_timer(ONE_SECOND / 50);
 
 Motor motorA(CRC_PWM_3);
@@ -32,6 +30,56 @@ const auto MAX_PULSE_LEN = 4160.0;
 PwmRotaryEncoder pwm_enco(CRC_DIG_12, MAX_PULSE_LEN, polling_timer);
 
 SwerveModule swerve(pmotorA, pmotorB, pwm_enco);
+
+namespace garbage
+{
+    // TODO: fix controller, if no input and x-y is 0,
+    // angle is automatically 0
+    auto controller_mode = false;
+    auto last_angle = 0;
+    auto last_xy = Vec2D(0, 0);
+    // struct controller
+    // {
+    //     Vec2D right, left;
+    // };
+
+    // controller read_controller()
+    // {
+    //     return (controller){
+    //         .right = Vec2D(
+    //                      double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X)) / HALF_PWM_OUTPUT,
+    //                      double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)) / HALF_PWM_OUTPUT)
+    //                      .normalize(),
+    //         .left = Vec2D(
+    //                     double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X)) / HALF_PWM_OUTPUT,
+    //                     double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y)) / HALF_PWM_OUTPUT)
+    //                     .normalize()};
+    // }
+
+    void update_controller_input()
+    {
+        last_xy = Vec2D(double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X)) / HALF_PWM_OUTPUT,
+                        double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)) / HALF_PWM_OUTPUT)
+                      .normalize();
+        if (last_xy.angle() != 0) {
+            last_angle = last_xy.angle();
+        }
+    }
+
+    void apply_controller_input()
+    {
+        // controller c = !CrcLib::IsCommValid()
+        //                    ? (controller){.right = Vec2D(0, 0), .left = Vec2D(0, 0)}
+        //                    : read_controller();
+
+        auto sh = (swerve_heading) {
+            .direction = last_angle,
+            .velocity = last_xy.norm(),
+        };
+
+        swerve.set_target(sh);
+    }
+}
 
 void setup()
 {
@@ -71,9 +119,8 @@ void execute_commands()
          * donne le target en coordonnes polaires
          */
         auto target_angle = cmd.getArg(0), target_speed = cmd.getArg(1);
-        auto target = (swerve_heading) {
-            .direction = target_angle, .velocity = target_speed
-        };
+        auto target = (swerve_heading){
+            .direction = target_angle, .velocity = target_speed};
         swerve.set_target(target);
         Serial.println("Target (@" + String(target.direction) + ")|(s" + String(target.velocity) + ")");
         break;
@@ -120,35 +167,11 @@ void execute_commands()
     }
     case 'C':
     {
-        controller_mode = !controller_mode;
+        garbage::controller_mode = !garbage::controller_mode;
         break;
     }
     }
 }
-
-struct controller
-{
-    Vec2D right, left;
-};
-controller read_controller()
-{
-    return (controller){
-        .right = Vec2D(
-            double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_X)) / HALF_PWM_OUTPUT,
-            double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK1_Y)) / HALF_PWM_OUTPUT).normalize(),
-        .left = Vec2D(
-            double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X)) / HALF_PWM_OUTPUT,
-            double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y)) / HALF_PWM_OUTPUT).normalize()};
-}
-
-// TODO: decommissionned until controller works
-// void apply_controller_input()
-// {
-//     controller c = !CrcLib::IsCommValid()
-//                        ? (controller){.right = Vec2D(0, 0), .left = Vec2D(0, 0)}
-//                        : read_controller();
-//     swerve.set_target(Vec2D(c.left.x() * 500, c.left.y() * 500));
-// }
 
 void loop()
 {
@@ -158,11 +181,11 @@ void loop()
     CrcLib::Update();
     cmd.refresh();
 
-// TODO: decommissionned until controller works
-    // if (controller_mode)
-    // {
-    //     apply_controller_input();
-    // }
+    garbage::update_controller_input();
+    if (garbage::controller_mode)
+    {
+        garbage::apply_controller_input();
+    }
 
     execute_commands();
     swerve.update();
@@ -171,15 +194,15 @@ void loop()
     {
 
         SPRINT("[ ANGLE ");
-        SPRINT("c:" +  padRight(String(swerve._e.getLast().rads, 2), 5));
+        SPRINT("c:" + padRight(String(swerve._e.getLast().rads, 2), 5));
         SPRINT(" ");
-        SPRINT("t:" +  padRight(String(swerve._target.direction, 2), 5));
+        SPRINT("t:" + padRight(String(swerve._target.direction, 2), 5));
         SPRINT(" ]");
         SPACER;
 
         auto oprev = swerve.get_oprev_result();
         SPRINT("[ OPREV ");
-        SPRINT(oprev.reverse? "Y": "N");
+        SPRINT(oprev.reverse ? "Y" : "N");
         SPRINT(" ");
         SPRINT(oprev.travel);
         SPRINT(" ]");
