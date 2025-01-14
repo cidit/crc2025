@@ -74,7 +74,7 @@ namespace garbage
 
         auto sh = (swerve_heading) {
             .direction = last_angle,
-            .velocity = last_xy.norm(),
+            .velocity = last_xy.norm() * 100,
         };
 
         swerve.set_target(sh);
