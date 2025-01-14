@@ -93,7 +93,7 @@ public:
         _pid.setInterval(ONE_SECOND / PrecisionMotor::DEFAULT_POLL_FREQ); // we use the same poll freq as the motor because why not
         _pid.setPoint(0);
         _pid.setPropOnError();
-        _pid.setReverse(false);
+        _pid.setReverse(true);
         _pid.setOutputRange(-400, 400); // rpms
     }
 
