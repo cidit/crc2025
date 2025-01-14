@@ -131,20 +131,20 @@ public:
         */
         const auto angular_velocity = get_angular_velocity(); // rpms
 
-        if (!oprev.reverse)
-        {
+        // if (!oprev.reverse)
+        // {
             _set_speeds(
                 wheel_velocity + (angular_velocity / 2), // in fw, clockwise
                 -wheel_velocity + (angular_velocity / 2) // counter clockwise
             );
-        }
-        else
-        {
-            _set_speeds(
-                -wheel_velocity - (angular_velocity / 2), // in bckw, counter clockwise
-                wheel_velocity - (angular_velocity / 2)   // clockwise
-            );
-        }
+        // }
+        // else
+        // {
+        //     _set_speeds(
+        //         -wheel_velocity - (angular_velocity / 2), // in bckw, counter clockwise
+        //         wheel_velocity - (angular_velocity / 2)   // clockwise
+        //     );
+        // }
     }
 
     /**
