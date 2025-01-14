@@ -51,29 +51,31 @@ void execute_commands()
 
     switch (toupper(cmd.getCommand()))
     {
-    case 'Z':
-    {
-        /**
-         * donne le target en coordonnees cartesiennes
-         */
-        Serial.println("WARNING: THE CODE IS NOT OPTIMAL FOR THE SAME REASON THAT THE CONTROLLER DOESNT WORK");
-        auto target_x_rpm = cmd.getArg(0), target_y_rpm = cmd.getArg(1);
-        auto target = Vec2D(target_x_rpm, target_y_rpm);
-        swerve.set_target(target);
-        Serial.println("Target (@" + String(target.angle()) + ")|(s" + String(target.norm()) + ")");
-        Serial.println("Target RPM: (vx:" + String(target.x()) + ")|(vy:" + String(target.y()) + ")");
-        break;
-    }
+    // TODO: DEPRECATED
+    // case 'Z':
+    // {
+    //     /**
+    //      * donne le target en coordonnees cartesiennes
+    //      */
+    //     Serial.println("WARNING: THE CODE IS NOT OPTIMAL FOR THE SAME REASON THAT THE CONTROLLER DOESNT WORK");
+    //     auto target_x_rpm = cmd.getArg(0), target_y_rpm = cmd.getArg(1);
+    //     auto target = Vec2D(target_x_rpm, target_y_rpm);
+    //     swerve.set_target(target);
+    //     Serial.println("Target (@" + String(target.angle()) + ")|(s" + String(target.norm()) + ")");
+    //     Serial.println("Target RPM: (vx:" + String(target.x()) + ")|(vy:" + String(target.y()) + ")");
+    //     break;
+    // }
     case 'X':
     {
         /**
          * donne le target en coordonnes polaires
          */
         auto target_angle = cmd.getArg(0), target_speed = cmd.getArg(1);
-        auto target = Vec2D::from_polar(target_angle, target_speed);
+        auto target = (swerve_heading) {
+            .direction = target_angle, .velocity = target_speed
+        };
         swerve.set_target(target);
-        Serial.println("Target (@" + String(target.angle()) + ")|(s" + String(target.norm()) + ")");
-        Serial.println("Target RPM: (vx:" + String(target.x()) + ")|(vy:" + String(target.y()) + ")");
+        Serial.println("Target (@" + String(target.direction) + ")|(s" + String(target.velocity) + ")");
         break;
     }
     case 'K':
@@ -139,13 +141,14 @@ controller read_controller()
             double(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y)) / HALF_PWM_OUTPUT).normalize()};
 }
 
-void apply_controller_input()
-{
-    controller c = !CrcLib::IsCommValid()
-                       ? (controller){.right = Vec2D(0, 0), .left = Vec2D(0, 0)}
-                       : read_controller();
-    swerve.set_target(Vec2D(c.left.x() * 500, c.left.y() * 500));
-}
+// TODO: decommissionned until controller works
+// void apply_controller_input()
+// {
+//     controller c = !CrcLib::IsCommValid()
+//                        ? (controller){.right = Vec2D(0, 0), .left = Vec2D(0, 0)}
+//                        : read_controller();
+//     swerve.set_target(Vec2D(c.left.x() * 500, c.left.y() * 500));
+// }
 
 void loop()
 {
@@ -154,10 +157,13 @@ void loop()
     polling_timer.update(now);
     CrcLib::Update();
     cmd.refresh();
-    if (controller_mode)
-    {
-        apply_controller_input();
-    }
+
+// TODO: decommissionned until controller works
+    // if (controller_mode)
+    // {
+    //     apply_controller_input();
+    // }
+
     execute_commands();
     swerve.update();
 
@@ -167,7 +173,7 @@ void loop()
         SPRINT("[ ANGLE ");
         SPRINT("c:" +  padRight(String(swerve._e.getLast().rads, 2), 5));
         SPRINT(" ");
-        SPRINT("t:" +  padRight(String(swerve._target.angle(), 2), 5));
+        SPRINT("t:" +  padRight(String(swerve._target.direction, 2), 5));
         SPRINT(" ]");
         SPACER;
 
