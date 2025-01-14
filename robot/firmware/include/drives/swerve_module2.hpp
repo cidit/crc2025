@@ -115,12 +115,13 @@ public:
             return;
         }
 
-        // const auto wheel_velocity = abs(oprev.travel) > STEERING_TOLERANCE
-        //                          ? 0
-        //                          : get_linear_velocity();
-        const auto wheel_velocity = 0; // TODO: dbg test
+        const auto wheel_velocity = abs(oprev.travel) > STEERING_TOLERANCE
+                                 ? 0
+                                 : get_linear_velocity();
+        // const auto wheel_velocity = 0; // TODO: dbg test
 
         // TODO: this doesnt deal with oprev
+        // TODO: nvm, it should deal with oprev. validate.
         /*
         FORWARD KINEMATICS
         linear velocity: v=(a+b)/2
@@ -131,6 +132,7 @@ public:
         */
         const auto angular_velocity = get_angular_velocity(); // rpms
 
+        // TODO: remove if obsolete
         // if (!oprev.reverse)
         // {
             _set_speeds(
