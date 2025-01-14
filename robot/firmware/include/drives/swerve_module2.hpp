@@ -16,6 +16,20 @@ struct oprev_result
 };
 
 /**
+ * A valid heading for a swerve
+ * the equivalent of a vector in polar notation
+ *
+ * turns out a valid heading cant be expressed in cartesian notation
+ * because if the norm is 0 the angle is always going to be 0 (left on
+ * the cartesian circle).
+ */
+struct swerve_heading
+{
+    double direction; // in rads
+    double velocity;  // in rpms
+};
+
+/**
  * check if can do the oposite & reverse optimisation
  * @param angle zeroed travel angle
  */
@@ -49,7 +63,7 @@ public:
     // pin_t _e_p;
     PwmRotaryEncoder &_e;
     PID_RT _pid; // for angular velocity of swerve
-    Vec2D _target;
+    swerve_heading _target;
     double _mtwr;
     bool _enabled;
 
@@ -72,7 +86,7 @@ public:
           //   _e_p(abs_enco_pin),
           _e(enco),
           _pid(),
-          _target(0, 0),
+          _target{.direction = 0, .velocity = 0},
           _mtwr(motor_to_wheel_ratio),
           _enabled(false)
     {
@@ -106,7 +120,6 @@ public:
         //                          : get_linear_velocity();
         const auto wheel_velocity = 0; // TODO: dbg test
 
-
         // TODO: this doesnt deal with oprev
         /*
         FORWARD KINEMATICS
@@ -118,25 +131,28 @@ public:
         */
         const auto angular_velocity = get_angular_velocity(); // rpms
 
-        if (!oprev.reverse) {
+        if (!oprev.reverse)
+        {
             _set_speeds(
                 wheel_velocity + (angular_velocity / 2), // in fw, clockwise
                 -wheel_velocity + (angular_velocity / 2) // counter clockwise
             );
-        } else {
+        }
+        else
+        {
             _set_speeds(
                 -wheel_velocity - (angular_velocity / 2), // in bckw, counter clockwise
-                wheel_velocity - (angular_velocity / 2) // clockwise
+                wheel_velocity - (angular_velocity / 2)   // clockwise
             );
         }
     }
 
     /**
      * sets the target angle and speed we want to reach
-     * @param target a vec that encodes a direction as an angle and a speed in RPMs
+     * @param target a direction as an angle and a speed in RPMs
      * // TODO: scale the target with some algebric formula to the limit of pmotors?
      */
-    void set_target(Vec2D target)
+    void set_target(swerve_heading target)
     {
         _target = target;
     }
@@ -147,8 +163,9 @@ public:
         return 0;
     }
 
-    oprev_result get_oprev_result() {
-        const auto t_angle = _target.angle();
+    oprev_result get_oprev_result()
+    {
+        const auto t_angle = _target.direction;
         // TODO: remove if externally polled absolute encoder works
         // const auto c_angle = get_current_angle();
         const auto c_angle = _e.getLast().rads;
@@ -159,16 +176,18 @@ public:
     /**
      * inspection function for individual motor speed calculation
      */
-    double get_angular_velocity() {
+    double get_angular_velocity()
+    {
         return _pid.getOutput();
     }
 
     /**
      * inspection functions for individual motor speed calculation
      */
-    double get_linear_velocity() {
+    double get_linear_velocity()
+    {
         // TODO: should be calculated according to angular distance
-        return _target.norm() * _mtwr;
+        return _target.velocity * _mtwr;
     }
 
     // TODO: remove if externally polled absolute encoder works
