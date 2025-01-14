@@ -12,7 +12,10 @@
 #include "util/print.hpp"
 
 Decodeur cmd(&Serial);
-bool read_mode = true, controller_mode = true;
+bool read_mode = true, 
+    // TODO: fix controller, if no input and x-y is 0, 
+    // angle is automatically 0
+    controller_mode = false;
 Timer print_timer(ONE_SECOND / 10), polling_timer(ONE_SECOND / 50);
 
 Motor motorA(CRC_PWM_3);
@@ -53,6 +56,7 @@ void execute_commands()
         /**
          * donne le target en coordonnees cartesiennes
          */
+        Serial.println("WARNING: THE CODE IS NOT OPTIMAL FOR THE SAME REASON THAT THE CONTROLLER DOESNT WORK");
         auto target_x_rpm = cmd.getArg(0), target_y_rpm = cmd.getArg(1);
         auto target = Vec2D(target_x_rpm, target_y_rpm);
         swerve.set_target(target);
