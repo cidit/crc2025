@@ -4,8 +4,43 @@
 This is the template file for Prelim4.
 Ceci est le fichier template pour le problème Prelim4.
 """
+#----- Optimization ideas -----
+#
+# In some cases it would be better to over and under stack
+#
 
+##############################################
+#                  Classes                   # 
+##############################################
+class Station:
+    coords:tuple[int, int]
+    customers:list[tuple[int, int]] = []
+    nb_customers:int = 0
+
+    def __init__(self, coords:tuple[int, int]):
+        self.coords = coords
+    
+    def compare_to(self, other_customers:list[tuple[int, int]])->list[tuple[int, int]]:
+        return set(self.customers) & set(other_customers)
+    
+    def set_customers(self, custs:list[tuple[int, int]]):
+        self.customers = custs
+        self.nb_customers = len(custs)
+    
+    def add_customer(self, customer:tuple[int, int]):
+        self.customers.append(customer)
+        self.nb_customers = len(self.customers)
+
+    def remove_customer(self, customer:tuple[int, int]):
+        self.customers.remove(customer)
+        self.nb_customers = len(self.customers)
+
+
+##############################################
+#                  Solving                   # 
+##############################################
 def distance_manhattan(city_a: tuple[int,int], city_b: tuple[int,int]) -> int:
+    """Part_1: Find Manhattan Distance"""
     distance = 0
 
     x = city_b[0] - city_a[0]
@@ -14,7 +49,93 @@ def distance_manhattan(city_a: tuple[int,int], city_b: tuple[int,int]) -> int:
 
     return distance
 
+def solve(map: list[list[int]], n: int) -> list[list[tuple[int, int]]]:
+    solution:list[list[tuple[int, int]]] = []
+    stations:list[Station] = []
+    customers:list[tuple[int, int]] = []
+    remaining_customers:list[tuple[int, int]] = []
 
+    #Find stations and customers
+    for x in range(n):
+        for y in range(n):
+            if map[x][y] == 1:
+                stations.append(Station(coords=(x, y)))
+            elif map[x][y] == 2:
+                customers.append((x, y))
+
+    #Sort stations
+    stations.sort(key=lambda stat: stat.coords)
+    remaining_customers = list(customers)
+    # print("NB Stations:", len(stations))
+    # print("Available Customers:", customers)
+
+
+    #Find the 5 best customers for each station
+    for stat in stations:
+        #Sort customers based on distance and take the first 5
+        customers.sort(key=lambda cust: distance_manhattan(stat.coords, cust))
+        stat.set_customers(list(customers[:5]))
+
+        # print("Station:", stat.coords, " Used Customers:", stat.customers)
+        #Remove used customers from remaining list
+        for cust in stat.customers:
+            try:
+                #print("Removing: ", cust)
+                remaining_customers.remove(cust)
+            except:
+                # print("\tDid not find:", cust)
+                pass
+        
+        # print("\tRemaining Cust:", remaining_customers)
+
+
+    #Check if customer is used more than once
+    for i in range(len(stations)):
+        for j in range(len(stations)-i-1):
+            matches = stations[i].compare_to(stations[i+j+1].customers)
+            if matches:
+                # print("Matches!")
+                #Found similar, remove from furthest station
+                for match in matches:
+                    # print("\tRemoving customer", match, "from station", stat.coords)
+                    stations[i].remove_customer(match) if distance_manhattan(match, stations[i].coords) > distance_manhattan(match, stations[i+j+1].coords) else stations[i+j+1].remove_customer(match)
+
+
+    #Do we have extra customers?
+    if not len(remaining_customers) == 0:
+        # print("Extras!")
+        #Assign every remaining customer to a station
+        for cust in remaining_customers:
+            #Find the best station for this customer, only dist
+            shortest_dist = 99999999
+            best_stat_index = 0
+            for stat_index in range(len(stations)):
+                dist_man = distance_manhattan(cust, stations[stat_index].coords)
+                if dist_man < shortest_dist and stations[stat_index].nb_customers < 5:
+                    best_stat_index = stat_index
+        
+            #Add customer to station
+            # print("\tAdding ", cust, " to the station ", stations[best_stat_index].coords)
+            stations[best_stat_index].add_customer(cust)
+    
+
+    #Generate Solution from Stations list
+    # print("Generating Solution...")
+    solution = [stat.customers for stat in stations]
+
+    # print("Solution:")
+    # print(*solution, sep='\n')
+    return solution
+
+
+
+
+##############################################
+#                Other Parts                 # 
+##############################################
+#
+# Part_2
+#
 def get_stations(map: list[list[int]], n: int) -> list[tuple[int, int]]:
     stations = []
 
@@ -29,6 +150,9 @@ def get_stations(map: list[list[int]], n: int) -> list[tuple[int, int]]:
 
     return stations
 
+#
+# Part_3
+#
 def get_customers(map: list[list[int]], n: int) -> list[tuple[int, int]]:
     customers = []
 
@@ -39,78 +163,3 @@ def get_customers(map: list[list[int]], n: int) -> list[tuple[int, int]]:
                 customers.append((x, y))
 
     return customers
-
-
-def solve(map: list[list[int]], n: int) -> list[list[tuple[int, int]]]:
-    solution = []
-    
-    #----- Optimization ideas -----
-    #
-    # Iterate only once for stations and customers 
-    #
-
-    #----- Algorithm Priority -----
-    #   1. Nb customer per station
-    #       - Even distribution is better: 444 > 552
-    #
-    #   2. Dist between customer and station
-    #       - 
-    
-    stations = []
-    customers = []
-
-    #Find stations and customers
-    for x in range(n):
-        for y in range(n):
-            if map[x][y] == 1:
-                stations.append((x, y))
-            elif map[x][y] == 2:
-                customers.append((x, y))
-
-    #Sort stations
-    stations.sort()
-
-    #Determine best nb of customer per station
-    nb_station = len(stations)
-    nb_customer = len(customers)
-    cust_per_stat = int(nb_customer/nb_station) #Best nb cust per station
-    remainder = nb_customer % nb_station #Station in extra
-
-    print("Stations:", stations)
-    print("Customers:", customers)
-    print("Cust/Stat: ", cust_per_stat, " Remainder: ", remainder)
-
-    #Create empty list for every station
-    for _ in stations:
-        cust_list = list() 
-        solution.append(cust_list)
-
-
-    # #Find the best customers for each station
-    # for stat in stations:
-    #     #Sort customers based on distance and take the first ones
-    #     customers.sort(key=lambda cust: distance_manhattan(stat, cust))
-    #     solution.append(list(customers[:cust_per_stat]))
-
-    #     #Remove used customers from list
-    #     customers = customers[cust_per_stat:]
-    #     print("Remaining Cust: ", customers)
-
-    # #Do we have extras
-    # if not len(customers) == 0:
-    #Assign every customer to a station
-    for cust in customers:
-        #Find the best station for this customer, only dist
-        shortest_dist = 99999999
-        best_stat_index = 0
-        for stat_index in range(len(stations)):
-            dist_man = distance_manhattan(cust, stations[stat_index])
-            if dist_man < shortest_dist:
-                best_stat_index = stat_index
-    
-        #Add customer to station
-        solution[best_stat_index].append(cust)
-    
-    #print("solution: ", solution)
-
-    return solution
