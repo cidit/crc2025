@@ -27,7 +27,7 @@ GobuildaRotaryEncoder goencoB(encoB, 145.1 * 2.5, polling_timer);
 PrecisionMotor pmotorB(motorB, goencoB, 400);
 
 const auto MAX_PULSE_LEN = 4160.0;
-PwmRotaryEncoder pwm_enco(CRC_DIG_12, MAX_PULSE_LEN, polling_timer);
+PwmRotaryEncoder pwm_enco(CRC_DIG_12, MAX_PULSE_LEN, 0.0, polling_timer);
 
 SwerveModule swerve(pmotorA, pmotorB, pwm_enco);
 
