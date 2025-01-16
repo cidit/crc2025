@@ -16,6 +16,14 @@ class PwmRotaryEncoder : public Sensor<PwmRotaryEncoderData>
     double _mpl, _offset;
 
 public:
+    /**
+     * absolute pwm-based encoder. deals in rads.
+     * 
+     * @param pin the pin to to read from
+     * @param max_pulse_length the expected maximum pulse length in microseconds
+     * @param the offset from zero in rads
+     * @param poll_timer an externally managed timer that dictates when the sensor should poll
+     */
     PwmRotaryEncoder(pin_t pin, double max_pulse_length, double offset, const Timer &poll_timer)
         : Sensor({0}, poll_timer),
           _p(pin), _mpl(max_pulse_length), _offset(offset)
