@@ -193,39 +193,44 @@ void loop()
     if (read_mode && print_timer.is_time())
     {
 
-        SPRINT(" ANGLE ");
-        SPRINT("c:" + String(swerve._e.getLast().rads));
-        SPRINT(" ");
-        SPRINT("t:" + String(swerve._target.direction));
-        SPRINT(" ");
+        // SPRINT(" ANGLE ");
+        // SPRINT("c:");
+        SPRINT(String(swerve._e.getLast().rads));
+        // SPRINT(" ");
+        // SPRINT("t:" + String(swerve._target.direction));
+        // SPRINT(" ");
 
         SEPARATOR;
 
         auto oprev = swerve.get_oprev_result();
-        SPRINT(" OPREV ");
+        // SPRINT(" OPREV ");
         SPRINT(oprev.reverse ? "Y" : "N");
+        // SPRINT(" ");
+        // SPRINT(padLeft(String(oprev.travel), 5, '+'));
+        // SPRINT(" ");
+
+        SEPARATOR;
+
+        // SPRINT(" SPEED ");
+        // SPRINT("lin:" + padLeft(String(swerve.get_linear_velocity(), 1), 6, '_'));
+        // SPRINT(" ");
+        // SPRINT("ang:" + padLeft(String(swerve.get_angular_velocity(), 1), 6, '_'));
+        // SPRINT(" ");
+        // SPRINT("w:" + padLeft(String(swerve.get_wheel_rpm(), 1), 6, '_')); // TODO: re-add when implemented
         SPRINT(" ");
-        SPRINT(padLeft(String(oprev.travel), 5, '+'));
+        SPRINT("[A] S:" + padLeft(String(swerve._pma._e.getLast().rpm, 1), 6, '\''));
+        SPRINT("  T:" + padLeft(String(swerve._pma._pid_speed.getSetPoint(), 1), 6, '\''));
+        SPRINT("  {" + String(swerve._pma._m.get_power()) + "}");
+        SEPARATOR;
+        SPRINT("[B] S:" + padLeft(String(swerve._pmb._e.getLast().rpm, 1), 6, '\''));
+        SPRINT("  T:" + padLeft(String(swerve._pmb._pid_speed.getSetPoint(), 1), 6, '\''));
+        SPRINT("  {" + String(swerve._pmb._m.get_power()) + "}");
         SPRINT(" ");
 
         SEPARATOR;
 
-        SPRINT(" SPEED ");
-        SPRINT("lin:" + padLeft(String(swerve.get_linear_velocity(), 1), 6, '_'));
-        SPRINT(" ");
-        SPRINT("ang:" + padLeft(String(swerve.get_angular_velocity(), 1), 6, '_'));
-        SPRINT(" ");
-        SPRINT("w:" + padLeft(String(swerve.get_wheel_rpm(), 1), 6, '_'));
-        SPRINT(" ");
-        SPRINT("a:" + padLeft(String(swerve._pma._e.getLast().rpm, 1), 6, '_'));
-        SPRINT(" ");
-        SPRINT("b:" + padLeft(String(swerve._pmb._e.getLast().rpm, 1), 6, '_'));
-        SPRINT(" ");
-
-        SEPARATOR;
-
-        SPRINT(" ");
-        SPRINT("s:" + String(swerve._pid.getSetPoint()) + "rad");
+        // SPRINT(" ");
+        // SPRINT("s:" + String(swerve._pid.getSetPoint()) + "rad");
         SPRINT(" ");
         SPRINT("i:" + padLeft(String(swerve._pid.getInput()), 5, '+') +"rad");
         SPRINT(" ");
