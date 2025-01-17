@@ -61,6 +61,10 @@ public:
         return _last_power;
     }
 
+    void set_inverted(bool inverted) {
+        _is_inverted = inverted;
+    }
+
 private:
     int _pin;
     bool _is_inverted;
