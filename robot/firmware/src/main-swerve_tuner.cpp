@@ -16,6 +16,9 @@ bool read_mode = true;
 
 Timer print_timer(ONE_SECOND / 10), polling_timer(ONE_SECOND / 50);
 
+// #define SWERVE_A 
+
+#ifdef SWERVE_A
 Motor motorA(CRC_PWM_3);
 Encoder encoA(CRC_I2C_SDA, CRC_DIG_4);
 GobuildaRotaryEncoder goencoA(encoA, 145.1 * 2.5, polling_timer);
@@ -28,6 +31,20 @@ PrecisionMotor pmotorB(motorB, goencoB, 400);
 
 const auto MAX_PULSE_LEN = 4160.0;
 PwmRotaryEncoder pwm_enco(CRC_DIG_12, MAX_PULSE_LEN, 0.0, polling_timer);
+#else
+Motor motorA(CRC_PWM_1);
+Encoder encoA(CRC_ENCO_B, CRC_DIG_3);
+GobuildaRotaryEncoder goencoA(encoA, 145.1 * 2.5, polling_timer);
+PrecisionMotor pmotorA(motorA, goencoA, 400);
+
+Motor motorB(CRC_PWM_7);
+Encoder encoB(CRC_I2C_SCL, CRC_DIG_5);
+GobuildaRotaryEncoder goencoB(encoB, 145.1 * 2.5, polling_timer);
+PrecisionMotor pmotorB(motorB, goencoB, 400);
+
+const auto MAX_PULSE_LEN = 4160.0;
+PwmRotaryEncoder pwm_enco(CRC_DIG_1, MAX_PULSE_LEN, 0.0, polling_timer);
+#endif
 
 SwerveModule swerve(pmotorA, pmotorB, pwm_enco);
 
@@ -87,8 +104,13 @@ void setup()
     CrcLib::Initialize();
 
     swerve.begin();
+    #ifdef SWERVE_A
+    pmotorA._pid_speed.setK(0.60000 0.00001 0.06000);
+    pmotorB._pid_speed.setK(0.60000 0.00001 0.10000);
+    #else
     pmotorA._pid_speed.setK(0.60000, 0.00001, 0.12000);
     pmotorB._pid_speed.setK(0.60000, 0.00001, 0.15500);
+    #endif
     swerve.enable(true);
 
     Serial.println("Setup Done");
