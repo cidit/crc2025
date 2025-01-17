@@ -4,7 +4,7 @@
 #include <PID_RT.h>
 
 #define SPRINT(things) Serial.print(things)
-#define SPACER Serial.print("    ")
+#define SEPARATOR Serial.print(" | ")
 
 void print_pid_vals(PID_RT& pid)
 {
@@ -18,21 +18,21 @@ void print_pid_vals(PID_RT& pid)
 
 
 // https://github.com/ElvisKremmen/Arduino-Code-Fragments/blob/main/Numeric%20string%20left-pad%20function
-String padLeft(String inString, uint16_t newLen)
+String padLeft(String inString, uint16_t newLen, char c)
 { // Pad a numeric string with spaces for output
     while (inString.length() < newLen)
     {
-        inString = String(" ") + inString;
+        inString = String(c) + inString;
     };
     return inString;
 }
 
 
-String padRight(String inString, uint16_t newLen)
+String padRight(String inString, uint16_t newLen, char c)
 { // Pad a numeric string with spaces for output
     while (inString.length() < newLen)
     {
-        inString = inString + String(" ");
+        inString = inString + String(c);
     };
     return inString;
 }
