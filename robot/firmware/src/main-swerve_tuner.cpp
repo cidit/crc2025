@@ -36,7 +36,7 @@ namespace garbage
     // TODO: fix controller, if no input and x-y is 0,
     // angle is automatically 0
     auto controller_mode = false;
-    auto last_angle = 0;
+    auto last_angle = 0.;
     auto last_xy = Vec2D(0, 0);
     // struct controller
     // {
@@ -193,51 +193,56 @@ void loop()
     if (read_mode && print_timer.is_time())
     {
 
-        SPRINT("[ ANGLE ");
-        SPRINT("c:" + padRight(String(swerve._e.getLast().rads, 2), 5));
+        SPRINT(" ANGLE ");
+        SPRINT("c:" + String(swerve._e.getLast().rads));
         SPRINT(" ");
-        SPRINT("t:" + padRight(String(swerve._target.direction, 2), 5));
-        SPRINT(" ]");
-        SPACER;
+        SPRINT("t:" + String(swerve._target.direction));
+        SPRINT(" ");
+
+        SEPARATOR;
 
         auto oprev = swerve.get_oprev_result();
-        SPRINT("[ OPREV ");
+        SPRINT(" OPREV ");
         SPRINT(oprev.reverse ? "Y" : "N");
         SPRINT(" ");
-        SPRINT(oprev.travel);
-        SPRINT(" ]");
-        SPACER;
+        SPRINT(padLeft(String(oprev.travel), 5, '+'));
+        SPRINT(" ");
 
-        SPRINT("[ SPEED ");
-        SPRINT("lin: " + String(swerve.get_linear_velocity()));
-        SPACER;
-        SPRINT("ang: " + String(swerve.get_angular_velocity()));
-        SPACER;
-        SPRINT("w:" + String(swerve.get_wheel_rpm(), 2));
-        SPACER;
-        SPRINT("a:" + String(swerve._pma._e.getLast().rpm, 2));
-        SPACER;
-        SPRINT("b:" + String(swerve._pmb._e.getLast().rpm, 2));
-        SPRINT(" ]");
-        SPACER;
+        SEPARATOR;
 
-        SPRINT("[ ");
-        SPRINT("s:" + padLeft(String(swerve._pid.getSetPoint()), 7));
+        SPRINT(" SPEED ");
+        SPRINT("lin:" + padLeft(String(swerve.get_linear_velocity(), 1), 6, '_'));
         SPRINT(" ");
-        SPRINT("i:" + padLeft(String(swerve._pid.getInput()), 7));
+        SPRINT("ang:" + padLeft(String(swerve.get_angular_velocity(), 1), 6, '_'));
         SPRINT(" ");
-        SPRINT("o:" + padLeft(String(swerve._pid.getOutput()), 7));
-        SPRINT(" ]");
-        SPACER;
+        SPRINT("w:" + padLeft(String(swerve.get_wheel_rpm(), 1), 6, '_'));
+        SPRINT(" ");
+        SPRINT("a:" + padLeft(String(swerve._pma._e.getLast().rpm, 1), 6, '_'));
+        SPRINT(" ");
+        SPRINT("b:" + padLeft(String(swerve._pmb._e.getLast().rpm, 1), 6, '_'));
+        SPRINT(" ");
 
-        SPRINT("[ K ");
-        SPRINT(padLeft(String(swerve._pid.getKp(), 5), 7));
+        SEPARATOR;
+
         SPRINT(" ");
-        SPRINT(padLeft(String(swerve._pid.getKi(), 5), 7));
+        SPRINT("s:" + String(swerve._pid.getSetPoint()) + "rad");
         SPRINT(" ");
-        SPRINT(padLeft(String(swerve._pid.getKd(), 5), 7));
-        SPRINT(" ]");
-        SPACER;
+        SPRINT("i:" + padLeft(String(swerve._pid.getInput()), 5, '+') +"rad");
+        SPRINT(" ");
+        SPRINT("o:" + padLeft(String(swerve._pid.getOutput(), 1), 7, '_') + "rpm");
+        SPRINT(" ");
+
+        SEPARATOR;
+
+        SPRINT(" K ");
+        SPRINT(String(swerve._pid.getKp(), 5));
+        SPRINT(" ");
+        SPRINT(String(swerve._pid.getKi(), 5));
+        SPRINT(" ");
+        SPRINT(String(swerve._pid.getKd(), 5));
+        SPRINT(" ");
+
+        SEPARATOR;
 
         Serial.println();
     }
