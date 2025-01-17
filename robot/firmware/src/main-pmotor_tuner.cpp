@@ -128,20 +128,20 @@ void loop()
         SPRINT("]");
         SPACER;
 
-        SPRINT("speed:" + padRight(String(pmotor._e.getLast().rpm), 7));
+        SPRINT("speed:" + padRight(String(pmotor._e.getLast().rpm), 7, '\''));
         SPACER;
         SPRINT("angle:" + String(pmotor._e.getLast().rads, 2));
         SPACER;
 
-        SPRINT("enco:" + padRight(String(enco.read()), 4));
+        SPRINT("enco:" + padRight(String(enco.read()), 4, '\''));
         SPACER;
 
         SPRINT("[ ");
-        SPRINT("s:" + padRight(String(tuning_pid.getSetPoint()), 7));
+        SPRINT("s:" + padRight(String(tuning_pid.getSetPoint()), 7, '\''));
         SPRINT(" ");
-        SPRINT("i:" + padRight(String(tuning_pid.getInput()), 7));
+        SPRINT("i:" + padRight(String(tuning_pid.getInput()), 7, '\''));
         SPRINT(" ");
-        SPRINT("o:" + padRight(String(tuning_pid.getOutput()), 7));
+        SPRINT("o:" + padRight(String(tuning_pid.getOutput()), 7, '\''));
         SPRINT(" ]");
         SPACER;
 
@@ -149,11 +149,11 @@ void loop()
         SPACER;
 
         SPRINT("[ K ");
-        SPRINT(padRight(String(tuning_pid.getKp(), 5), 7));
+        SPRINT(padRight(String(tuning_pid.getKp(), 5), 7, '\''));
         SPRINT(" ");
-        SPRINT(padRight(String(tuning_pid.getKi(), 5), 7));
+        SPRINT(padRight(String(tuning_pid.getKi(), 5), 7, '\''));
         SPRINT(" ");
-        SPRINT(padRight(String(tuning_pid.getKd(), 5), 7));
+        SPRINT(padRight(String(tuning_pid.getKd(), 5), 7, '\''));
         SPRINT(" ]");
         SPACER;
 
