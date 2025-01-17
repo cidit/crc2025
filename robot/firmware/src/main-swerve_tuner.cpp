@@ -37,7 +37,7 @@ Encoder encoA(CRC_ENCO_B, CRC_DIG_3);
 GobuildaRotaryEncoder goencoA(encoA, 145.1 * 2.5, polling_timer);
 PrecisionMotor pmotorA(motorA, goencoA, 400);
 
-Motor motorB(CRC_PWM_7, false);
+Motor motorB(CRC_PWM_7, true);
 Encoder encoB(CRC_I2C_SCL, CRC_DIG_5);
 GobuildaRotaryEncoder goencoB(encoB, 145.1 * 2.5, polling_timer, true);
 PrecisionMotor pmotorB(motorB, goencoB, 400);
