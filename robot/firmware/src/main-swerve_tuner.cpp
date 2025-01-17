@@ -110,6 +110,7 @@ void setup()
     #else
     pmotorA._pid_speed.setK(0.60000, 0.00001, 0.12000);
     pmotorB._pid_speed.setK(0.60000, 0.00001, 0.15500);
+    pmotorB._m.set_inverted(true);
     #endif
     swerve.enable(true);
 

@@ -32,6 +32,8 @@ precision motor BB: (A)
         angle: ???
 
 precision motor BH: (B)
+    notes:
+        motor is reversed
     motor: CRC_PWM_7
     enco: CRC_I2C_SCL, CRC_DIG_5
     pids:
