@@ -25,7 +25,7 @@ public:
         Encoder &internal_encoder,
         double ticks_per_turn,
         const Timer &polling_timer,
-        const bool reversed)
+        const bool reversed = false)
         : Sensor({
                      .rads = 0,
                      .rpm = 0,
