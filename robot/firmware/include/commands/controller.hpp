@@ -1,12 +1,14 @@
 #pragma once
 #include "math/vectors.hpp"
+#include "util/lifecycle.hpp"
 #include "CrcRemoteState.h"
 #include "CrcLib.h"
+#include "CrcXbee.h"
 
 /**
  * largely based off of @squid's controller
  */
-class Controller
+class Controller: public Lifecycle
 {
 public:
     /**
@@ -15,9 +17,17 @@ public:
      */
     struct joystick
     {
-        Vec2D raw;
+        Vec2D xy;
         double angle;
     } j1, j2;
+
+    CrcUtility::RemoteState _raw_last, _raw_current;
     
-    CrcUtility::RemoteState _raw_last, raw_current;
+    void begin() override {
+
+    }
+
+    void update() override {
+    
+    }
 };
