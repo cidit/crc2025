@@ -17,5 +17,5 @@ struct dataframe
 union dataframe_softcast
 {
     dataframe data;
-    byte bytes[sizeof(dataframe)]; // + 1]; // +1 is necessary because SPI works in alternance
+    byte bytes[sizeof(dataframe) + 1]; // +1 is necessary because SPI works in alternance
 };
