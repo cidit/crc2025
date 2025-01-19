@@ -58,6 +58,7 @@ void loop()
         }
         else
         {
+            Serial.println(request);
             Serial.println("not request byte");
         }
 
