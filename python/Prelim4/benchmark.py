@@ -12,7 +12,7 @@ from game_logic import view_stations
 from game_logic import view_solution
 
 def benchmark():
-    test_with_one_size = 100 ### put the value of n you want to try your algorithm with or use 0 for a full benchmark
+    test_with_one_size = 0 ### put the value of n you want to try your algorithm with or use 0 for a full benchmark
 
 
 
@@ -36,7 +36,7 @@ def benchmark():
             if end_time - start_time > 60000:
                 print('solution took too much time!!!')
 
-            #print('time to solve size', n, ' is ', (end_time-start_time), 'ms')
+            print('time to solve size', n, ' is ', (end_time-start_time), 'ms')
             score_per_value[n] = get_score(city_map, solution)/tests_per_value + (score_per_value[n] if n in score_per_value else 0)
     
     for n in score_per_value:
