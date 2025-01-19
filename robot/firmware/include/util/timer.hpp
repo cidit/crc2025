@@ -3,6 +3,8 @@
 
 using timestamp = uint32_t;
 
+// TODO: the current implementation can drift over time since we dont keep track of delta time, (ex: if the last time we updated was longer than the delay by .5 times itself, the timer will always trigger half a delay later (goes out of sync))
+
 class Timer
 {
 
