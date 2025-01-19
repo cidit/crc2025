@@ -10,7 +10,7 @@ spi master
 #include "util/timer.hpp"
 #include "util/print.hpp"
 
-Timer spi_poll_timer(ONE_SECOND/4);
+Timer spi_poll_timer(ONE_SECOND/1);
 
 void myinit() {
     pinMode(SS, OUTPUT);

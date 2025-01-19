@@ -39,9 +39,10 @@ void loop()
         for (auto rawb : df.bytes)
         {
             auto recv = SPI.transfer(rawb);
-            Serial.print("received: ");
-            Serial.println(recv);
+            Serial.print(recv);
+            Serial.print("|");
         }
+        Serial.println();
         SPI.endTransaction();
     }
 }
