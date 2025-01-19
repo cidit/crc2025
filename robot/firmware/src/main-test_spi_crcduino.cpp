@@ -6,6 +6,7 @@ spi master
 #include <Arduino.h>
 #include <SPI.h>
 #include "communication/enco_peripherals.hpp"
+#include "util/constants.hpp"
 #include "util/timer.hpp"
 #include "util/print.hpp"
 
