@@ -19,9 +19,9 @@ bool read_mode = true;
 Timer print_timer(ONE_SECOND / 40);
 Timer polling_timer(ONE_SECOND / 40);
 
-Motor motor(CRC_PWM_1);
-Encoder enco(CRC_ENCO_B, CRC_DIG_3);
-GobuildaRotaryEncoder roenco(enco, 145.1 * 2.5, polling_timer);
+Motor motor(CRC_PWM_7);
+Encoder enco(CRC_I2C_SCL, CRC_DIG_5);
+GobuildaRotaryEncoder roenco(enco, 145.1 * 2.5, polling_timer, true);
 PrecisionMotor pmotor(motor, roenco, 400.);
 
 void setup()
@@ -133,7 +133,7 @@ void loop()
         SPRINT("angle:" + String(pmotor._e.getLast().rads, 2));
         SPACER;
 
-        SPRINT("enco:" + padRight(String(enco.read()), 4, '\''));
+        SPRINT("enco:" + padRight(String(pmotor._e._internal_read()), 4, '\''));
         SPACER;
 
         SPRINT("[ ");
