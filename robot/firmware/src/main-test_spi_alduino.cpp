@@ -2,6 +2,7 @@
 spi slave
 */
 
+// #include <ArduinoSTL.h>
 #include <Arduino.h>
 #include <SPI.h>
 #include "communication/enco_peripherals.hpp"
@@ -21,9 +22,9 @@ void setup()
     Serial.begin(115200);
 
     pinMode(SS, INPUT);
-    SPI.begin(SS);
+    SPI.begin();
 
-    // SPI.setClockDivider(SPI_CLOCK_DIV8); // ajust to match clock speed with master
+    SPI.setClockDivider(SPI_CLOCK_DIV8); // ajust to match clock speed with master
 }
 
 void loop()

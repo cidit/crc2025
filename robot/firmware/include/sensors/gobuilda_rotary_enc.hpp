@@ -6,12 +6,7 @@
 #include "util/misc.hpp"
 #include "math/angles.hpp"
 #include "sensors/sensor.hpp"
-
-struct GobuildaRotaryEncoderData
-{
-    double rads;
-    double rpm;
-};
+#include "sensors/gobuilda_rotary_enc_data.hpp"
 
 class GobuildaRotaryEncoder : public Sensor<GobuildaRotaryEncoderData>
 {

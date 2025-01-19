@@ -11,7 +11,7 @@ spi master
 
 Timer spi_poll_timer(ONE_SECOND/4);
 
-void init() {
+void myinit() {
     pinMode(SS, OUTPUT);
     digitalWrite(SS, HIGH);
 }
@@ -21,7 +21,7 @@ dataframe retrieve_df() {
 
     SPI.beginTransaction(SPI_AL_CRC_SETTINGS);
     digitalWrite(SS, LOW); // INITIATE COMM WITH SLAVE
-    for (auto i = 0; i < sizeof(dfs.bytes); i++) {
+    for (uint8_t i = 0; i < sizeof(dfs.bytes); i++) {
         dfs.bytes[i] = SPI.transfer(i);
     }
     digitalWrite(SS, HIGH); // END COMM
@@ -33,7 +33,7 @@ dataframe retrieve_df() {
 void setup() {
     Serial.begin(115200);
     
-    init();
+    myinit();
     SPI.begin();
     // SPI.begin(SS);
     // SPI.setDataMode(SS, SPI_MODE0);
