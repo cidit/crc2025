@@ -20,7 +20,7 @@ void myinit() {
     digitalWrite(SS, HIGH);
 }
 
-dataframe retrieve_df() {
+dataframe_softcast retrieve_df() {
     dataframe_softcast dfs;
 
     SPI.beginTransaction(SPI_AL_CRC_SETTINGS);
@@ -35,7 +35,7 @@ dataframe retrieve_df() {
     digitalWrite(SS, HIGH); // END COMM
     SPI.endTransaction();
 
-    return dfs.data;
+    return dfs;
 }
 
 void setup() {
@@ -53,10 +53,14 @@ void loop() {
 
     if (spi_poll_timer.is_time()) {
         auto df = retrieve_df();
-        for (auto data: df.data) {
-            SPRINT("v:" + String(data.rpm));
-            SPRINT("a:"+ String(data.rads));
-            SEPARATOR;
+        // for (auto data: df.data) {
+        //     SPRINT("v:" + String(data.rpm));
+        //     SPRINT("a:"+ String(data.rads));
+        //     SEPARATOR;
+        // }
+        for (auto b: df.bytes) {
+            SPRINT(b);
+            SPRINT(" ");
         }
         SPRINT('\n');
     }
