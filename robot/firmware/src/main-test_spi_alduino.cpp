@@ -55,7 +55,7 @@ void spi_slave_crazy_init()
 
 void SPI0_Handler()
 {
-    uint16_t DataReceived;
+    uint16_t DataReceived = 0;
     uint32_t status = SPI0->SPI_SR;
 
     if (status & SPI_SR_RDRF)
@@ -82,16 +82,38 @@ Encoder e[ENCO_NUM] = {
 
 Timer polling_timer(ONE_SECOND / 4);
 
+GobuildaRotaryEncoder ge[ENCO_NUM]{
+    GobuildaRotaryEncoder(e[0], 145.1 * 2.5, polling_timer),
+    GobuildaRotaryEncoder(e[1], 145.1 * 2.5, polling_timer),
+    GobuildaRotaryEncoder(e[2], 145.1 * 2.5, polling_timer),
+    GobuildaRotaryEncoder(e[3], 145.1 * 2.5, polling_timer),
+    GobuildaRotaryEncoder(e[4], 145.1 * 2.5, polling_timer),
+    GobuildaRotaryEncoder(e[5], 145.1 * 2.5, polling_timer),
+    GobuildaRotaryEncoder(e[6], 145.1 * 2.5, polling_timer),
+    GobuildaRotaryEncoder(e[7], 145.1 * 2.5, polling_timer),
+};
+
 void setup()
 {
     Serial.begin(115200);
     // spi_slave_crazy_init();
+
+    for (auto enco : ge)
+    {
+        enco.begin();
+    }
 }
 
 void loop()
 {
     auto now = millis();
     polling_timer.update(now);
+
+    for (auto &enco : ge)
+    {
+        enco.update();
+    }
+
     if (!polling_timer.is_time())
     {
         return;
@@ -103,8 +125,10 @@ void loop()
             "| e" +
             String(i) +
             ": " +
-            String(e[i].readAndReset()) +
-            " ");
+            String(ge[i].getLast().rads) +
+            "a " +
+            String(ge[i].getLast().rpm) +
+            "s ");
     }
     Serial.println("|");
 }
