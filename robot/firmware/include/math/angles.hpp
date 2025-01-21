@@ -1,5 +1,4 @@
 #pragma once
-#include <cmath>
 #include "util/misc.hpp"
 
 static const double MAX_RAD = PI * 2;
