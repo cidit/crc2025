@@ -9,13 +9,28 @@ static const SPISettings SPI_AL_CRC_SETTINGS(
     MSBFIRST,
     SPI_MODE0);
 
-struct dataframe
-{
-    GobuildaRotaryEncoderData data[8];
-};
+constexpr auto ENCO_NUM = 8;
+constexpr auto DF_LEN = sizeof(int32_t) * ENCO_NUM;
 
-union dataframe_softcast
-{
-    dataframe data;
-    byte bytes[sizeof(dataframe)]; // + 1]; // +1 is necessary because SPI works in alternance
-};
+
+void master_enco_spi_init() {
+    pinMode(SS, OUTPUT);
+    digitalWrite(SS, HIGH);
+}
+
+/**
+ * retrieves a dataframe
+ */
+void retrieve_df(int32_t df[ENCO_NUM]) {
+    auto buff = (byte*)df;
+
+    SPI.beginTransaction(SPI_AL_CRC_SETTINGS);
+    digitalWrite(SS, LOW); // INITIATE COMM WITH SLAVE
+
+    for (byte i = 0; i < DF_LEN; i++) {
+      buff[i] = SPI.transfer(0x01); // 0x01 is just random data. we need to send something to receive something.
+    }
+
+    digitalWrite(SS, HIGH); // END COMM
+    SPI.endTransaction();
+}
