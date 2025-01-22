@@ -9,6 +9,7 @@
 // #include <ArduinoSTL.h>
 #include <Arduino.h>
 #include <SPI.h>
+#include "util/print.hpp"
 #include "communication/enco_peripherals.hpp"
 #include "sensors/gobuilda_rotary_enc.hpp"
 #include "sensors/gobuilda_rotary_enc_data.hpp"
@@ -25,54 +26,57 @@ bool does_master_need_data()
 
 void spi_slave_crazy_init()
 {
-    // https://forum.arduino.cc/t/arduino-due-spi-interrupt/574857/4
+    // FROM: https://forum.arduino.cc/t/arduino-due-spi-interrupt/574857/4
 
-    // SPI serial recieve
-    REG_PMC_PCER0 |= PMC_PCER0_PID24;   // Power up SPI clock
-    REG_SPI0_WPMR = 0 << SPI_WPMR_WPEN; // Unlock user interface for SPI
+    // // SPI serial recieve
+    // REG_PMC_PCER0 |= PMC_PCER0_PID24;   // Power up SPI clock
+    // REG_SPI0_WPMR = 0 << SPI_WPMR_WPEN; // Unlock user interface for SPI
 
-    // Instance SPI0, MISO: PA25, (MISO), MOSI: PA26, (MOSI), SCLK: PA27, (SCLK), NSS: PA28, (NPCS0)
-    REG_PIOA_ABSR |= PIO_ABSR_P25; // Transfer Pin control from PIO to SPI
-    REG_PIOA_PDR |= PIO_PDR_P25;   // Set MISO pin to an output
+    // // Instance SPI0, MISO: PA25, (MISO), MOSI: PA26, (MOSI), SCLK: PA27, (SCLK), NSS: PA28, (NPCS0)
+    // REG_PIOA_ABSR |= PIO_ABSR_P25; // Transfer Pin control from PIO to SPI
+    // REG_PIOA_PDR |= PIO_PDR_P25;   // Set MISO pin to an output
 
-    REG_PIOA_ABSR |= PIO_ABSR_P26;    // Transfer Pin control from PIO to SPI
-    REG_PIOA_PDR |= 0 << PIO_PDR_P26; // Set MOSI pin to an input
+    // REG_PIOA_ABSR |= PIO_ABSR_P26;    // Transfer Pin control from PIO to SPI
+    // REG_PIOA_PDR |= 0 << PIO_PDR_P26; // Set MOSI pin to an input
 
-    REG_PIOA_ABSR |= PIO_ABSR_P27;    // Transfer Pin control from PIO to SPI
-    REG_PIOA_PDR |= 0 << PIO_PDR_P27; // Set SCLK pin to an input
+    // REG_PIOA_ABSR |= PIO_ABSR_P27;    // Transfer Pin control from PIO to SPI
+    // REG_PIOA_PDR |= 0 << PIO_PDR_P27; // Set SCLK pin to an input
 
-    REG_PIOA_ABSR |= PIO_ABSR_P28;    // Transfer Pin control from PIO to SPI
-    REG_PIOA_PDR |= 0 << PIO_PDR_P28; // Set NSS pin to an input
+    // REG_PIOA_ABSR |= PIO_ABSR_P28;    // Transfer Pin control from PIO to SPI
+    // REG_PIOA_PDR |= 0 << PIO_PDR_P28; // Set NSS pin to an input
 
-    REG_SPI0_CR = 1; // Enable SPI
-    REG_SPI0_MR = 0; // Slave mode
-    // Receive Data Register Full Interrupt
-    SPI0->SPI_IER = SPI_IER_RDRF;
+    // REG_SPI0_CR = 1; // Enable SPI
+    // REG_SPI0_MR = 0; // Slave mode
+    // // Receive Data Register Full Interrupt
+    // SPI0->SPI_IER = SPI_IER_RDRF;
+    // NVIC_EnableIRQ(SPI0_IRQn);
+
+    // SPI0->SPI_CSR[0] = SPI_CSR_NCPHA | SPI_CSR_BITS_8_BIT; // Shift on falling edge and transfer 8 bits.
+
+
+    // FROM: https://github.com/MrScrith/arduino_due/blob/master/spi_slave.ino
+    NVIC_ClearPendingIRQ(SPI0_IRQn);
     NVIC_EnableIRQ(SPI0_IRQn);
+    SPI.begin(SS);
+    REG_SPI0_CR = SPI_CR_SWRST; // reset SPI
 
-    SPI0->SPI_CSR[0] = SPI_CSR_NCPHA | SPI_CSR_BITS_8_BIT; // Shift on falling edge and transfer 8 bits.
+    // Setup interrupt
+    REG_SPI0_IDR = SPI_IDR_TDRE | SPI_IDR_MODF | SPI_IDR_OVRES | SPI_IDR_NSSR | SPI_IDR_TXEMPTY | SPI_IDR_UNDES;
+    REG_SPI0_IER = SPI_IER_RDRF;
+
+    // Setup the SPI registers.
+    REG_SPI0_CR = SPI_CR_SPIEN;   // enable SPI
+    REG_SPI0_MR = SPI_MR_MODFDIS; // slave and no modefault
+    REG_SPI0_CSR = SPI_MODE0;     // DLYBCT=0, DLYBS=0, SCBR=0, 8 bit transfer
 }
 
-void SPI0_Handler()
-{
-    uint16_t DataReceived = 0;
-    uint32_t status = SPI0->SPI_SR;
+// dataframe_softcast df;
 
-    if (status & SPI_SR_RDRF)
-    {
-        DataReceived = SPI0->SPI_RDR & SPI_RDR_RD_Msk;
-    }
-    // Send something to receive something
-    if (status & SPI_SR_TDRE)
-    {
-        SPI0->SPI_TDR = (uint16_t)DataReceived;
-    }
-}
+Timer print_timer(ONE_SECOND);
 
-const auto ENCO_NUM = 8;
 Encoder e[ENCO_NUM] = {
     Encoder(38, 36), // right high
-    Encoder(40, 34), // right low
+    Encoder(40, 34), // right low (ITS INVERTED!)
     Encoder(42, 32), // left low
     Encoder(44, 30), // left high
     Encoder(46, 28),
@@ -80,57 +84,74 @@ Encoder e[ENCO_NUM] = {
     Encoder(50, 24),
     Encoder(52, 22)};
 
-Timer polling_timer(ONE_SECOND / 4);
+byte df[sizeof(int32_t) * ENCO_NUM];
 
-GobuildaRotaryEncoder ge[ENCO_NUM]{
-    GobuildaRotaryEncoder(e[0], 145.1 * 2.5, polling_timer),
-    GobuildaRotaryEncoder(e[1], 145.1 * 2.5, polling_timer),
-    GobuildaRotaryEncoder(e[2], 145.1 * 2.5, polling_timer),
-    GobuildaRotaryEncoder(e[3], 145.1 * 2.5, polling_timer),
-    GobuildaRotaryEncoder(e[4], 145.1 * 2.5, polling_timer),
-    GobuildaRotaryEncoder(e[5], 145.1 * 2.5, polling_timer),
-    GobuildaRotaryEncoder(e[6], 145.1 * 2.5, polling_timer),
-    GobuildaRotaryEncoder(e[7], 145.1 * 2.5, polling_timer),
-};
+int df_idx = 0;
+
+int interupt_c;
 
 void setup()
 {
     Serial.begin(115200);
-    // spi_slave_crazy_init();
-
-    for (auto enco : ge)
-    {
-        enco.begin();
-    }
+    spi_slave_crazy_init();
 }
 
 void loop()
 {
-    auto now = millis();
-    polling_timer.update(now);
+    print_timer.update(millis());
 
-    for (auto &enco : ge)
+    // update dataframe
+    auto df_enco_vals = (int32_t *)df;
+    for (byte i = 0; i < ENCO_NUM; i++)
     {
-        enco.update();
+        df_enco_vals[i] = e[i].read();
     }
 
-    if (!polling_timer.is_time())
+    if (print_timer.is_time())
     {
-        return;
+        SPRINT("c:");
+        SPRINT(interupt_c);
+        SPRINT(" ");
+        for (byte i = 0; i < ENCO_NUM; i++)
+        {
+            SPRINT("| e");
+            SPRINT(i);
+            SPRINT(":");
+            SPRINT(df_enco_vals[i]);
+            SPRINT(" ");
+        }
+        Serial.println('|');
     }
+}
 
-    for (auto i = 0; i < ENCO_NUM; i++)
+void SPI0_Handler()
+{
+    interupt_c++;
+    // uint32_t status = SPI0->SPI_SR;
+
+    // if (status & SPI_SR_RDRF)
+    // {
+
+    // MUST READ EVEN IF UNUSED
+    // how it would normally be: `byte read_value = SPI0->SPI_RDR & SPI_RDR_RD_Msk;`
+    (void) (SPI0->SPI_RDR & SPI_RDR_RD_Msk);
+    
+    //     if (recv == 0x01) {
+    //         // 0x01 is what we decided restarts the transmission.
+    //         df_idx = 0;
+    //     }
+    // }
+
+    // Send something to receive something
+    // if (status & SPI_SR_TDRE)
+    // {
+    SPI0->SPI_TDR = (df[df_idx]);
+    // }
+
+    if (++df_idx == DF_LEN)
     {
-        Serial.print(
-            "| e" +
-            String(i) +
-            ": " +
-            String(ge[i].getLast().rads) +
-            "a " +
-            String(ge[i].getLast().rpm) +
-            "s ");
+        df_idx = 0;
     }
-    Serial.println("|");
 }
 
 #else
