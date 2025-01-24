@@ -6,6 +6,7 @@
 precision motor AB: (A)
     motor: CRC_PWM_3
     enco: CRC_I2C_SDA, CRC_DIG_4
+        on alduino: 1
     pids:
         speed: K 0.60000 0.00001 0.06000
         angle: ???
@@ -13,6 +14,7 @@ precision motor AB: (A)
 precision motor AH: (B)
     motor: CRC_PWM_4
     enco: CRC_ENCO_A, CRC_DIG_2
+        on alduino: 0
     pids:
         speed: K 0.60000 0.00001 0.10000
         angle: ???
@@ -27,6 +29,7 @@ abs enco:
 precision motor BB: (A)
     motor: CRC_PWM_1
     enco: CRC_ENCO_B, CRC_DIG_3
+        on alduino: 2
     pids:
         speed: K 0.60000 0.00001 0.12000
         angle: ???
@@ -36,6 +39,7 @@ precision motor BH: (B)
         motor is reversed
     motor: CRC_PWM_7
     enco: CRC_I2C_SCL, CRC_DIG_5
+        on alduino: 3
     pids:
         speed: K 0.60000 0.00001 0.15500
         angle: ???
