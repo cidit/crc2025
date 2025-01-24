@@ -10,6 +10,7 @@
 #include <PID_RT.h>
 #include <sensors/gobuilda_rotary_enc.hpp>
 #include "util/print.hpp"
+#include "sensors/paul_stroffregen_enco_sensor_wrapper.hpp"
 
 #define SPRINT(things) Serial.print(things)
 #define SPACER Serial.print("    ")
@@ -21,7 +22,8 @@ Timer polling_timer(ONE_SECOND / 40);
 
 Motor motor(CRC_PWM_7);
 Encoder enco(CRC_I2C_SCL, CRC_DIG_5);
-GobuildaRotaryEncoder roenco(enco, 145.1 * 2.5, polling_timer, true);
+EncoderWrapper enco_wrapped(enco, polling_timer);
+GobuildaRotaryEncoder roenco(enco_wrapped, 145.1 * 2.5, polling_timer, true);
 PrecisionMotor pmotor(motor, roenco, 400.);
 
 void setup()
