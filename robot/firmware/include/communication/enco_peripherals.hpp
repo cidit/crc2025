@@ -13,6 +13,8 @@ constexpr auto ENCO_NUM = 8;
 constexpr auto DF_LEN = sizeof(int32_t) * ENCO_NUM;
 
 
+#ifndef ARDUINO_SAM_DUE
+
 void master_enco_spi_init() {
     pinMode(SS, OUTPUT);
     digitalWrite(SS, HIGH);
@@ -34,3 +36,6 @@ void retrieve_df(int32_t df[ENCO_NUM]) {
     digitalWrite(SS, HIGH); // END COMM
     SPI.endTransaction();
 }
+
+
+#endif
