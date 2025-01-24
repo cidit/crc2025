@@ -6,7 +6,7 @@
 
 class EncoderWrapper : public Sensor<int32_t>
 {
-
+    public:
     Encoder &_ie;
 
     EncoderWrapper(

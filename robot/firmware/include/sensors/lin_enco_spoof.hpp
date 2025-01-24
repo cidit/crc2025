@@ -9,7 +9,7 @@
  */
 class LinEncSpoof : public Sensor<int32_t>
 {
-
+public:
     const int32_t &_actual;
 
     LinEncSpoof(
