@@ -10,13 +10,13 @@
 class GobuildaRotaryEncoder : public Sensor<GobuildaRotaryEncoderData>
 {
 public:
-    Encoder &_ie;
+    Sensor<int32_t> &_ie;
     int32_t _ie_current, _ie_old;
     const double _tpt;
     bool _is_reversed;
 
     GobuildaRotaryEncoder(
-        Encoder &internal_encoder,
+        Sensor<int32_t> &internal_encoder,
         double ticks_per_turn,
         const Timer &polling_timer,
         const bool reversed = false)
@@ -31,12 +31,14 @@ public:
 
     void begin() override
     {
-        _ie.write(0);
+        // TODO: keep track of an offset in this class instead and update it to the current value here.
+        // _ie.write(0);
     }
 
     void reset()
     {
-        _ie.write(0);
+        // TODO: keep track of an offset instead like explained in begin()
+        // _ie.write(0);
         _last = {0, 0};
     }
 
@@ -74,7 +76,7 @@ public:
     }
 
     int32_t _internal_read() {
-        auto read = _ie.read();
+        auto read = _ie.getLast();
         return _is_reversed? -read: read;
     }
 };
