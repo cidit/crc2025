@@ -21,7 +21,8 @@ void master_enco_spi_init() {
 }
 
 /**
- * retrieves a dataframe
+ * retrieves a dataframe.
+ * the dataframe should always be updated before it's dependents are themselves updated
  */
 void retrieve_df(int32_t df[ENCO_NUM]) {
     auto buff = (byte*)df;
