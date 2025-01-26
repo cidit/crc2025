@@ -21,5 +21,6 @@ public:
     bool sample(int32_t &out)
     {
         out = _actual;
+        return true;
     }
 };

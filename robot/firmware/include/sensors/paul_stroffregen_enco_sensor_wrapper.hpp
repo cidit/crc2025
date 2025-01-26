@@ -20,5 +20,6 @@ class EncoderWrapper : public Sensor<int32_t>
     bool sample(int32_t &out)
     {
         out = _ie.read();
+        return true;
     }
 };
