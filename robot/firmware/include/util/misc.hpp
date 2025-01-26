@@ -1,20 +1,17 @@
 #pragma once
 #include <Arduino.h>
-#include <PID_RT.h>
 #include "util/constants.hpp"
 
 #define pin_t uint8_t
 
-enum class Direction : bool
-{
-    CLOCKWISE,
-    COUNTER_CLOCKWISE,
-};
 struct PIDTunings
 {
     float p, i, d;
 };
 
+#ifndef ARDUINO_SAM_DUE
+
+#include <PID_RT.h>
 /**
  * returns the pid to a sane state by resetting the errorsum, lasttime and derivative factors.
  */
@@ -49,3 +46,5 @@ void pid_soft_reset(PID_RT &pid)
         // poi is the default so we dont need to do anything.
     }
 }
+
+#endif
