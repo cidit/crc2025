@@ -14,7 +14,7 @@
 #include "util/print.hpp"
 
 
-Timer spi_poll_timer(ONE_SECOND/1);
+Timer poll_timer(ONE_SECOND/1);
 
 void setup() {
     Serial.begin(115200);
@@ -23,9 +23,9 @@ void setup() {
 }
 
 void loop() {
-    spi_poll_timer.update(millis());
+    poll_timer.update(millis());
 
-    if (spi_poll_timer.is_time()) {
+    if (poll_timer.is_time()) {
         int32_t df[ENCO_NUM];
         // TODO: for some reason, the values seem to be multiplied by 256
         retrieve_df(df);
