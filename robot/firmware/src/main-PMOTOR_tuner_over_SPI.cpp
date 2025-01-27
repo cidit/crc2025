@@ -29,7 +29,7 @@ Timer polling_timer(ONE_SECOND / 40);
 
 
 
-const size_t MAX_SELECTABLE_MOTORS = 4;
+const size_t NUM_MOTORS = 4;
 
 Timer poll_timer(ONE_SECOND / 10000);
 
@@ -57,21 +57,21 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
     GobuildaRotaryEncoder(spoofs[7], 145.1 * 2.5, poll_timer),
 };
 
-Motor motors[MAX_SELECTABLE_MOTORS] = {
+Motor motors[NUM_MOTORS] = {
     Motor(CRC_PWM_4),
     Motor(CRC_PWM_3),
     Motor(CRC_PWM_1),
     Motor(CRC_PWM_7),
 };
 
-PrecisionMotor pmotors[MAX_SELECTABLE_MOTORS] = {
+PrecisionMotor pmotors[NUM_MOTORS] = {
     PrecisionMotor(motors[0], goencs[0], 400.),
     PrecisionMotor(motors[1], goencs[1], 400.),
     PrecisionMotor(motors[2], goencs[2], 400.),
     PrecisionMotor(motors[3], goencs[3], 400.),
 };
 
-// should always be between 0 and MAX_SELECTABLE_MOTORS
+// should always be between 0 and NUM_MOTORS
 size_t currently_selected_pmotor_idx = 0;
 
 void update_df()
@@ -82,33 +82,6 @@ void update_df()
     for (int i = 0; i < ENCO_NUM; i++)
     {
         df[i] /= 256;
-    }
-}
-
-void loop()
-{
-    poll_timer.update(millis());
-
-    if (poll_timer.is_time())
-    {
-        update_df();
-    }
-
-    // TESTING GOBILDA ENCS
-    if (poll_timer.is_time())
-    {
-        for (auto i = 0; i < ENCO_NUM; i++)
-        {
-            goencs[i].update();
-            SPRINT("| e");
-            SPRINT(i);
-            SPRINT(" ");
-            SPRINT(goencs[i].getLast().rads);
-            SPRINT(" ");
-            SPRINT(goencs[i].getLast().rpm);
-            SPRINT(" ");
-        }
-        Serial.println("|");
     }
 }
 
@@ -171,7 +144,7 @@ void execute_commands()
     {
         // change which motor is selected
         auto selected_idx = cmd.getArg(0);
-        if (selected_idx >= 0 && selected_idx < MAX_SELECTABLE_MOTORS)
+        if (selected_idx >= 0 && selected_idx < NUM_MOTORS)
         {
             currently_selected_pmotor_idx = selected_idx;
         }
