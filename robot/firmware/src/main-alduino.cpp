@@ -2,16 +2,10 @@
 // spi slave
 // */
 
-// #include <ArduinoSTL.h>
 #include <Arduino.h>
 #include <SPI.h>
-#include <Encoder.h>
 #include "communication/enco_peripherals.hpp"
-
-bool does_master_need_data()
-{
-    return digitalRead(SS) == LOW;
-}
+#include <Encoder.h>
 
 void spi_slave_crazy_init()
 {
@@ -53,6 +47,7 @@ void setup()
 
 void loop()
 {
+
     // update dataframe
     auto df_enco_vals = (int32_t *)df;
     for (byte i = 0; i < ENCO_NUM; i++)
@@ -66,6 +61,7 @@ void SPI0_Handler()
     // MUST READ EVEN IF UNUSED
     // how it would normally be: `byte read_value = SPI0->SPI_RDR & SPI_RDR_RD_Msk;`
     (void) (SPI0->SPI_RDR & SPI_RDR_RD_Msk);
+
     SPI0->SPI_TDR = (df[df_idx]);
 
     if (++df_idx == DF_LEN)
