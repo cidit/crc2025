@@ -33,6 +33,7 @@ public:
     {
         // TODO: keep track of an offset in this class instead and update it to the current value here.
         // _ie.write(0);
+        _ie.begin();
     }
 
     void reset()
@@ -78,5 +79,10 @@ public:
     int32_t _internal_read() {
         auto read = _ie.getLast();
         return _is_reversed? -read: read;
+    }
+
+    void update() override {
+        _ie.update();
+        Sensor<GobuildaRotaryEncoderData>::update();
     }
 };
