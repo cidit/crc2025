@@ -1,17 +1,24 @@
+/*
+spi master. expects a slave to be uploaded to the arduino.
+*/
 
-#include <CrcLib.h>
+#include <Arduino.h>
+#include <SPI.h>
 #include <Encoder.h>
+#include <Servo.h>
+#include <Decodeur.h>
+#include <PID_RT.h>
+#include <CrcLib.h>
+#include <sensors/lin_enco_spoof.hpp>
+#include <sensors/gobuilda_rotary_enc.hpp>
+#include "communication/enco_peripherals.hpp"
+#include "util/constants.hpp"
+#include "util/timer.hpp"
+#include "util/print.hpp"
 #include <drives/precision_motor2.hpp>
 #include <controller.hpp>
 #include "util/looped.hpp"
 #include "math/vectors.hpp"
-#include <Servo.h>
-#include <Decodeur.h>
-#include <PID_RT.h>
-#include <sensors/gobuilda_rotary_enc.hpp>
-#include "util/print.hpp"
-#include "sensors/lin_enco_spoof.hpp"
-#include "communication/enco_peripherals.hpp"
 
 int32_t enco_values[ENCO_NUM];
 
@@ -20,24 +27,7 @@ bool read_mode = true;
 Timer print_timer(ONE_SECOND / 40);
 Timer polling_timer(ONE_SECOND / 40);
 
-// Motor motor(CRC_PWM_7);
-// // Encoder enco(CRC_I2C_SCL, CRC_DIG_5);
-// LinEncSpoof enco_wrapped(enco_values[3], polling_timer);
-// GobuildaRotaryEncoder roenco(enco_wrapped, 145.1 * 2.5, polling_timer, true);
-// PrecisionMotor pmotor(motor, roenco, 400.);
 
-/*
-spi master. expects a slave to be uploaded to the arduino.
-*/
-
-#include <Arduino.h>
-#include <SPI.h>
-#include <sensors/lin_enco_spoof.hpp>
-#include <sensors/gobuilda_rotary_enc.hpp>
-#include "communication/enco_peripherals.hpp"
-#include "util/constants.hpp"
-#include "util/timer.hpp"
-#include "util/print.hpp"
 
 const size_t MAX_SELECTABLE_MOTORS = 4;
 
