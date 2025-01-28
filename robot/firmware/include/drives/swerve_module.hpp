@@ -97,6 +97,9 @@ public:
         _pid.setOutputRange(-400, 400); // rpms
     }
 
+    SwerveModule(const SwerveModule &) = delete;
+    SwerveModule &operator=(const SwerveModule &) = delete;
+
     void begin() override
     {
         _pma.begin();

@@ -17,6 +17,9 @@ public:
         Timer &polling_timer) 
         : Sensor(0, polling_timer), _actual(actual_value_to_read) {}
 
+    LinEncSpoof(const LinEncSpoof &) = delete;
+    LinEncSpoof &operator=(const LinEncSpoof &) = delete;
+
     void begin() override { /* no-op*/ };
     bool sample(int32_t &out)
     {

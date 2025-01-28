@@ -16,25 +16,25 @@ Timer poll_timer(ONE_SECOND / 10000);
 int32_t df[ENCO_NUM];
 
 LinEncSpoof spoofs[ENCO_NUM] = {
-    LinEncSpoof(df[0], poll_timer),
-    LinEncSpoof(df[1], poll_timer),
-    LinEncSpoof(df[2], poll_timer),
-    LinEncSpoof(df[3], poll_timer),
-    LinEncSpoof(df[4], poll_timer),
-    LinEncSpoof(df[5], poll_timer),
-    LinEncSpoof(df[6], poll_timer),
-    LinEncSpoof(df[7], poll_timer),
+    {df[0], poll_timer},
+    {df[1], poll_timer},
+    {df[2], poll_timer},
+    {df[3], poll_timer},
+    {df[4], poll_timer},
+    {df[5], poll_timer},
+    {df[6], poll_timer},
+    {df[7], poll_timer},
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
-    GobuildaRotaryEncoder(spoofs[0], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[1], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[2], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[3], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[4], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[5], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[6], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[7], 145.1 * 2.5, poll_timer),
+    {spoofs[0], 145.1 * 2.5, poll_timer},
+    {spoofs[1], 145.1 * 2.5, poll_timer},
+    {spoofs[2], 145.1 * 2.5, poll_timer},
+    {spoofs[3], 145.1 * 2.5, poll_timer},
+    {spoofs[4], 145.1 * 2.5, poll_timer},
+    {spoofs[5], 145.1 * 2.5, poll_timer},
+    {spoofs[6], 145.1 * 2.5, poll_timer},
+    {spoofs[7], 145.1 * 2.5, poll_timer},
 };
 
 void setup()

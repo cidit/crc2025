@@ -30,6 +30,9 @@ public:
     {
     }
 
+    PwmRotaryEncoder(const PwmRotaryEncoder &) = delete;
+    PwmRotaryEncoder &operator=(const PwmRotaryEncoder &) = delete;
+
     void begin() override
     {
         // no-op

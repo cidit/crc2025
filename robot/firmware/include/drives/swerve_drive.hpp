@@ -17,6 +17,9 @@ public:
         // no-op
     }
 
+    SwerveDrive(const SwerveDrive &) = delete;
+    SwerveDrive &operator=(const SwerveDrive &) = delete;
+
     void begin() override {
         // TODO: unimplemented
     }

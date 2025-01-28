@@ -16,6 +16,9 @@ class EncoderWrapper : public Sensor<int32_t>
     {
     }
 
+    EncoderWrapper(const EncoderWrapper &) = delete;
+    EncoderWrapper &operator=(const EncoderWrapper &) = delete;
+
     void begin() override { /* no-op*/ };
     bool sample(int32_t &out)
     {

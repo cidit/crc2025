@@ -33,39 +33,39 @@ const size_t NUM_MOTORS = 4;
 int32_t df[ENCO_NUM];
 
 LinEncSpoof spoofs[ENCO_NUM] = {
-    LinEncSpoof(df[0], poll_timer), // right high
-    LinEncSpoof(df[1], poll_timer), // right low (ITS INVERTED!)
-    LinEncSpoof(df[2], poll_timer), // left low
-    LinEncSpoof(df[3], poll_timer), // left high
-    LinEncSpoof(df[4], poll_timer),
-    LinEncSpoof(df[5], poll_timer),
-    LinEncSpoof(df[6], poll_timer),
-    LinEncSpoof(df[7], poll_timer),
+    {df[0], poll_timer}, // right high
+    {df[1], poll_timer}, // right low (ITS INVERTED!)
+    {df[2], poll_timer}, // left low
+    {df[3], poll_timer}, // left high
+    {df[4], poll_timer},
+    {df[5], poll_timer},
+    {df[6], poll_timer},
+    {df[7], poll_timer},
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
-    GobuildaRotaryEncoder(spoofs[0], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[1], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[2], 145.1 * 2.5, poll_timer, true),
-    GobuildaRotaryEncoder(spoofs[3], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[4], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[5], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[6], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[7], 145.1 * 2.5, poll_timer),
+    {spoofs[0], 145.1 * 2.5, poll_timer},
+    {spoofs[1], 145.1 * 2.5, poll_timer},
+    {spoofs[2], 145.1 * 2.5, poll_timer, true},
+    {spoofs[3], 145.1 * 2.5, poll_timer},
+    {spoofs[4], 145.1 * 2.5, poll_timer},
+    {spoofs[5], 145.1 * 2.5, poll_timer},
+    {spoofs[6], 145.1 * 2.5, poll_timer},
+    {spoofs[7], 145.1 * 2.5, poll_timer},
 };
 
 Motor motors[NUM_MOTORS] = {
-    Motor(CRC_PWM_4),
-    Motor(CRC_PWM_3),
-    Motor(CRC_PWM_1),
-    Motor(CRC_PWM_7),
+    {CRC_PWM_4},
+    {CRC_PWM_3},
+    {CRC_PWM_1},
+    {CRC_PWM_7},
 };
 
 PrecisionMotor pmotors[NUM_MOTORS] = {
-    PrecisionMotor(motors[0], goencs[0], 400.),
-    PrecisionMotor(motors[1], goencs[1], 400.),
-    PrecisionMotor(motors[2], goencs[2], 400.),
-    PrecisionMotor(motors[3], goencs[3], 400.),
+    {motors[0], goencs[0], 400.},
+    {motors[1], goencs[1], 400.},
+    {motors[2], goencs[2], 400.},
+    {motors[3], goencs[3], 400.},
 };
 
 const auto MAX_PULSE_LEN = 4160.0;
@@ -110,7 +110,7 @@ SwerveModule &get_swerve(size_t swerve_num)
 
 void execute_commands()
 {
-    auto swerve = get_swerve(currently_selected_swerve);
+    auto &swerve = get_swerve(currently_selected_swerve);
 
     switch (toupper(cmd.getCommand()))
     {

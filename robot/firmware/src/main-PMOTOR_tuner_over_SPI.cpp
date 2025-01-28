@@ -36,39 +36,39 @@ Timer poll_timer(ONE_SECOND / 10000);
 int32_t df[ENCO_NUM];
 
 LinEncSpoof spoofs[ENCO_NUM] = {
-    LinEncSpoof(df[0], poll_timer),
-    LinEncSpoof(df[1], poll_timer),
-    LinEncSpoof(df[2], poll_timer),
-    LinEncSpoof(df[3], poll_timer),
-    LinEncSpoof(df[4], poll_timer),
-    LinEncSpoof(df[5], poll_timer),
-    LinEncSpoof(df[6], poll_timer),
-    LinEncSpoof(df[7], poll_timer),
+    {df[0], poll_timer},
+    {df[1], poll_timer},
+    {df[2], poll_timer},
+    {df[3], poll_timer},
+    {df[4], poll_timer},
+    {df[5], poll_timer},
+    {df[6], poll_timer},
+    {df[7], poll_timer},
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
-    GobuildaRotaryEncoder(spoofs[0], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[1], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[2], 145.1 * 2.5, poll_timer, true),
-    GobuildaRotaryEncoder(spoofs[3], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[4], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[5], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[6], 145.1 * 2.5, poll_timer),
-    GobuildaRotaryEncoder(spoofs[7], 145.1 * 2.5, poll_timer),
+    {spoofs[0], 145.1 * 2.5, poll_timer},
+    {spoofs[1], 145.1 * 2.5, poll_timer},
+    {spoofs[2], 145.1 * 2.5, poll_timer, true},
+    {spoofs[3], 145.1 * 2.5, poll_timer},
+    {spoofs[4], 145.1 * 2.5, poll_timer},
+    {spoofs[5], 145.1 * 2.5, poll_timer},
+    {spoofs[6], 145.1 * 2.5, poll_timer},
+    {spoofs[7], 145.1 * 2.5, poll_timer},
 };
 
 Motor motors[NUM_MOTORS] = {
-    Motor(CRC_PWM_4),
-    Motor(CRC_PWM_3),
-    Motor(CRC_PWM_1),
-    Motor(CRC_PWM_7),
+    {CRC_PWM_4},
+    {CRC_PWM_3},
+    {CRC_PWM_1},
+    {CRC_PWM_7},
 };
 
 PrecisionMotor pmotors[NUM_MOTORS] = {
-    PrecisionMotor(motors[0], goencs[0], 400.),
-    PrecisionMotor(motors[1], goencs[1], 400.),
-    PrecisionMotor(motors[2], goencs[2], 400.),
-    PrecisionMotor(motors[3], goencs[3], 400.),
+    {motors[0], goencs[0], 400.},
+    {motors[1], goencs[1], 400.},
+    {motors[2], goencs[2], 400.},
+    {motors[3], goencs[3], 400.},
 };
 
 // should always be between 0 and NUM_MOTORS
@@ -105,7 +105,7 @@ void setup()
     Serial.println("Setup Done");
 }
 
-PID_RT &get_current_pid_to_tune(PrecisionMotor pmotor)
+PID_RT &get_current_pid_to_tune(PrecisionMotor &pmotor)
 {
     return pmotor._mode == PrecisionMotor::Mode::MATCH_ANGLE
                ? pmotor._pid_angle
@@ -119,7 +119,7 @@ PrecisionMotor &get_pmotor(size_t pmotor_idx)
 
 void execute_commands()
 {
-    auto pmotor = get_pmotor(currently_selected_pmotor_idx);
+    auto &pmotor = get_pmotor(currently_selected_pmotor_idx);
     auto &tuning_pid = get_current_pid_to_tune(pmotor);
 
     switch (toupper(cmd.getCommand()))
@@ -220,7 +220,7 @@ void loop()
 
     if (read_mode && print_timer.is_time())
     {
-        auto pmotor = get_pmotor(currently_selected_pmotor_idx);
+        auto &pmotor = get_pmotor(currently_selected_pmotor_idx);
         auto &tuning_pid = get_current_pid_to_tune(pmotor);
 
         SPRINT("[");

@@ -29,6 +29,9 @@ public:
     {
     }
 
+    GobuildaRotaryEncoder(const GobuildaRotaryEncoder &) = delete;
+    GobuildaRotaryEncoder &operator=(const GobuildaRotaryEncoder &) = delete;
+
     void begin() override
     {
         // TODO: keep track of an offset in this class instead and update it to the current value here.

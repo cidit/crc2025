@@ -97,6 +97,9 @@ public:
         }
     }
 
+    PrecisionMotor(const PrecisionMotor &) = delete;
+    PrecisionMotor &operator=(const PrecisionMotor &) = delete;
+
     void begin() override
     {
         _m.begin();
