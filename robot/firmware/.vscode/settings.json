@@ -3,6 +3,10 @@
         "memory": "cpp",
         "cmath": "cpp",
         "iterator_base": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "limits": "cpp",
+        "istream": "cpp",
+        "ios": "cpp",
+        "algorithm": "cpp"
     }
 }

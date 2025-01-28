@@ -15,7 +15,7 @@ double oppAngleFromTarget;
 double rPower;
 
 
-math::Angle target_angle = math::Angle::zero();
+Angle target_angle = Angle::zero();
 
 // Initialize PID controller
 PID_RT pid;
@@ -73,12 +73,12 @@ void loop() {
   
   // unsigned long now = millis();
   // double timeChange = (double)(now - lastTime);
-  auto currentAngle = math::Angle::from_ratio(pulseIn(CRC_PWM_12, HIGH) / 4195.0 * 360);
+  auto currentAngle = Angle::from_ratio(pulseIn(CRC_PWM_12, HIGH) / 4195.0 * 360);
 
   // oppAngleWrap = angleWrap(currentAngle + 180);
   // angleFromTarget = angleWrap(setpoint - currentAngle);
   // oppAngleFromTarget = angleWrap(setpoint - oppAngleWrap);
-  auto travel = math::Angle::travel(currentAngle, target_angle);
+  auto travel = Angle::travel(currentAngle, target_angle);
 
   //Serial.println("currentAngle: "+String(currentAngle._radians) + "\ttravel: "+ String(travel));
 

@@ -12,39 +12,44 @@ Ceci est le fichier template pour le problème Prelim4.
 # Notes: Nb of station is  n (size of map) / 5
 #
 
-#import time
-# Search: 1734.375
-# firstloop: 5343.75
-# sort: 5343.75
-# Loop # 0 : 7015.625
-# Loop # 1 : 8421.875
-# Loop # 2 : 9359.375
-# Loop # 3 : 9765.625
-# Loop # 4 : 10000.0
-# Sort2: 10000.0
-# Solution: 10000.0
-
 ##############################################
 #                  Classes                   # 
 ##############################################
 class Station:
     coords:tuple[int, int]
     cities:list[tuple[int, int]] = []
-    weight:int = 0
+    nb_cities:int = 0
 
     def __init__(self, coords:tuple[int, int]):
         self.coords = coords
+    
+    def compare_to(self, other_cities:list[tuple[int, int]])->list[tuple[int, int]]:
+        return set(self.cities) & set(other_cities)
+    
+    def set_cities(self, cs:list[tuple[int, int]]):
+        self.cities = cs
+        self.nb_cities = len(cs)
     
     def add_city(self, city:tuple[int, int]):
         if len(self.cities) == 0:
             self.cities = [city]
         else:
             self.cities.append(city)
+        self.nb_cities = len(self.cities)
+
+    def remove_city(self, city:tuple[int, int]):
+        self.cities.remove(city)
+        self.nb_cities = len(self.cities)
+
 
 class City:
     coords:tuple[int, int]
     stations:list[Station]
+    nb_stations_radius:int = 0
+    stations_weight:int = 0
+
     assignements:list[Station] = []
+    nb_assign:int = 0
 
     def __init__(self, coords:tuple[int, int]):
         self.coords = coords
@@ -55,6 +60,30 @@ class City:
         else:
             self.assignements.append(station)
         station.add_city(self.coords)
+        self.nb_assign = len(self.assignements)
+
+    def remove_assign(self, station:Station):
+        self.assignements.remove(station)
+        station.remove_city(self.coords)
+        self.nb_assign = len(self.assignements)
+
+    def closest_station(self)->Station:
+        man_dist = [distance_manhattan(self.coords, stat.coords) for stat in self.assignements]
+        return self.assignements[man_dist.index(min(man_dist))]
+    
+    def keep_station(self, station:Station):
+        to_remove = []
+        for stat in self.assignements:
+            #print("\t\tCurrent Stat", stat)
+            if stat == station:
+                #print("\t\tKeeping")
+                continue
+            #print("\t\tRemoving")
+            to_remove.append(stat)
+        
+        #Must be in a seperate loop, if removed while looping, previous loop gets shortened
+        for r in to_remove:
+            self.remove_assign(r)
     
 
 ##############################################
@@ -76,7 +105,6 @@ def solve(map: list[list[int]], n: int) -> list[list[tuple[int, int]]]:
     stations:list[Station] = []
     cities:list[City] = []
 
-    #start_time = time.process_time()*1000.0
     #Find stations and cities
     for x in range(n):
         for y in range(n):
@@ -88,58 +116,49 @@ def solve(map: list[list[int]], n: int) -> list[list[tuple[int, int]]]:
             elif num == 2:
                 cities.append(City((x, y)))
 
+    #Sort stations (Needed by prelim requirements)
+    stations.sort(key=lambda stat: stat.coords)
+
 
     # Pour chaque ville, combien de caserne dans un rayon donnée (selon taille grille)
     # Commence par assigner les villes isoler
 
-    #radius = n * 0.25
-    #print("Radius:", radius)
+    radius = n * 0.25
+    print("Radius:", radius)
 
-    #print("Search:", time.process_time()*1000.0 - start_time)
-    for i in range(5):
-        # Weight
-        for station in stations:
-            station.weight = 0
-            cities.sort(key=lambda city: distance_manhattan(station.coords, city.coords))
-            for city in cities[:10]:
-                dist = distance_manhattan(station.coords, city.coords)
-                station.weight += dist**2
+    #Sorting stations in
+    for city in cities:
+        city.stations = stations.copy()
+        city.stations.sort(key=lambda stat: distance_manhattan(stat.coords, city.coords))
+        
+        for station in city.stations:
+            dist = distance_manhattan(station.coords, city.coords)
+            city.stations_weight += dist**2
+            # if distance_manhattan(station.coords, city.coords) > radius:
+            #     break
 
-        #print("Weight:", time.process_time()*1000.0 - start_time)
+            # city.nb_stations_radius += 1
 
-        stations.sort(key=lambda station: station.weight)
+    cities.sort(key=lambda city: city.stations_weight, reverse=True)
 
-        #print("Sort:", time.process_time()*1000.0 - start_time)
+    city_num = 0
+    for city in cities:
+        print("City #", city_num)
+        print("   Nb Station in radius", city.nb_stations_radius)
+        for station in city.stations:
+            if station.nb_cities >= 5:
+                print("   Station full")
+                continue
+
+            city.add_assign(station)
+            print("   Dist: ", distance_manhattan(station.coords, city.coords))
+            break
+        city_num += 1
     
-        stat_num = 0
-        for station in stations:
-            #print("Station #", stat_num)
-            short_dist = 9999999999
-            close_city = None
-
-            for city in cities:
-                dist = distance_manhattan(station.coords, city.coords)
-
-                if dist < short_dist:
-                    short_dist = dist
-                    close_city = city
-
-            close_city.add_assign(station)
-            cities.remove(close_city)
-            #print("   Dist: ", short_dist)
-            stat_num += 1
-
-        #print("Loop #", i, ":", time.process_time()*1000.0 - start_time)    
-
-    #Sort stations (Needed by prelim requirements)
-    stations.sort(key=lambda stat: stat.coords)
-
-    #print("Sort2:", time.process_time()*1000.0 - start_time)    
 
     #Generate Solution from Stations list
     # print("Generating Solution...")
     solution = [stat.cities for stat in stations]
-    #print("Solution:", time.process_time()*1000.0 - start_time)    
 
     # print("Solution:")
     # print(*solution, sep='\n')
@@ -171,7 +190,7 @@ def get_stations(map: list[list[int]], n: int) -> list[tuple[int, int]]:
 #
 # Part_3
 #
-def get_customers(map: list[list[int]], n: int) -> list[tuple[int, int]]:
+def get_cities(map: list[list[int]], n: int) -> list[tuple[int, int]]:
     cities = []
 
     #Find cities
@@ -186,25 +205,13 @@ def get_customers(map: list[list[int]], n: int) -> list[tuple[int, int]]:
 
 
 #------------- Best Yet -------------------
-# For n = 10  your average risk score is  4.7
-# For n = 25  your average risk score is  9.65
-# For n = 50  your average risk score is  17.19
-# For n = 100  your average risk score is  29.92
-# For n = 250  your average risk score is  46.28
-# For n = 500  your average risk score is  63.02
-# For n = 1000  your average risk score is  116.51
-# For n = 2500  your average risk score is  191.17
-# For n = 5000  your average risk score is  316.08
-# For n = 10000  your average risk score is  435.38
-
-
-# For n = 10  your average risk score is  5.13
-# For n = 25  your average risk score is  10.12
-# For n = 50  your average risk score is  13.98
-# For n = 100  your average risk score is  25.69
-# For n = 250  your average risk score is  46.68
-# For n = 500  your average risk score is  71.99
-# For n = 1000  your average risk score is  105.34
-# For n = 2500  your average risk score is  171.98
-# For n = 5000  your average risk score is  268.06
-# For n = 10000  your average risk score is  422.43
+# For n = 10  your average risk score is  5.47
+# For n = 25  your average risk score is  9.8
+# For n = 50  your average risk score is  17.03
+# For n = 100  your average risk score is  26.55
+# For n = 250  your average risk score is  43.75
+# For n = 500  your average risk score is  89.68
+# For n = 1000  your average risk score is  116.58
+# For n = 2500  your average risk score is  208.72
+# For n = 5000  your average risk score is  373.51
+# For n = 10000  your average risk score is  675.7

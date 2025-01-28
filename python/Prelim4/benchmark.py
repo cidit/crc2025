@@ -12,7 +12,7 @@ from game_logic import view_stations
 from game_logic import view_solution
 
 def benchmark():
-    test_with_one_size = 0 ### put the value of n you want to try your algorithm with or use 0 for a full benchmark
+    test_with_one_size = 0  ### put the value of n you want to try your algorithm with or use 0 for a full benchmark
 
 
 
@@ -44,7 +44,7 @@ def benchmark():
     return
 
 def test_one_size(size: int):
-    city_map = create_map(size, 100)#random.randint(0, 10000)
+    city_map = create_map(size, random.randint(0, 10000))#random.randint(0, 10000)
     view_stations(city_map)
 
     start_time = time.time() * 1000

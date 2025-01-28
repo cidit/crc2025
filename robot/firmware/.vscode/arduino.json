@@ -1,3 +1,4 @@
 {
-    "port": "/dev/ttyS0"
+    "port": "/dev/ttyS0",
+    "board": "arduino:avr:uno"
 }

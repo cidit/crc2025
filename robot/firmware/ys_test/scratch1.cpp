@@ -21,17 +21,17 @@
 // //     b_e(CRC_I2C_SDA, CRC_I2C_SCL);
 // // sensors::RotaryEncoder a_re(a_e, ticks_per_turn),
 // //     b_re(b_e, 0); // tpt UNKNOWN
-// // drives::Motor a_m({CRC_PWM_1, 0, 0}),
+// // Motor a_m({CRC_PWM_1, 0, 0}),
 // //     b_m({CRC_PWM_2, 0, 0}); // 0s mean its irrelevent in this impl
-// // drives::PrecisionMotor a_pm(a_m, a_re),
+// // PrecisionMotor a_pm(a_m, a_re),
 // //     b_pm(b_m, b_re);
-// // drives::Swerve swerve(a_pm, b_pm);
+// // Swerve swerve(a_pm, b_pm);
 
 // // #include <ESP32Encoder.h> // https://github.com/madhephaestus/ESP32Encoder.git
 // #include "sensors/rotary_encoder.hpp"
 
 // sensors::RotaryEncoder re{34, 35, ticks_per_turn};
-// drives::Motor a_m({0, 0, 33});
+// Motor a_m({0, 0, 33});
 
 // void setup()
 // {
@@ -67,7 +67,7 @@
 //         " re: " + String(re.getLast()._radians));
 //   })
 
-//   // auto current_wheel_angle = math::Angle::zero();
+//   // auto current_wheel_angle = Angle::zero();
 //   // a_re.sample(current_wheel_angle);
 
 //   if (!decoder.isAvailable())
