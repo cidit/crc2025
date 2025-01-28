@@ -1,6 +1,6 @@
 #pragma once
 #include "util/lifecycle.hpp"
-#include "drives/swerve_module2.hpp"
+#include "drives/swerve_module.hpp"
 
 using Gyro = int; // dummy implementation, extract to concrete type.
 

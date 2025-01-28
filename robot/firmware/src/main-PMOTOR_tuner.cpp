@@ -1,7 +1,7 @@
 
 #include <CrcLib.h>
 #include <Encoder.h>
-#include <drives/precision_motor2.hpp>
+#include <drives/precision_motor.hpp>
 #include <controller.hpp>
 #include "util/looped.hpp"
 #include "math/vectors.hpp"
