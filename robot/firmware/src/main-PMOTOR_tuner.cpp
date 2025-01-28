@@ -1,7 +1,7 @@
 
 #include <CrcLib.h>
 #include <Encoder.h>
-#include <drives/precision_motor2.hpp>
+#include <drives/precision_motor.hpp>
 #include <controller.hpp>
 #include "util/looped.hpp"
 #include "math/vectors.hpp"
@@ -10,6 +10,7 @@
 #include <PID_RT.h>
 #include <sensors/gobuilda_rotary_enc.hpp>
 #include "util/print.hpp"
+#include "sensors/paul_stroffregen_enco_sensor_wrapper.hpp"
 
 #define SPRINT(things) Serial.print(things)
 #define SPACER Serial.print("    ")
@@ -19,9 +20,10 @@ bool read_mode = true;
 Timer print_timer(ONE_SECOND / 40);
 Timer polling_timer(ONE_SECOND / 40);
 
-Motor motor(CRC_PWM_1);
-Encoder enco(CRC_ENCO_B, CRC_DIG_3);
-GobuildaRotaryEncoder roenco(enco, 145.1 * 2.5, polling_timer);
+Motor motor(CRC_PWM_7);
+Encoder enco(CRC_I2C_SCL, CRC_DIG_5);
+EncoderWrapper enco_wrapped(enco, polling_timer);
+GobuildaRotaryEncoder roenco(enco_wrapped, 145.1 * 2.5, polling_timer, true);
 PrecisionMotor pmotor(motor, roenco, 400.);
 
 void setup()
@@ -128,20 +130,20 @@ void loop()
         SPRINT("]");
         SPACER;
 
-        SPRINT("speed:" + padRight(String(pmotor._e.getLast().rpm), 7));
+        SPRINT("speed:" + padRight(String(pmotor._e.getLast().rpm), 7, '\''));
         SPACER;
         SPRINT("angle:" + String(pmotor._e.getLast().rads, 2));
         SPACER;
 
-        SPRINT("enco:" + padRight(String(enco.read()), 4));
+        SPRINT("enco:" + padRight(String(pmotor._e._internal_read()), 4, '\''));
         SPACER;
 
         SPRINT("[ ");
-        SPRINT("s:" + padRight(String(tuning_pid.getSetPoint()), 7));
+        SPRINT("s:" + padRight(String(tuning_pid.getSetPoint()), 7, '\''));
         SPRINT(" ");
-        SPRINT("i:" + padRight(String(tuning_pid.getInput()), 7));
+        SPRINT("i:" + padRight(String(tuning_pid.getInput()), 7, '\''));
         SPRINT(" ");
-        SPRINT("o:" + padRight(String(tuning_pid.getOutput()), 7));
+        SPRINT("o:" + padRight(String(tuning_pid.getOutput()), 7, '\''));
         SPRINT(" ]");
         SPACER;
 
@@ -149,11 +151,11 @@ void loop()
         SPACER;
 
         SPRINT("[ K ");
-        SPRINT(padRight(String(tuning_pid.getKp(), 5), 7));
+        SPRINT(padRight(String(tuning_pid.getKp(), 5), 7, '\''));
         SPRINT(" ");
-        SPRINT(padRight(String(tuning_pid.getKi(), 5), 7));
+        SPRINT(padRight(String(tuning_pid.getKi(), 5), 7, '\''));
         SPRINT(" ");
-        SPRINT(padRight(String(tuning_pid.getKd(), 5), 7));
+        SPRINT(padRight(String(tuning_pid.getKd(), 5), 7, '\''));
         SPRINT(" ]");
         SPACER;
 

@@ -12,6 +12,9 @@ protected:
         : _last(last_default_val),
           _polling_timer(polling_timer) {}
 
+    Sensor(const Sensor &) = delete;
+    Sensor &operator=(const Sensor &) = delete;
+
 public:
     virtual void begin() = 0;
     virtual bool sample(Measure &out) = 0;

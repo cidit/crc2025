@@ -16,6 +16,9 @@ public:
         // no-op
     }
 
+    Motor(const Motor &) = delete;
+    Motor &operator=(const Motor &) = delete;
+
     //-------------------------- PUBLICS -----------------------------
     /**
      * Must be called in Setup
@@ -57,8 +60,14 @@ public:
         CrcLib::SetPwmOutput(_pin, power);
     }
 
-    double get_power() {
+    double get_power()
+    {
         return _last_power;
+    }
+
+    void set_inverted(bool inverted)
+    {
+        _is_inverted = inverted;
     }
 
 private:
