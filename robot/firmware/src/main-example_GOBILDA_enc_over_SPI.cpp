@@ -11,7 +11,7 @@ spi master. expects a slave to be uploaded to the arduino.
 #include "util/timer.hpp"
 #include "util/print.hpp"
 
-Timer poll_timer(ONE_SECOND / 10000);
+Timer poll_timer(ONE_SECOND / 1000);
 
 int32_t df[ENCO_NUM];
 
