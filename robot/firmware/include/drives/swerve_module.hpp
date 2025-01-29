@@ -186,6 +186,10 @@ public:
         return _pid.getOutput();
     }
 
+    double get_max_angular_velocity() {
+        return _pid.getOutputMax() / 2; // TODO: div by 2 because the pid output is divided by 2 in the reverse kinematics. investigate if necessary to divide by 2 at all at any point since we are taking angular velocity from the pid anyways (AKA, just reduce proportionnal by 2?)
+    }
+
     /**
      * inspection functions for individual motor speed calculation
      */
@@ -193,6 +197,11 @@ public:
     {
         // TODO: should be calculated according to angular distance
         return _target.velocity * _mtwr;
+    }
+
+    double get_max_linear_velocity() {
+        // TODO: verify if this is actually correct
+        return (_pma._max_rpm + _pmb._max_rpm) * _mtwr;
     }
 
     // TODO: remove if externally polled absolute encoder works
