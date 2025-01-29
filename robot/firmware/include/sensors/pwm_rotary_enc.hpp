@@ -39,7 +39,7 @@ public:
     }
 
     bool sample(PwmRotaryEncoderData &out) override {
-        const double pulse = pulseIn(_p, HIGH, _mpl * 2); // TODO: if there are issues later, check the pulseIn
+        const double pulse = pulseIn(_p, HIGH); // TODO: if there are issues later, check the pulseIn
         const double angle = (pulse / _mpl) * (2 * M_PI);
         const double offsetted = Angle::from_rad(angle + _offset)._radians;
         out = {
