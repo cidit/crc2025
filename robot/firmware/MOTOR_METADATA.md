@@ -57,3 +57,26 @@ precision motor:
     pids:
         speed: K 1.00000 0.00001 0.28500
         angle: ???
+
+## Bras
+
+precision motor LB:
+    motor: ???
+    enco: 6
+    pids:
+        speed: K 1.00000 0.00001 0.28500
+        angle: ???
+
+precision motor RB:
+    motor: ???
+    enco: 5
+    pids:
+        speed: K 1.00000 0.00001 0.28500
+        angle: ???
+
+precision motor PB:
+    motor: ???
+    enco: 8
+    pids:
+        speed: K 1.00000 0.00001 0.28500
+        angle: ???
