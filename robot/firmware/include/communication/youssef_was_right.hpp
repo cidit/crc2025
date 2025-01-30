@@ -95,7 +95,11 @@ void update_df(dataframe_t &df)
     // copy the bytes when the data is ready
     if (received)
     {
-        memcpy(df, buffer, DATAFRAME_BUFFER_LEN);
+        auto raw_df = reinterpret_cast<byte*>(df);
+        // memcpy(df, buffer, DATAFRAME_BUFFER_LEN);
+        for (size_t i =0; i < DATAFRAME_BUFFER_LEN; i++ ) {
+            raw_df[i] = buffer[i];
+        }
         received = false;
     }
     // if (index != 0 && digitalRead(CS_SPI_PIN) == HIGH) {
