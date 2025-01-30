@@ -26,7 +26,7 @@ int32_t enco_values[ENCO_NUM];
 Decodeur cmd(&Serial);
 bool read_mode = true, controller_mode = false;
 Timer print_timer(ONE_SECOND / 40);
-Timer poll_timer(ONE_SECOND / 10000);
+Timer poll_timer(ONE_SECOND / 100);
 
 const size_t NUM_MOTORS = 4;
 
@@ -114,7 +114,7 @@ void execute_commands()
 
     switch (toupper(cmd.getCommand()))
     {
-    case 'X':
+    case 'T':
     {
         /**
          * donne le target en coordonnes polaires
@@ -193,24 +193,19 @@ void setup()
 
     master_enco_spi_init();
     SPI.begin();
-
-    for (auto &pmotor : pmotors)
-    {
-        pmotor._pid_angle.setInterval(poll_timer._delay);
-        pmotor._pid_speed.setInterval(poll_timer._delay);
-        pmotor.begin();
-        pmotor.enable(true);
-    }
-
     {
         swerve_right.begin();
         swerve_right._pma._pid_speed.setK(0.60000, 0.00001, 0.12000);
+        swerve_right._pma._pid_speed.setInterval(poll_timer._delay);
         swerve_right._pmb._pid_speed.setK(0.60000, 0.00001, 0.15500);
+        swerve_right._pmb._pid_speed.setInterval(poll_timer._delay);
         swerve_right.enable(true);
 
         swerve_left.begin();
         swerve_left._pma._pid_speed.setK(0.60000, 0.00001, 0.12000);
+        swerve_left._pma._pid_speed.setInterval(poll_timer._delay);
         swerve_left._pmb._pid_speed.setK(0.60000, 0.00001, 0.15500);
+        swerve_left._pmb._pid_speed.setInterval(poll_timer._delay);
         swerve_left.enable(true);
     }
 
@@ -238,6 +233,9 @@ void loop()
     {
         auto &swerve = get_swerve(currently_selected_swerve);
 
+        SPRINT(currently_selected_swerve == 0? "[R]": "[L]");
+
+        SEPARATOR;
         // SPRINT(" ANGLE ");
         // SPRINT("c:");
         SPRINT(String(swerve._e.getLast().rads));
@@ -265,11 +263,11 @@ void loop()
         SPRINT(" ");
         SPRINT("[A] S:" + padLeft(String(swerve._pma._e.getLast().rpm, 1), 6, '\''));
         SPRINT("  T:" + padLeft(String(swerve._pma._pid_speed.getSetPoint(), 1), 6, '\''));
-        SPRINT("  {" + String(swerve._pma._m.get_power()) + "}");
+        SPRINT("  (" + String(swerve._pma._m.get_power()) + ")");
         SEPARATOR;
         SPRINT("[B] S:" + padLeft(String(swerve._pmb._e.getLast().rpm, 1), 6, '\''));
         SPRINT("  T:" + padLeft(String(swerve._pmb._pid_speed.getSetPoint(), 1), 6, '\''));
-        SPRINT("  {" + String(swerve._pmb._m.get_power()) + "}");
+        SPRINT("  (" + String(swerve._pmb._m.get_power()) + ")");
         SPRINT(" ");
 
         SEPARATOR;
