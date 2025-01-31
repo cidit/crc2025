@@ -24,7 +24,6 @@ void loop() {
 
     if (poll_timer.is_time()) {
         dataframe_t df;
-        // TODO: for some reason, the values seem to be multiplied by 256
         retrieve_df(df);
         for (auto i = 0; i < ENCO_NUM; i++) {
             SPRINT("| e");
