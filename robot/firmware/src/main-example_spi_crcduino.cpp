@@ -2,7 +2,7 @@
 // spi master
 // */
 
-#define youssef
+// #define youssef
 
 #ifndef youssef
 
@@ -33,10 +33,17 @@ void loop() {
             SPRINT("| e");
             SPRINT(i);
             SPRINT(":");
-            SPRINT(df[i]/256);
+            SPRINT(df[i]);
             SPRINT(" ");
         }
         Serial.println("|");
+        auto raw = reinterpret_cast<byte*>(df);
+        for (size_t i = 0; i < DATAFRAME_BUFFER_LEN; i++) {
+            if (i%4==0) Serial.print(" ");
+            if (raw[i] < 10) Serial.print("0");
+            Serial.print(raw[i], HEX);
+        }
+        Serial.println("");
     }
     
 }

@@ -4,6 +4,12 @@
 #include <SPI.h>
 #include "sensors/gobuilda_rotary_enc_data.hpp"
 
+
+constexpr size_t NUM_ENCOS = 8;
+constexpr size_t DATAFRAME_BUFFER_LEN = (sizeof(int32_t) * NUM_ENCOS);
+
+using dataframe_t = int32_t[NUM_ENCOS];
+
 static const SPISettings SPI_AL_CRC_SETTINGS(
     1000000,
     MSBFIRST,
@@ -29,9 +35,12 @@ void retrieve_df(int32_t df[ENCO_NUM]) {
 
     SPI.beginTransaction(SPI_AL_CRC_SETTINGS);
     digitalWrite(SS, LOW); // INITIATE COMM WITH SLAVE
+    
+    SPI.transfer(0x0F); // sync
+    // SPI.transfer(0x00); // trash the first byte i guess???
 
     for (byte i = 0; i < DF_LEN; i++) {
-      buff[i] = SPI.transfer(0x01); // 0x01 is just random data. we need to send something to receive something.
+      buff[i] = SPI.transfer(0x00); // 0x00 is just random data. we need to send something to receive something.
     }
 
     digitalWrite(SS, HIGH); // END COMM

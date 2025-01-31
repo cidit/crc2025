@@ -2,7 +2,7 @@
 // spi slave
 // */
 
-#define youssef
+// #define youssef
 
 #ifndef youssef
 
@@ -18,11 +18,6 @@
 // int byteIndex = 0;  // Current byte to send
 // int dataSize = sizeof(dataFrame);  // Total size of the array in bytes
 // byte* dataPtr = (byte*)dataFrame;  // Pointer to the array as bytes
-
-bool does_master_need_data()
-{
-    return digitalRead(SS) == LOW;
-}
 
 void spi_slave_crazy_init()
 {
@@ -121,6 +116,13 @@ void loop()
             SPRINT(" ");
         }
         Serial.println('|');
+        auto raw = reinterpret_cast<byte*>(df);
+        for (size_t i = 0; i < DATAFRAME_BUFFER_LEN; i++) {
+            if (i%4==0) Serial.print(" ");
+            if (raw[i] < 10) Serial.print("0");
+            Serial.print(raw[i], HEX);
+        }
+        Serial.println("");
     }
 }
 
@@ -133,8 +135,14 @@ void SPI0_Handler()
     // {
 
     // MUST READ EVEN IF UNUSED
-    // how it would normally be: `byte read_value = SPI0->SPI_RDR & SPI_RDR_RD_Msk;`
-    (void) (SPI0->SPI_RDR & SPI_RDR_RD_Msk);
+    // how it would normally be: 
+    byte read_value = SPI0->SPI_RDR & SPI_RDR_RD_Msk;
+    if (read_value == 0x0F) {
+        df_idx = 0;
+        // SPI0->SPI_TDR = 0; // send garbage
+        // return;
+    }
+    // (void) (SPI0->SPI_RDR & SPI_RDR_RD_Msk);
     
     //     if (recv == 0x01) {
     //         // 0x01 is what we decided restarts the transmission.
