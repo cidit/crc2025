@@ -34,7 +34,7 @@ void loop() {
         }
         Serial.println("|");
         auto raw = reinterpret_cast<byte*>(df);
-        for (size_t i = 0; i < DATAFRAME_BUFFER_LEN; i++) {
+        for (size_t i = 0; i < DF_LEN; i++) {
             if (i%4==0) Serial.print(" ");
             if (raw[i] < 10) Serial.print("0");
             Serial.print(raw[i], HEX);

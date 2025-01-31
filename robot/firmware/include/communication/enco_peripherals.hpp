@@ -5,18 +5,15 @@
 #include "sensors/gobuilda_rotary_enc_data.hpp"
 
 
-constexpr size_t NUM_ENCOS = 8;
-constexpr size_t DATAFRAME_BUFFER_LEN = (sizeof(int32_t) * NUM_ENCOS);
+constexpr auto ENCO_NUM = 8;
+using dataframe_t = int32_t[ENCO_NUM];
+constexpr auto DF_LEN = sizeof(dataframe_t);
 
-using dataframe_t = int32_t[NUM_ENCOS];
 
 static const SPISettings SPI_AL_CRC_SETTINGS(
     1000000,
     MSBFIRST,
     SPI_MODE0);
-
-constexpr auto ENCO_NUM = 8;
-constexpr auto DF_LEN = sizeof(int32_t) * ENCO_NUM;
 
 
 #ifndef ARDUINO_SAM_DUE
