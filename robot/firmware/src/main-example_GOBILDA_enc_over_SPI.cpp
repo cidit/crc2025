@@ -44,24 +44,13 @@ void setup()
     SPI.begin();
 }
 
-void update_df()
-{
-    // TODO: for some reason, the values seem to be multiplied by 256
-    retrieve_df(df);
-    // here, we sorta patch the multiplied by 256 problem
-    for (int i = 0; i < ENCO_NUM; i++)
-    {
-        df[i] /= 256;
-    }
-}
-
 void loop()
 {
     poll_timer.update(millis());
 
     if (poll_timer.is_time())
     {
-        update_df();
+        retrieve_df(df);
     }
 
     // // TESTING DATAFRAME

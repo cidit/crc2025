@@ -11,7 +11,7 @@
 #include "util/print.hpp"
 
 
-Timer poll_timer(ONE_SECOND/1);
+Timer poll_timer(ONE_SECOND/100);
 
 void setup() {
     Serial.begin(115200);
@@ -33,13 +33,13 @@ void loop() {
             SPRINT(" ");
         }
         Serial.println("|");
-        auto raw = reinterpret_cast<byte*>(df);
-        for (size_t i = 0; i < DF_LEN; i++) {
-            if (i%4==0) Serial.print(" ");
-            if (raw[i] < 10) Serial.print("0");
-            Serial.print(raw[i], HEX);
-        }
-        Serial.println("");
+        // auto raw = reinterpret_cast<byte*>(df);
+        // for (size_t i = 0; i < DF_LEN; i++) {
+        //     if (i%4==0) Serial.print(" ");
+        //     if (raw[i] < 10) Serial.print("0");
+        //     Serial.print(raw[i], HEX);
+        // }
+        // Serial.println("");
     }
     
 }

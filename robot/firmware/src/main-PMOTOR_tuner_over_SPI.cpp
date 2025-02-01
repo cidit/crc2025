@@ -24,16 +24,12 @@ int32_t enco_values[ENCO_NUM];
 
 Decodeur cmd(&Serial);
 bool read_mode = true;
-Timer print_timer(ONE_SECOND / 40);
-Timer polling_timer(ONE_SECOND / 40);
-
-
+Timer print_timer(ONE_SECOND / 100);
+Timer poll_timer(ONE_SECOND / 40);
 
 const size_t NUM_MOTORS = 4;
 
-Timer poll_timer(ONE_SECOND / 10000);
-
-int32_t df[ENCO_NUM];
+dataframe_t df;
 
 LinEncSpoof spoofs[ENCO_NUM] = {
     {df[0], poll_timer},
@@ -47,7 +43,7 @@ LinEncSpoof spoofs[ENCO_NUM] = {
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
-    {spoofs[0], 145.1 * 2.5, poll_timer},
+    {spoofs[0], 145.1 * 2.5, poll_timer, true},
     {spoofs[1], 145.1 * 2.5, poll_timer},
     {spoofs[2], 145.1 * 2.5, poll_timer, true},
     {spoofs[3], 145.1 * 2.5, poll_timer},
@@ -58,7 +54,7 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
 };
 
 Motor motors[NUM_MOTORS] = {
-    {CRC_PWM_4},
+    {CRC_PWM_4, true},
     {CRC_PWM_3},
     {CRC_PWM_1},
     {CRC_PWM_7},
@@ -74,17 +70,6 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
 // should always be between 0 and NUM_MOTORS
 size_t currently_selected_pmotor_idx = 0;
 
-void update_df()
-{
-    // TODO: for some reason, the values seem to be multiplied by 256
-    retrieve_df(df);
-    // here, we sorta patch the multiplied by 256 problem
-    for (int i = 0; i < ENCO_NUM; i++)
-    {
-        df[i] /= 256;
-    }
-}
-
 void setup()
 {
     Serial.begin(115200);
@@ -96,8 +81,8 @@ void setup()
 
     for (auto &pmotor : pmotors)
     {
-        pmotor._pid_angle.setInterval(polling_timer._delay);
-        pmotor._pid_speed.setInterval(polling_timer._delay);
+        pmotor._pid_angle.setInterval(poll_timer._delay);
+        pmotor._pid_speed.setInterval(poll_timer._delay);
         pmotor.begin();
         pmotor.enable(true);
     }
@@ -210,7 +195,7 @@ void loop()
 
     if (poll_timer.is_time())
     {
-        update_df();
+        retrieve_df(df);
     }
 
     for (auto &pmotor : pmotors)
@@ -260,5 +245,7 @@ void loop()
         SEPARATOR;
 
         Serial.println();
+
+        hexdump_df(df);
     }
 }
