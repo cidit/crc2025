@@ -19,7 +19,6 @@ void hexdump_df(dataframe_t &df)
             Serial.print("0");
         Serial.print(raw[i], HEX);
     }
-    Serial.println("");
 }
 
 static const SPISettings SPI_AL_CRC_SETTINGS(
