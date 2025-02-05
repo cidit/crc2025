@@ -31,6 +31,11 @@ void setup()
 
 void loop()
 {
+    // reset the idx if slave is deselected
+    if (df_idx != 0 && digitalRead(SS) == HIGH) {
+        df_idx = 0;
+    }
+
     // update dataframe
     for (byte i = 0; i < ENCO_NUM; i++)
     {
