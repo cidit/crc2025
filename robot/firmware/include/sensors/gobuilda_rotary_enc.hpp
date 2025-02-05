@@ -13,7 +13,7 @@ public:
     Sensor<int32_t> &_ie;
     int32_t _ie_current, _ie_old;
     const double _tpt;
-    bool _is_reversed;
+    bool _is_inverted;
 
     GobuildaRotaryEncoder(
         Sensor<int32_t> &internal_encoder,
@@ -25,7 +25,7 @@ public:
                      .rpm = 0,
                  },
                  polling_timer),
-          _ie(internal_encoder), _ie_current(0), _ie_old(0), _tpt(ticks_per_turn), _is_reversed(reversed)
+          _ie(internal_encoder), _ie_current(0), _ie_old(0), _tpt(ticks_per_turn), _is_inverted(reversed)
     {
     }
 
@@ -44,6 +44,10 @@ public:
         // TODO: keep track of an offset instead like explained in begin()
         // _ie.write(0);
         _last = {0, 0};
+    }
+
+    void set_inverted(bool inverted) {
+        _is_inverted = inverted;
     }
 
     bool sample(GobuildaRotaryEncoderData &out) override
@@ -81,7 +85,7 @@ public:
 
     int32_t _internal_read() {
         auto read = _ie.getLast();
-        return _is_reversed? -read: read;
+        return _is_inverted? -read: read;
     }
 
     void update() override {
