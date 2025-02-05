@@ -27,14 +27,14 @@ LinEncSpoof spoofs[ENCO_NUM] = {
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
-    {spoofs[0], 145.1 * 2.5, poll_timer},
-    {spoofs[1], 145.1 * 2.5, poll_timer},
-    {spoofs[2], 145.1 * 2.5, poll_timer},
-    {spoofs[3], 145.1 * 2.5, poll_timer},
-    {spoofs[4], 145.1 * 2.5, poll_timer},
-    {spoofs[5], 145.1 * 2.5, poll_timer},
-    {spoofs[6], 145.1 * 2.5, poll_timer},
-    {spoofs[7], 145.1 * 2.5, poll_timer},
+    {spoofs[0], 145.1 * 5, poll_timer},
+    {spoofs[1], 145.1 * 5, poll_timer},
+    {spoofs[2], 145.1 * 5, poll_timer},
+    {spoofs[3], 145.1 * 5, poll_timer},
+    {spoofs[4], 145.1 * 5, poll_timer},
+    {spoofs[5], 145.1 * 5, poll_timer},
+    {spoofs[6], 145.1 * 5, poll_timer},
+    {spoofs[7], 145.1 * 5, poll_timer},
 };
 
 void setup()
@@ -92,11 +92,13 @@ void loop()
             SPRINT("| e");
             SPRINT(i);
             SPRINT(" ");
-            SPRINT(goencs[i].getLast().rads);
+            SPRINT(String(goencs[i].getLast().rads, 1));
             SPRINT(" ");
-            SPRINT(goencs[i].getLast().rpm);
+            SPRINT(String(goencs[i].getLast().rpm, 1));
             SPRINT(" ");
+            SPRINT(padLeft(String(goencs[i]._ie.getLast()), 3, '0'));
         }
+        hexdump_df(df);
         Serial.println("|");
     }
 }

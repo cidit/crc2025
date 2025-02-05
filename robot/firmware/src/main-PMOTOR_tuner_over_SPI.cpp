@@ -19,6 +19,7 @@ spi master. expects a slave to be uploaded to the arduino.
 #include <controller.hpp>
 #include "util/looped.hpp"
 #include "math/vectors.hpp"
+#include "config.hpp"
 
 int32_t enco_values[ENCO_NUM];
 
@@ -43,14 +44,14 @@ LinEncSpoof spoofs[ENCO_NUM] = {
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
-    {spoofs[0], 145.1 * 2.5, poll_timer, true},
-    {spoofs[1], 145.1 * 2.5, poll_timer},
-    {spoofs[2], 145.1 * 2.5, poll_timer, true},
-    {spoofs[3], 145.1 * 2.5, poll_timer},
-    {spoofs[4], 145.1 * 2.5, poll_timer},
-    {spoofs[5], 145.1 * 2.5, poll_timer},
-    {spoofs[6], 145.1 * 2.5, poll_timer},
-    {spoofs[7], 145.1 * 2.5, poll_timer},
+    {spoofs[0], 145.1 * 5, poll_timer, true},
+    {spoofs[1], 145.1 * 5, poll_timer},
+    {spoofs[2], 145.1 * 5, poll_timer, true},
+    {spoofs[3], 145.1 * 5, poll_timer},
+    {spoofs[4], 145.1 * 5, poll_timer},
+    {spoofs[5], 145.1 * 5, poll_timer},
+    {spoofs[6], 145.1 * 5, poll_timer},
+    {spoofs[7], 145.1 * 5, poll_timer},
 };
 
 Motor motors[NUM_MOTORS] = {
@@ -70,6 +71,17 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
 // should always be between 0 and NUM_MOTORS
 size_t currently_selected_pmotor_idx = 0;
 
+void configure_motors()
+{
+    for (auto &pmotor : pmotors)
+    {
+        pmotor._pid_angle.setInterval(poll_timer._delay);
+        pmotor._pid_speed.setInterval(poll_timer._delay);
+        pmotor.begin();
+        // pmotor.enable(true);
+    }
+}
+
 void setup()
 {
     Serial.begin(115200);
@@ -79,13 +91,11 @@ void setup()
     master_enco_spi_init();
     SPI.begin();
 
-    for (auto &pmotor : pmotors)
-    {
-        pmotor._pid_angle.setInterval(poll_timer._delay);
-        pmotor._pid_speed.setInterval(poll_timer._delay);
-        pmotor.begin();
-        pmotor.enable(true);
-    }
+    pmotors_config(pmotors);
+    configure_motors();
+
+    auto &pm = get_pmotor(currently_selected_pmotor_idx);
+    pm.enable(true);
 
     Serial.println("Setup Done");
 }
@@ -109,6 +119,20 @@ void execute_commands()
 
     switch (toupper(cmd.getCommand()))
     {
+    case 'Z':
+    {
+        // change which motor is selected. disable the currently selected motor and enables the selected one
+        auto selected_idx = cmd.getArg(0);
+        if (selected_idx >= 0 && selected_idx < NUM_MOTORS)
+        {
+            auto &old_pm = get_pmotor(currently_selected_pmotor_idx);
+            old_pm.enable(false);
+            currently_selected_pmotor_idx = selected_idx;
+            auto &new_pm = get_pmotor(currently_selected_pmotor_idx);
+            new_pm.enable(true);
+        }
+        break;
+    }
     case 'S':
     {
         // change speed
@@ -125,16 +149,20 @@ void execute_commands()
         Serial.println("Target angle: " + String(target_angle));
         break;
     }
-    case 'C':
+
+    case 'Q':
     {
-        // change which motor is selected
-        auto selected_idx = cmd.getArg(0);
-        if (selected_idx >= 0 && selected_idx < NUM_MOTORS)
-        {
-            currently_selected_pmotor_idx = selected_idx;
-        }
+        // toggle current motor
+        pmotor.enable(!pmotor._enabled);
         break;
     }
+    case 'W':
+    {
+        pmotor._m.set_power_ratio(cmd.getArg(0));
+        break;
+    }
+
+    // pid shit
     case 'K':
     {
         // set all pid constants
@@ -169,16 +197,54 @@ void execute_commands()
         print_pid_vals(tuning_pid);
         break;
     }
-    case 'M':
-    {
-        // enable/disable current motor
-        pmotor.enable(!pmotor._enabled);
-        break;
-    }
+
     case 'R':
     {
         // enable/disable printing of values
         read_mode = !read_mode;
+        break;
+    }
+
+    // toggle encoder and motor directions
+    case 'N':
+    {
+        // toggle reverse state of encoder
+        pmotor._e._is_inverted = !pmotor._e._is_inverted;
+        break;
+    }
+    case 'M':
+    {
+        // toggle reverse state of motor
+        pmotor._m.set_inverted(!pmotor._m._is_inverted);
+        break;
+    }
+
+    case 'X':
+    {
+        // generate a report
+        for (size_t i = 0; i < NUM_MOTORS; i++)
+        {
+            auto &pm = get_pmotor(i);
+            Serial.println("/* PMOTOR #[" + String(i) + "] config */ {");
+            Serial.println("\tauto &pm = pmotors[" + String(i) + "];");
+            Serial.println("\tpm._e.set_inverted(" + String(pm._e._is_inverted ? "true" : "false") + ");");
+            Serial.println("\tpm._m.set_inverted(" + String(pm._m._is_inverted ? "true" : "false") + ");");
+            Serial.println("\tpm._pid_angle.setK(" +
+                           String(pm._pid_angle.getKp(), 5) +
+                           ", " +
+                           String(pm._pid_angle.getKi(), 5) +
+                           ", " +
+                           String(pm._pid_angle.getKd(), 5) +
+                           ");");
+            Serial.println("\tpm._pid_speed.setK(" +
+                           String(pm._pid_speed.getKp(), 5) +
+                           ", " +
+                           String(pm._pid_speed.getKi(), 5) +
+                           ", " +
+                           String(pm._pid_speed.getKd(), 5) +
+                           ");");
+            Serial.println("};");
+        }
         break;
     }
     }
@@ -212,6 +278,11 @@ void loop()
         SPRINT(pmotor._mode == PrecisionMotor::Mode::MATCH_ANGLE ? 'A' : 'S');
         SPRINT("#");
         SPRINT(currently_selected_pmotor_idx);
+        SPRINT("|R");
+        SPRINT(" E");                               // encoder reveresd?
+        SPRINT(pmotor._e._is_inverted ? "Y" : "N"); // yes reversed, no reversed
+        SPRINT(" M");                               // motor reversed?
+        SPRINT(pmotor._m._is_inverted ? "Y" : "N"); // yes reversed, no reversed
         SPRINT("]");
         SEPARATOR;
 
@@ -244,8 +315,7 @@ void loop()
         SPRINT(" ]");
         SEPARATOR;
 
-        Serial.println();
-
         hexdump_df(df);
+        Serial.println();
     }
 }
