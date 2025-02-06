@@ -1,0 +1,1616 @@
+<!-----------------------------------------------------------------------------
+Titre : Crafting Rich Coffee - Clicker Game
+Description : 
+Ce projet représente un jeu de type "clicker" interactif où l'utilisateur
+incarne un entrepreneur cherchant à bâtir un empire dans l'industrie du café.
+Ce projet est conçu avec HTML, CSS et JavaScript, offrant une expérience
+utilisateur agréable avec des animations et des fonctionnalités interactives.
+
+Utilité : 
+- Apprendre les bases du développement web à travers un projet ludique.
+- Illustrer la gestion des événements, des animations et des états interactifs.
+- Offrir une démonstration pratique des interactions utilisateur, de la mise
+  en page responsive et des styles dynamiques.
+
+Auteur(s) : Alexis Savard, Kevin Lechasseur
+Droits : © Copyright altech
+------------------------------------------------------------------------------>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Crafting Rich Coffee</title>
+    <link rel="icon" href="images/beans.jpg" type="image/x-icon" />
+
+    <!--THIS MAKES TAILWIND WORKS DONT RMOVE IT -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Trebuchet+MS&display=swap');
+
+        body {
+            font-family: 'Trebuchet MS', sans-serif;
+            color: #000000;
+        }
+
+        .bg-progressBar {
+            background-color: #EAD8C0;
+        }
+
+        .bg-background {
+            background-color: #D1BB9E;
+        }
+
+        .bg-primary {
+            background-color: #A79277;
+        }
+
+        .clickables {
+            background-color: #FFF2E1;
+        }
+
+        .container {
+            margin: 0 auto;
+            padding: 0 5vw;
+            /* Utilisation des unités vw */
+        }
+
+        #stats,
+        #upgrades,
+        #actions,
+        #machines,
+        #journal {
+            margin-bottom: 2vh;
+            /* Utilisation des unités vh */
+            padding: 1vw;
+            /* Utilisation des unités vw */
+            background-color: #EAD8C0;
+            box-shadow: 0.5vw 0.5vw 1vw #968c73;
+            /* Utilisation des unités vw */
+        }
+
+
+        .hidden {
+            display: none;
+        }
+
+        .visible {
+            display: block;
+        }
+
+        #progressContainer {
+            position: relative;
+            width: 300px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 5px;
+        }
+
+        #progressBar {
+            position: absolute;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background-color: #4caf50;
+            transition: width 0.2s ease;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .grid-2x2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1vw;
+            /* Utilisation des unités vw */
+        }
+
+        .grid-2x22 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15vw;
+            /* Utilisation des unités vw */
+        }
+
+        .grid-3x5 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1vw;
+            /* Utilisation des unités vw */
+        }
+
+        .grid-5x5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1vw;
+            /* Utilisation des unités vw */
+        }
+
+        .grid-4x4 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5vw;
+            /* Utilisation des unités vw */
+        }
+
+        /* button style */
+        .button {
+            font-size: 1.8rem;
+            /* Utilisation des unités rem */
+            border: none;
+            border-radius: 0.8rem;
+            /* Utilisation des unités rem */
+            padding: 1.5rem 3rem;
+            /* Utilisation des unités rem */
+            cursor: pointer;
+            box-shadow: 0 0.4rem 0.6rem rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .button:active {
+            transform: translateY(0.3rem);
+            /* Utilisation des unités rem */
+            box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.3);
+        }
+
+        .button.pressed {
+            animation: bounce 0.2s ease-out;
+        }
+
+        @keyframes bounce {
+            0% {
+                transform: translateY(0.3rem);
+                /* Utilisation des unités rem */
+            }
+
+            50% {
+                transform: translateY(-0.5rem);
+                /* Utilisation des unités rem */
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        #gears {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .gear {
+            position: absolute;
+            width: 5vw;
+            /* Taille relative à la largeur de la fenêtre */
+            height: 5vw;
+            /* Taille relative à la largeur de la fenêtre */
+            object-fit: contain;
+            /* Appliquer l'animation aux engrenages */
+            animation: rotate 5s linear infinite;
+            /* Rotation en 5s, linéaire, en boucle */
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .reverse-gear {
+            position: absolute;
+            width: 5vw;
+            /* Taille relative à la largeur de la fenêtre */
+            height: 5vw;
+            /* Taille relative à la largeur de la fenêtre */
+            object-fit: contain;
+            /* Appliquer l'animation aux engrenages */
+            animation: rotate 5s linear infinite reverse;
+            /* Rotation inversée */
+        }
+
+
+
+
+
+        /* Positionnement des engrenages */
+        #rotating-object-1 {
+            top: 23%;
+            left: -2.7vw;
+        }
+
+        #rotating-object-2 {
+            top: 31%;
+            left: -2.5vw;
+        }
+
+        #rotating-object-3 {
+            top: 50%;
+            left: -2vw;
+        }
+
+        #rotating-object-4 {
+            top: 57%;
+            left: -0.45vw;
+        }
+
+        #rotating-object-5 {
+            top: 70%;
+            left: -2.5vw;
+        }
+
+        #rotating-object-6 {
+            top: 30%;
+            right: -2.5vw;
+        }
+
+        #rotating-object-7 {
+            top: 70%;
+            right: 0.4vw;
+        }
+
+        #rotating-object-8 {
+            top: 50%;
+            right: -1vw;
+        }
+
+        #rotating-object-9 {
+            top: 83%;
+            right: -0.9vw;
+        }
+
+        #rotating-object-10 {
+            top: 90%;
+            right: -2.5vw;
+        }
+
+        #rotating-object-11 {
+            top: 95%;
+            left: -1vw;
+        }
+
+        #rotating-object-12 {
+            top: 76%;
+            right: -2.2vw;
+        }
+
+        #rotating-object-reverse {
+            display: none;
+        }
+
+        #animation-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .floating-number {
+            position: absolute;
+            font-size: 1.8rem;
+            /* Utilisation des unités rem */
+            font-weight: bold;
+            animation: floatUp 1.5s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-10vh);
+                /* Utilisation des unités vh */
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-background bg-no-repeat bg-right-top">
+
+    <!-- Page d'accueil -->
+    <div id="homePage" class="hidden visible w-100% justify-center gap-2 sm:gap-4 bg-primary">
+
+        <!-- Boutons d'icônes en haut -->
+        <div class="flex gap-4 px-2 py-2">
+            <button onclick="navigateTo('homePage')">
+                <img src="images/home.png" alt="homePage"
+                    class="bg-progressBar flex shadow rounded items-center p-2 w-16 h-16 cursor-pointer" />
+            </button>
+            <button onclick="navigateTo('aboutPage')">
+                <img src="images/about.png" alt="aboutPage"
+                    class="bg-progressBar shadow rounded flex items-center p-2 w-16 h-16 cursor-pointer" />
+            </button>
+            <button onclick="navigateTo('clickerPage')">
+                <img src="images/game.png" alt="gamePage"
+                    class="bg-progressBar flex shadow rounded items-center p-2 w-16 h-16 cursor-pointer" />
+            </button>
+            <button class="langSwitchBtn w-16 h-16 bg-progressBar flex shadow rounded items-center cursor-pointer"
+                onclick="switchLanguage('fr')">
+                <img src="images/drapeau-francais.png" alt="changeLanguage" class="w-16 h-9" />
+            </button>
+        </div>
+
+        <!-- Barres de navigation -->
+        <div class="overflow-auto py-16 bg-progressBar flex items-center justify-center"
+            style="min-height: calc(100vh - 80px)">
+            <div class="flex flex-col items-center mx-auto space-y-8 w-2/3">
+                <h1 class="text-center font-bold text-lg">Welcome to Clockwork Roasted Coffee!
+                </h1><br>
+                <button onclick="navigateTo('clickerPage')"
+                    class="w-full mx-auto py-8 clickables rounded-3xl shadow-xl hover:bg-opacity-80"><b>Play</b></button>
+                <button onclick="navigateTo('aboutPage')"
+                    class="w-full mx-auto py-8 clickables rounded-3xl shadow-xl hover:bg-opacity-80"><b>About</b></button>
+                <button onclick="switchLanguage('fr')"
+                    class="langSwitchBtn w-full mx-auto py-8 clickables rounded-3xl shadow-xl hover:bg-opacity-80"><b>Change
+                        language</b></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page À propos -->
+    <div class="w-100% justify-center gap-2 sm:gap-4 bg-primary">
+        <div class="hidden" id="aboutPage">
+            <div class="flex items-start space-x-4 mb-6">
+                <button onclick="navigateTo('homePage')">
+                    <img src="images/home.png" alt="homePage"
+                        class="bg-progressBar flex shadow rounded items-center p-2 flex-1 ml-2 my-2 w-16 h-16 cursor-pointer" />
+                </button>
+                <button onclick="navigateTo('aboutPage')">
+                    <img src="images/about.png" alt="homePage"
+                        class="bg-progressBar shadow rounded flex flex-col items-center p-2 flex-1  my-2 w-16 h-16 cursor-pointer" />
+                </button>
+                <button onclick="navigateTo('clickerPage')">
+                    <img src="images/game.png" alt="gamePage"
+                        class="bg-progressBar flex shadow rounded items-center p-2 flex-1  my-2 w-16 h-16 cursor-pointer" />
+                </button>
+                <button
+                    class="langSwitchBtn w-16 h-16 bg-progressBar flex shadow rounded items-center cursor-pointer my-2"
+                    onclick="switchLanguage('fr')">
+                    <img src="images/drapeau-francais.png" alt="changeLanguage" class="w-16 h-9" />
+                </button>
+            </div>
+
+            <div class="bg-background overflow-auto mb-4">
+                <div class="bg-progressBar py-2">
+                    <h1 class="text-center font-bold text-lg">About</h1>
+                    <div class="clickables mx-2 my-2 px-2 py-2 shadow rounded">
+                        <div id="PresentationEquipe" class="text-center items-center text-justify">
+                            Welcome to the official website of our robotics team for the TakTik 2025 competition!
+                            We are a team passionate about robotics, programming, and web design, brought together
+                            around a captivating theme: Steampunk.
+                            As you may have seen in our video or our video game, we gave our all during the months of
+                            work to exceed your expectations and inspire you to join the world we have created around
+                            our theme.</div>
+
+                        <p class="col-span-3 text-center font-bold">
+                            <br><br> To begin, here is our team that worked countless hours and is essential to the
+                            success of this project.
+                        </p><br>
+                        <div id="PhotoEquipe" class="grid-3x5">
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Sara</p>
+                                <img src="images/SW-Sara.png" alt="Sara" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Sara is a very creative person who expresses herself well,
+                                    but she sometimes seems confused about the courses offered in her study program.</p>
+                                <p class="text-sm text-gray-600">Booth manager, actress, costume designer.
+                                </p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Félix</p>
+                                <img src="images/SW-Félix.png" alt="Félix" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Félix is probably one of the most understanding and patient
+                                    people around, but he still has to defeat his number one enemy: mathematics.</p>
+                                <p class="text-sm text-gray-600">Programmer, actor, costume designer.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <h1 class="font-bold">Juliette</h1>
+                                <img src="images/Juliette.jpg" alt="Juliette"
+                                    class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Juliette is a person who is always ready to help when it's
+                                    REALLY necessary!</p>
+                                <p class="text-sm text-gray-600">Website content, booth design.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Madjda</p>
+                                <img src="images/Madjda.jpg" alt="Madjda" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Madjda is a ball of energy and positivity who participated
+                                    in all projects involving art.</p>
+                                <p class="text-sm text-gray-600">Responsable des costumes, actrice, conception kiosque.
+                                </p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Liam</p>
+                                <img src="images/SW-Liam.png" alt="Liam" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Liam is an important player in the CRC. He was essential in
+                                    the creation of the robot and the video, always keeping his smile and good mood.</p>
+                                <p class="text-sm text-gray-600">Programmer, robot, actor.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Antoine</p>
+                                <img src="images/SW-Antoine.png" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Antoine pays a lot of attention to detail and surprised us
+                                    all with his artistic talent.</p>
+                                <p class="text-sm text-gray-600">Programmer, robot, actor, painter, booth.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Guillaume</p>
+                                <img src="images/SW-Guillaue.png" alt="Guillaume"
+                                    class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Guillaume is a hard worker who threw himself wholeheartedly
+                                    into the creation of the robot and provided many resources for the success of this
+                                    project. Guillaume is a very strong person despite his battle against the "8%."</p>
+                                <p class="text-sm text-gray-600">SwErVe Drive robot, actor, funding, 3D printing,
+                                    costume design, actor, tutorial, website content, booth design.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Martin</p>
+                                <img src="images/SW-Martin.png" alt="Martin"
+                                    class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Martin is the project manager, and thanks to him, his team
+                                    was able to keep their objectives and the team's shared vision in mind.
+
+                                </p>
+                                <p class="text-sm text-gray-600">Project management, tutorial.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Laurent</p>
+                                <img src="images/SW-Laurent.png" alt="Laurent"
+                                    class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Laurent is a hard worker who surprised us all with his
+                                    mastery of multiple fields and is always ready to help those around him.</p>
+                                <p class="text-sm text-gray-600">Actor, costume design, assistant director.
+                                </p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Ana</p>
+                                <img src="images/SW-Ana.png" alt="Ana" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Ana is a very creative person who has shown how talented
+                                    she is in the film industry, and no aspect of it escapes her. She has managed to
+                                    stay grounded despite her overflowing imagination.</p>
+                                <p class="text-sm text-gray-600">Official video manager.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Simon</p>
+                                <img src="images/SW-Simon.png" alt="Simon" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">SSimon is someone who accomplishes his goals despite
+                                    difficulties and someone with great listening skills, always ready to advise those
+                                    around him. Professionals would recommend a few more hours of sleep for him.</p>
+                                <p class="text-sm text-gray-600">Programmer, actor.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Youssef</p>
+                                <img src="images/SW-Youssef.png" alt="Youssef"
+                                    class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Youssef is an extremely kind person, always friendly and
+                                    thinking a lot about others. He is on the right track to win the contest for the
+                                    person who stayed at college the longest.</p>
+                                <p class="text-sm text-gray-600">Robot, actor, booth, costume, 3D printing / Steampunk
+                                    accessories.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Ray</p>
+                                <img src="images/SW-Ray.png" alt="Ray" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Ray is a very artistic person who contributed to the
+                                    completion of this project.</p>
+                                <p class="text-sm text-gray-600">Funding search, set design.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Laurence</p>
+                                <img src="images/SW-Laurence.png" alt="" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Laurence is a very positive and cheerful person who
+                                    contributed to the completion of the project.</p>
+                                <p class="text-sm text-gray-600">Robot.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Laurent</p>
+                                <img src="images/SW-Laurent2.png" alt="" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Laurent participated in the programming of the robot. Old
+                                    soul always ready to give advice.</p>
+                                <p class="text-sm text-gray-600">Programming.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Nicolas</p>
+                                <img src="images/SW-Nicolas.png" alt="Nicolas"
+                                    class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Nicolas was essential in the creation of the video, and
+                                    with Ana, they formed an effective and dynamic team.</p>
+                                <p class="text-sm text-gray-600">Pole vaulter.</p>
+                            </div>
+
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Alexis</p>
+                                <img src="images/SW-Alexis.png" alt="Alexis"
+                                    class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Alexis is someone who dedicates himself 100% to his
+                                    projects and shows great self-deprecation. Alexis is a very inspiring person, even
+                                    if he might want to give up decorating our space.</p>
+                                <p class="text-sm text-gray-600">Co-website manager, actor.</p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <p class="font-bold">Kevin</p>
+                                <img src="images/SW-Kevin.png" alt="Kevin" class="w-80 h-80 rounded-full object-cover">
+                                <p class="text-sm font-bold">Kevin is a very funny person who knows how to bring a smile
+                                    to those around him, and he is a very versatile person who has participated in many
+                                    different projects related to CRC.</p>
+                                <p class="text-sm text-gray-600">Co-website/game manager, actor, costume design,
+                                    funding, booth design.</p>
+                            </div>
+                            <br><br>
+                        </div>
+                        <div id="descriptionDeLaCRC" class="text-center px-6">
+                            <div class="flex items-center justify-center gap-2">
+                                <p class="font-bold text-lg"><br>Qu'est-ce que la CRC?</p>
+                                <img src="images/CRC.png" alt="CRC" class="w-32 h-24 rounded-3xl">
+                                <br>
+                            </div>
+                            <p class="mt-4 text-justify">
+                                The CRC Robotics Competition is an annual event where teams of college-level students
+                                design, build, and program a robot to complete specific tasks in a themed game. This
+                                competition tests their skills in engineering, programming, and teamwork.
+                                Every year, a new challenge is presented, inspired by real-world or futuristic
+                                situations. Teams must analyze the game rules, design a high-performing robot, and
+                                develop strategies to maximize their points during matches.
+                                But the CRC is not limited to robotics! In addition to the robot, participants must
+                                create a themed booth, produce a presentation video, and develop a website to document
+                                their project. The entrepreneurial aspect is also emphasized with sponsorship searches
+                                and project management.
+                                Beyond the competition, the CRC promotes the development of both technical and
+                                interpersonal skills. It represents a unique opportunity to collaborate, innovate, and
+                                face challenges in a spirit of camaraderie and perseverance.
+                                In short, the CRC is an immersive experience that prepares students for the world of
+                                engineering and science while allowing them to live an exciting human and technological
+                                adventure!
+
+
+                            </p>
+                        </div>
+                        <div id="descriptionDUJEU" class="text-center items-center text-justify">
+                            <br><br><br>
+                            <p class="text-center items-center text-justify">
+                            <p><br>The Game Field: The field is a large area with nine stations where robots can place
+                                rings. These stations are arranged to form a three-by-three grid, similar to a
+                                tic-tac-toe board.</p>
+                            <p><br>Game Objective: Teams must use their robots to place rings in the field's stations.
+                                When a team controls three aligned stations in a row, column, or diagonal, they earn a
+                                point multiplier for these stations, thus increasing their score.</p>
+                            <p><br>Essential Rules: For the starting zones, the robots start in one of the two
+                                assigned starting zones. To control a station, the robots must place rings according to
+                                certain conditions, teams must be the first to place a ring in one of the
+                                zones, and for the others, the teams must be the last and/or have the greatest
+                                dominance in that section. Each match lasts 5 minutes, during which teams must
+                                execute their strategies to score as many points as possible.</p>
+                            <p><br>Skills Developed: TAKTIK 2025 allows participants to develop various skills,
+                                including: Engineering and Design: Designing and building a functional robot adapted to
+                                the game's challenges. Programming: Programming the robot to perform tasks autonomously
+                                or respond to operators' commands. Strategy: Developing plans to control the stations
+                                and optimize the score. Teamwork: Collaborating effectively with teammates to achieve
+                                common goals.</p>
+                        </div>
+
+                        <p class="flex flex-col items-center text-center font-bold"><br>Robot conceptualization based on
+                            the competition goals.<br></p>
+                        <div id="7.2.5" class="grid-5x5">
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/Etape1Robo.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/Etape1Robo2.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/Etape1Robo3.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/Screenshot 2025-02-03 at 9.42.50 PM.png" alt=""
+                                    class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/Etape1.robotfils.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                        </div>
+                        <p class="flex flex-col items-center text-center font-bold"><br>Robot construction.<br></p>
+                        <div id="7.2.5" class="grid-5x5">
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/robot1.png" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/robot2.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/robot3.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/robot11.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/robot5.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/robot6.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/robot7.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/robot8.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/robot9.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/robot10.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                        </div>
+
+                        <p class="flex flex-col items-center text-center font-bold"><br>Creation of the booth.<br></p>
+                        <div id="7.2.5" class="grid-5x5">
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/kiosque1.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/Kiosque2.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/Kiosque3.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/Kiosque4.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/Kiosque6.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                        </div>
+                        <p class="flex flex-col items-center text-center font-bold"><br>Creation of the video.<br></p>
+                        <div id="7.2.5" class="grid-4x4">
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video2.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video3.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video4.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video11.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video5.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video6.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video7.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video8.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video9.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video13.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video15.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video14.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video10.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                            <div class="flex flex-col items-center text-center">
+                                <img src="images/video12.jpg" alt="" class="w-80 h-80 rounded-2xl">
+                                <p class="text-sm font-bold"></p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-center text-center justify-center">
+                            <p class="font-bold"><br>The problems we encountered over the months are:
+                            </p>
+                            <p class="flex flex-col items-center text-center justify-center"><br>
+                                For the robot conceptualization, we decided to integrate a swerve drive to make
+                                the robot ultra-maneuverable, but the programming turned out to be much more complicated
+                                than
+                                expected.
+                                Each test forced us to adjust our calculations and refine the motor synchronization.
+                                Despite the challenges, we knew that if we succeeded, our robot would have a serious
+                                advantage.
+                                <br><br>
+                                For the construction of the robot, the launcher was designed quickly and worked well
+                                from the first tests.
+                                However, integrating all the systems together was a real puzzle, especially with
+                                the electronics and communication between the motors. After hours of adjustments and
+                                tests, our robot is finally ready to perform on the field!
+                                <br>
+                                <br>For the booth, the first obstacle we encountered was that we didn’t know exactly
+                                what it should look like.
+                                We eventually opted for a main counter as well as walls on which we would hang many
+                                steampunk accessories. We then had to transport the panels for building the walls in a
+                                U-Haul.
+
+                                For the rest, we only encountered one more issue when storing the panels and the
+                                counter.
+                                We had stored the walls in a room near our space during spring break, but we had to move
+                                them in front of our space
+                                before classes resumed.
+                                <br><br>
+                                And finally, for the video, the biggest obstacle we encountered was that we were missing
+                                actors and equipment to film.
+                                Fortunately, our library lent us high-quality equipment, and the members of our
+                                committee eagerly took part in the video staging.
+                                Also, with the little time we had after spring break, Ana had to write the script in two
+                                weeks, film it in one week, and edit the video in 11 days.
+                                As you’ve seen, the video is amazing, and we are very proud of it.
+
+
+                                <br><br><br><br>
+                            </p>
+                        </div>
+                        <div class="grid-2x22 justify-items-center">
+                            <p>Here is the link to the official video:</p>
+                            <p>Here is the link to the tutorial:</p>
+                        </div>
+                        <div class="grid-2x22 justify-items-center">
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/nJ7UCW_pstA"
+                                frameborder="0" allowfullscreen>
+                            </iframe>
+
+
+
+
+                            <iframe width="560" height="315" src="https://www.youtube.com/embed/cDRNol3qn3w"
+                                frameborder="0" allowfullscreen>
+                            </iframe>
+
+
+
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="clickerPage" class="hidden">
+
+
+        <!-- Div Top -->
+        <div class="flex flex-wrap items-start w-100% gap-2 bg-primary" id="clickerPage">
+            <button onclick="navigateTo('homePage')">
+                <img src="images/home.png" alt="homePage"
+                    class="bg-progressBar flex shadow rounded items-center p-2 flex-1 ml-2 my-2 w-16 h-16 cursor-pointer" />
+            </button>
+            <button onclick="navigateTo('aboutPage')">
+                <img src="images/about.png" alt="homePage"
+                    class="bg-progressBar shadow rounded flex flex-col items-center p-2 flex-1 ml-2 mr-1 my-2 w-16 h-16 cursor-pointer" />
+            </button>
+            <button onclick="navigateTo('clickerPage')">
+                <img src="images/game.png" alt="gamePage"
+                    class="bg-progressBar flex shadow rounded items-center p-2 flex-1 mx-1 my-2 w-16 h-16 cursor-pointer" />
+            </button>
+            <button
+                class="langSwitchBtn w-16 h-16 mt-2 mx-1 bg-progressBar flex shadow rounded items-center cursor-pointer"
+                onclick="switchLanguage('fr')">
+                <img src="images/drapeau-francais.png" alt="changeLanguage" class="w-16 h-9" />
+            </button>
+            <button onclick="finishGame()"
+                class="bg-progressBar flex shadow rounded items-center p-2 flex-1 mx-1 my-2 w-28 h-16 max-w-md cursor-pointer">
+                <p class="font-bold">Click here if you want to complete the game!</p>
+            </button>
+        </div>
+
+        <!-- div barre progression -->
+        <div class="mb-4">
+            <div id="progress" class="bg-progressBar">
+                <div id="progressContainer">
+                    <div id="progressBar"></div>
+                </div>
+                <span id="progressText">0/5000</span>
+            </div>
+        </div>
+
+        <!-- div gear -->
+        <div id="gears">
+            <img id="rotating-object-1" src="images/gear.jpg" alt="Gear 1" class="reverse-gear">
+            <img id="rotating-object-2" src="images/gear.jpg" alt="Gear 2" class="gear">
+            <img id="rotating-object-3" src="images/gear.jpg" alt="Gear 3" class="reverse-gear">
+            <img id="rotating-object-4" src="images/gear.jpg" alt="Gear 4" class="gear">
+            <img id="rotating-object-5" src="images/gear.jpg" alt="Gear 5" class="gear">
+            <img id="rotating-object-6" src="images/gear.jpg" alt="Gear 6" class="gear">
+            <img id="rotating-object-7" src="images/gear.jpg" alt="Gear 1" class="gear">
+            <img id="rotating-object-8" src="images/gear.jpg" alt="Gear 2" class="reverse-gear">
+            <img id="rotating-object-9" src="images/gear.jpg" alt="Gear 3" class="gear">
+            <img id="rotating-object-10" src="images/gear.jpg" alt="Gear 4" class="reverse-gear">
+            <img id="rotating-object-11" src="images/gear.jpg" alt="Gear 4" class="gear">
+            <img id="rotating-object-12" src="images/gear.jpg" alt="Gear 4" class="reverse-gear">
+        </div>
+
+        <!-- div stats and upgrades -->
+        <div class="container">
+            <div class="flex-between mb-4">
+
+                <!-- div stats -->
+                <div id="stats" class="select-none w-1/2 mr-4">
+                    <h2 class="text-center font-bold text-lg mb-4">Stats</h2>
+                    <p>Gold: <span id="gold">0</span></p>
+                    <p>Cups: <span id="cups">50</span></p>
+                    <p>Coffee (L): <span id="coffee">5</span></p>
+                    <p>Coffees Prepared: <span id="preparedCoffees">0</span></p>
+                </div>
+
+                <!-- div upgrades -->
+                <div id="upgrades" class="w-1/2 flex flex-wrap justify-center gap-2 sm:gap-4">
+                    <button id="doubleProductionBtn" onclick="doubleProduction()"
+                        class="clickables shadow rounded flex-col items-center p-2 flex-1 min-w-[120px] max-w-[10000px]">Double
+                        Production<br>(300 💰)</button>
+                    <button id="halfCupCostBtn" onclick="halfCupCost()"
+                        class="clickables shadow rounded flex-col items-center p-2 flex-1 min-w-[120px] max-w-[10000px]">Half
+                        Cup Cost<br>(500 💰)</button>
+                    <button id="reduceCoffeeCostBtn" onclick="reduceCoffeeCost()"
+                        class="clickables shadow rounded flex-col items-center p-2 flex-1 min-w-[120px] max-w-[10000px]">Reduce
+                        Coffee Cost<br>(500 💰)</button>
+                    <button id="reduceCoffeeCostBtn2" onclick="reduceCoffeeCost2()"
+                        class="hidden clickables shadow rounded flex-col items-center p-2 flex-1 min-w-[120px] max-w-[10000px]">Reduce
+                        coffee cost<br>(2000 💰)</button>
+                    <button id="reduceCupCostBtn2" onclick="reduceCupCost2()"
+                        class="hidden clickables shadow rounded flex-col items-center p-2 flex-1 min-w-[120px] max-w-[10000px]">Reduce
+                        Cup Cost<br>(1000 💰)</button>
+                    <button id="AutoBuyCups" onclick="UnlockAutoBuyCups()"
+                        class="hidden clickables shadow rounded flex-col items-center p-2 flex-1 min-w-[120px] max-w-[10000px]">Automatically
+                        buys cups<br>(3000 💰)</button>
+                    <button id="AutoBuyCoffee" onclick="UnlockAutoBuyCoffee()"
+                        class="hidden clickables shadow rounded flex-col items-center p-2 flex-1 min-w-[120px] max-w-[10000px]">Automatically
+                        buys coffee<br>(3000 💰)</button>
+                </div>
+            </div>
+
+            <!-- Actions and Machines Section -->
+            <div id="actions-machines">
+                <div class="grid-2x2">
+
+                    <!-- div actions -->
+                    <div id="actions" class="mb-4">
+                        <h2 class="text-center font-bold text-lg">Actions</h2>
+
+                        <!--Div machine à café-->
+                        <div id="animateButton" onclick="makeCoffee(coffeePerClick, event)"
+                            class="button clickables text-center shadow rounded flex flex-col items-center p-2 flex-1 min-w-[120px] max-w-[1000px] my-4">
+                            <button class="text-center">
+                                <img src="images/coffee_machine.png" alt="Coffee Machine"
+                                    class="block mx-auto w-16 h-16 cursor-pointer" />
+                                Make coffee<br><br>
+                            </button>
+                        </div>
+
+                        <!--Div cups-->
+                        <div id="BuyCupsBtn" onclick="buyCups(CupsBuyQuantity, event)"
+                            class="button clickables text-center shadow rounded flex flex-col items-center p-2 flex-1 min-w-[120px] max-w-[1000px] my-4">
+                            <button class="text-center">
+                                <img src="images/coffee_cup.png" alt="Buy Cups"
+                                    class="block mx-auto w-10 h-16 cursor-pointer" />
+                                + 100 cups<br>(5💰)
+                            </button>
+                        </div>
+
+                        <!--Div café-->
+                        <div id="BuyCoffeeBtn" onclick="buyCoffee(CoffeeBuyQuantity, event)"
+                            class="button clickables text-center shadow rounded flex flex-col items-center p-2 flex-1 min-w-[120px] max-w-[1000px] my-4">
+                            <button class="text-center">
+                                <img src="images/beans.jpg" alt="Buy Coffee"
+                                    class="block mx-auto w-16 h-16 cursor-pointer" />
+                                + 1L coffee<br>(10💰)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- div machines -->
+                    <div id="machines" class="mb-4">
+                        <h2 class="text-center font-bold text-lg">machines</h2>
+
+                        <!-- Div machine -->
+                        <div id="buyMachineBtn" onclick="buyMachine(1, event)"
+                            class="button clickables text-center shadow rounded flex-col items-center p-2 flex-1 min-w-[120px] max-w-[10000px] my-4">
+                            <button class="text-center">
+                                <img src="images/coffee_machine.png" alt="Buy Machine"
+                                    class="block mx-auto w-16 h-16 cursor-pointer" />
+                                Buy Coffee Machine<br>(500💰)
+                            </button>
+                        </div>
+
+                        <!-- Div stand -->
+                        <div id="buyStand" onclick="buyStand(1, event)"
+                            class="button clickables text-center shadow rounded flex-col items-center p-2 flex-1 min-w-[120px] max-w-[10000px] my-4">
+                            <button class="text-center">
+                                <img src="images/coffee_stand.png" alt="Buy Stand"
+                                    class="block mx-auto w-16 h-16 cursor-pointer" />
+                                Buy a coffee stand<br>(1000💰)
+                            </button>
+                        </div>
+
+                        <!-- Div store -->
+                        <div id="buyStores" onclick="buyStores(1 ,event)"
+                            class="button clickables text-center shadow rounded flex-col items-center p-2 flex-1 min-w-[120px] max-w-[10000px] my-4">
+                            <button class="text-center">
+                                <img src="images/coffee_shop.png" alt="Buy Stores"
+                                    class="block mx-auto w-16 h-16 cursor-pointer" />
+                                Buy Stores<br>(2000💰)
+                            </button>
+                        </div>
+
+                        <div id="animation-container"></div>
+
+                    </div>
+                </div>
+
+                <!-- journal de bord -->
+                <div id="journal" class="overflow-auto mb-4">
+                    <div>
+                        <h1 class="text-center font-bold text-lg">Logbook</h1>
+                        <p id="entry1" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Day 1: Kevin, still
+                            shaken by the loss of his grandfather, goes to his house to collect some personal items. In
+                            a dark corner of the kitchen, he finds the old coffee machine his grandfather used,
+                            a bit rusty but full of memories. He decides to take it with him, even though the idea of
+                            using it feels nostalgic. He has no idea yet that this machine will be the starting point of
+                            something big.</p>
+                        <p id="entryMachine" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Kevin is now
+                            ready to take the big step. He receives his brand-new coffee machine, far more advanced than
+                            his grandfather's. As soon as he turns it on, he knows he’s on the right track. The aromas
+                            that fill the air are a delight. Kevin makes several cups for his friends and family, all of
+                            whom are impressed. This day marks a turning point in his journey, and Kevin starts thinking
+                            about how he could share this passion with others.</p>
+                        <p id="entry2" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Day 2: Kevin tries
+                            to make his first coffee with his grandfather’s machine. The taste is far from exceptional,
+                            but there’s something magical about the experience. Even though he’s frustrated by the
+                            process’s slowness and the mediocre taste, he starts thinking that perhaps he could turn
+                            this into his passion. The idea of a coffee empire begins to slowly form in his mind.</p>
+                        <p id="entry3" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Day 3: Kevin
+                            researches different coffee machines and reads online forums to learn more about the best
+                            models. He starts imagining a coffee-related business, thinking that perhaps this old
+                            machine
+                            is just the beginning. He’s determined to improve his coffee-making skills.</p>
+                        <p id="entry4" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Day 4: Kevin finally
+                            buys his new coffee machine. After saving up and choosing a high-end model, he installs it
+                            at home with excitement. The first coffee he makes is exceptional. He’s so pleased with
+                            the result that he begins to think big. The taste is rich, the texture perfect. This is the
+                            moment Kevin decides that his dream of a coffee empire can become a reality.</p>
+                        <p id="entry5" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Day 5: With his new
+                            machine, Kevin starts selling coffee to his friends and neighbors. The feedback is positive,
+                            and he realizes there’s a market for his product. The idea of opening a small café or
+                            stand starts to take shape. But he quickly realizes that he needs to refine his approach to
+                            make his coffee even more appealing.</p>
+                        <p id="entry6" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Day 6: Kevin’s
+                            orders increase as more people discover the quality of his coffee. He starts taking notes on
+                            sales management, how to optimize service, and how to handle the growing demand. He meets a
+                            local investor who shows interest in supporting his coffee venture. The idea of having a
+                            real point of sale begins to seem more and more feasible.</p>
+                        <p id="entry7" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Day 7: Encouraged by
+                            the growing interest, Kevin decides to find a location for his first coffee stand. After
+                            visiting several spots, he finds a small corner in a local market, perfect for attracting
+                            regular customers. He begins planning the stand’s layout and preparing for the grand
+                            opening. The excitement is palpable. He sees not just a coffee stand, but the first step
+                            toward his empire.</p>
+                        <p id="entry8" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Day 8: Kevin’s
+                            coffee stand quickly becomes popular, and he starts attracting regular customers. He hires a
+                            few friends to help because demand is greater than he expected. Hours fly by, and sales
+                            continue to rise. Kevin begins to realize that he could expand into a small chain of stands.
+                            He also receives offers to partner for events and local festivals.</p>
+                        <p id="entry9" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Day 9: Kevin’s
+                            business continues to grow. He builds relationships with coffee suppliers, local producers,
+                            and other entrepreneurs. These encounters allow him to expand his network and refine his
+                            vision.
+                            However, logistical challenges intensify, especially when it comes to stock management and
+                            maintaining service quality. Kevin realizes he needs to find solutions to handle the growth.
+                        </p>
+                        <p id="entryStand" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">The
+                            much-anticipated moment arrives: Kevin buys his first coffee stand. He secures the space at
+                            the market and begins setting up his little counter. It’s hard work, but Kevin is
+                            determined. On opening
+                            day, he’s both nervous and excited. His first customers are regulars from the market, and
+                            they’re thrilled to discover such refined coffee. Kevin is delighted to see his dream start
+                            to take shape.</p>
+
+                        <p id="entryStore" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Finally, thanks
+                            to the success of his stand, Kevin manages to buy his first coffee shop. He takes over a
+                            location in a bustling neighborhood and carefully designs the space. This place is more than
+                            just a café; it’s a hub for coffee lovers, where people can relax, work, or meet over a
+                            great cup of coffee. Kevin is proud to see his project becoming a reality. The coffee empire
+                            he had envisioned is beginning to take shape in this shop.</p>
+                        <p id="entry10" class="hidden clickables mx-2 my-2 px-2 py-2 shadow rounded">Day 10: Kevin
+                            enjoys the grand opening of his coffee shop. It’s a big moment for him, and he’s overwhelmed
+                            with emotion. Customers flock to the shop, drawn by the reputation he’s starting to build.
+                            He knows this is just the beginning, but today, he looks at his journey with pride. Kevin’s
+                            story, which began with an old coffee machine inherited from his grandfather, is taking an
+                            exciting and promising turn.</p>
+
+
+                    </div>
+                </div>
+
+                <!-- Div Bottom -->
+                <div class="gears" style="width: 100%; padding: 0; margin: 0;">
+                    <p style="margin: 0; padding: 10px 0; text-align: center;">© copyright altech</p>
+                </div>
+            </div>
+</body>
+<script>
+    //anti selection
+    document.addEventListener('dblclick', function (event) {
+        event.preventDefault();
+    });
+
+    // setup pour les gears dans les marges (PAS TOUCHE KEVIN)
+    let lastScrollTop = 0;
+    const gears = document.querySelectorAll('.gear');
+
+    function rotateGears() {
+        const st = window.pageYOffset || document.documentElement.scrollTop;
+        const angle = st / 4;
+
+        gears.forEach((gear, index) => {
+            const reverse = (index % 2 === 1); // Alternance pour rotation inverse
+            gear.style.transform = `rotate(${reverse ? -angle : angle}deg)`;
+        });
+
+        lastScrollTop = st <= 0 ? 0 : st;
+        requestAnimationFrame(rotateGears);
+    }
+
+    window.addEventListener('scroll', function () {
+        requestAnimationFrame(rotateGears);
+    }, { passive: true });
+
+    // tu peux toucher a partir de la
+
+    // Initial stats
+    let gold = 50;
+    let cups = 50;
+    let coffee = 10000; // in ml
+    let preparedCoffees = 0;
+    let totalCoffees = 0;
+    let baseMachineCost = 500; // Coût de base de la machine
+    let machineCostMultiplier = 1.4; // Multiplicateur exponentiel
+    let coffeeMachines = 0; // Nombre de machines possédées
+    let progressMax = 5000;
+    // Upgrade flags
+    let doubleProductionUnlocked = false;
+    let halfCupCostUnlocked = false;
+    let reduceCoffeeCostUnlocked = false;
+    let AutoBuysCups = false
+    let AutoBuysCoffee = false
+    let halfCupCostUnlocked2 = false
+    let reduceCoffeeCostUnlocked2 = false
+    // Production and costs
+    let CoffeePrice = 5;     //Prix du coffee
+
+    let BuyCupsPrice = 5; //prix d'achat de cups
+    let BuyCoffeePrice = 10; //prix  d'achat du coffee 
+
+    let coffeePerClick = 1; //nb de coffee fait en un click
+
+    let cupCost = 1;          //nb de verre utiliser par coffee préparé
+    let coffeeCost = 200;     // ml de coffee utiliser par coffee préparé
+
+    let Stores = 1;             //nb de magasin
+    let StoresPrice = 2000;
+    let CupsBuyQuantity = 100;
+    let CoffeeBuyQuantity = 1;
+    let quantity = 1;
+    let Stand = 1;
+    let StandPrice = 1000;
+    let dblProductionCost = 300;
+    const button = document.getElementById('animateButton');
+
+
+
+    button.addEventListener('click', () => {
+        // Ajouter la classe pour l'animation
+        button.classList.add('pressed');
+
+        // Supprimer la classe après l'animation
+        setTimeout(() => {
+            button.classList.remove('pressed');
+        }, 200); // Durée de l'animation (0.2s)
+    });
+
+    //Update stats && ProgressBar
+    function updateStats() {
+        document.getElementById("gold").textContent = gold;
+        document.getElementById("cups").textContent = cups;
+        document.getElementById("coffee").textContent = coffee / 1000;
+        updateProgressBar(); // Appel ici
+        document.getElementById("preparedCoffees").textContent = preparedCoffees;
+        document.getElementById("progressText").textContent = `${totalCoffees}/5000`;
+        document.getElementById("progressBar").value = totalCoffees;
+        checkJournal();
+    }
+    function updateProgressBar() {
+        const progressBar = document.getElementById("progressBar");
+        const progressText = document.getElementById("progressText");
+
+        // Calculer la progression en pourcentage
+        let percentage = (totalCoffees / progressMax) * 100;
+
+        // Mettre à jour la largeur de la barre bleue
+        progressBar.style.width = `${percentage}%`; // La largeur dépasse le conteneur
+
+        // Appliquer des couleurs selon la progression
+        if (percentage > 200) {
+            progressBar.style.backgroundColor = "#FA0000"; // Rouge si >200%
+        } else if (percentage > 100) {
+            progressBar.style.backgroundColor = "#ff9800"; // Orange si >100%
+        } else {
+            progressBar.style.backgroundColor = "#4caf50"; // Vert par défaut
+        }
+
+        // Mettre à jour le texte de la progression
+        progressText.textContent = `${totalCoffees}/${progressMax}`;
+    }
+
+
+    // Make coffee action pas dans le code a alexis
+    function makeCoffee(quantity, event) {
+        // Vérifie si on peut produire un café complet avec les ressources disponibles
+        if (cups >= coffeePerClick && coffee >= 200 * coffeePerClick) {
+            // Mise à jour des statistiques
+            preparedCoffees += coffeePerClick;
+            totalCoffees += coffeePerClick;
+            cups -= coffeePerClick; // Réduit les cups utilisés
+            coffee -= 200 * coffeePerClick; // Réduit le café utilisé (200 ml par café)
+            showFloatingNumber(quantity, event, "green"); // Affiche un nombre flottant
+            updateStats();
+        }
+        // Cas où il manque des cups mais du café reste
+        else if (cups > 0 && cups < coffeePerClick && coffee >= 200 * cups) {
+            preparedCoffees += cups; // Utilise tous les cups restants
+            totalCoffees += cups;
+            coffee -= 200 * cups; // Réduit le café en fonction des cups utilisés
+            cups = 0; // Plus de cups restants
+            showFloatingNumber(cups, event, "green");
+            updateStats();
+        }
+        // Cas où il manque du café mais des cups restent
+        else if (coffee > 0 && coffee < 200 * coffeePerClick && cups >= coffeePerClick) {
+            let maxCupsPossible = Math.floor(coffee / 200); // Calcule le nombre de cafés faisables avec le café restant
+            preparedCoffees += maxCupsPossible;
+            totalCoffees += maxCupsPossible;
+            cups -= maxCupsPossible; // Réduit les cups utilisés
+            coffee = 0; // Plus de café restant
+            showFloatingNumber(maxCupsPossible, event, "green");
+            updateStats();
+        }
+        // Cas où les deux sont insuffisants
+        else if (cups === 0 || coffee < 200) {
+            console.log("Pas assez de ressources (cups ou café) pour préparer un café !");
+            return; // Arrête la fonction si les ressources sont insuffisantes
+        }
+    }
+
+    function checkJournal() {
+        if (totalCoffees >= 50) document.getElementById("entry1").classList.remove("hidden");
+        if (totalCoffees >= 100) document.getElementById("entry2").classList.remove("hidden");
+        if (totalCoffees >= 200) document.getElementById("entry3").classList.remove("hidden");
+        if (totalCoffees >= 300) document.getElementById("entry4").classList.remove("hidden");
+        if (totalCoffees >= 500) document.getElementById("entry5").classList.remove("hidden");
+        if (totalCoffees >= 1000) document.getElementById("entry6").classList.remove("hidden");
+        if (totalCoffees >= 2000) document.getElementById("entry7").classList.remove("hidden");
+        if (totalCoffees >= 3000) document.getElementById("entry8").classList.remove("hidden");
+        if (totalCoffees >= 4000) document.getElementById("entry9").classList.remove("hidden");
+        if (totalCoffees >= 5000) document.getElementById("entry10").classList.remove("hidden");
+        if (coffeeMachines >= 1) document.getElementById("entryMachine").classList.remove("hidden");
+        if (Stand >= 2) document.getElementById("entryStand").classList.remove("hidden");
+        if (Stores >= 2) document.getElementById("entryStore").classList.remove("hidden");
+    }
+
+
+    function buyMachine(event) {
+        let currentMachineCost = calculateMachineCost();
+        if (gold >= currentMachineCost) {
+            gold -= currentMachineCost;
+            coffeeMachines += 1;
+            showFloatingNumber(1, event, "black");
+            updateMachineCostDisplay();
+            updateStats();
+            startAutoProduction();
+        }
+    }
+
+    function calculateMachineCost() {
+        return Math.floor(baseMachineCost * Math.pow(machineCostMultiplier, coffeeMachines));
+    }
+
+
+    function updateMachineCostDisplay() {
+        let nextMachineCost = calculateMachineCost();
+        document.getElementById("buyMachineBtn").textContent = `Buy Coffee Machine (${nextMachineCost} 💰)`;
+        buyMachineBtn.innerHTML = `<img
+                            src="images/coffee_machine.png"
+                            alt="Coffee Machine"
+                            class="block mx-auto w-16 h-16 cursor-pointer"
+                        /> Buy Coffee Machine<br>(${nextMachineCost} 💰)`;
+    }
+
+    function startAutoProduction() {
+        setInterval(() => {
+            if (coffeeMachines > 0 && cups > coffeeMachines && coffee >= coffeeMachines * coffeeCost) {
+                preparedCoffees += coffeeMachines;
+                totalCoffees += coffeeMachines;
+                cups -= coffeeMachines;
+                coffee -= coffeeMachines * coffeeCost;
+                updateStats();
+                checkJournal();
+            }
+        }, 1000);
+    }
+
+    //Multiply the number of coffee made in one click
+    function doubleProduction() {
+        if (gold >= dblProductionCost) {
+            gold -= dblProductionCost;
+            coffeePerClick *= 2;
+            dblProductionCost = Math.ceil(dblProductionCost * 3);
+            const doubleProductionBtn = document.getElementById("doubleProductionBtn");
+            doubleProductionBtn.innerHTML = `Double Production (${dblProductionCost} 💰)`;
+            //document.getElementById("doubleProductionBtn").classList.add("hidden");
+
+            updateStats();
+        }
+    }
+
+    // CUPS
+
+
+    function buyCups(CupsBuyQuantity, event) {
+        if (gold >= BuyCupsPrice) {
+            cups += CupsBuyQuantity;
+            gold -= BuyCupsPrice;
+            showFloatingNumber(CupsBuyQuantity, event, "blue");
+            updateStats();
+        }
+    }
+
+    //First upgrade
+    function halfCupCost() {
+        if (gold >= 500 && !halfCupCostUnlocked) {
+            gold -= 500;
+            halfCupCostUnlocked = true;
+            BuyCupsPrice = 10;
+            CupsBuyQuantity = 1000;
+            document.getElementById("halfCupCostBtn").classList.add("hidden");
+            document.getElementById("reduceCupCostBtn2").classList.remove("hidden");
+            // Changer le texte du bouton Buy Cups
+            const buyCupsBtn = document.getElementById("BuyCupsBtn")
+            buyCupsBtn.innerHTML = `<img
+                                    src="images/coffee_cup.png"
+                                    alt="Buy Cups"
+                                    class="block mx-auto w-10 h-16 cursor-pointer"
+                                />  1000 Cups<br>(10💰)`;
+            updateStats();
+        }
+    }
+    //Second upgrade
+    function reduceCupCost2() {
+        if (gold >= 1000 && !halfCupCostUnlocked2) {
+            gold -= 1000;
+            BuyCupsPrice = 50;
+            CupsBuyQuantity = 10000;
+            document.getElementById("reduceCupCostBtn2").classList.add("hidden");
+            document.getElementById("AutoBuyCups").classList.remove("hidden");
+            halfCupCostUnlocked2 = true;
+            const buyCupsBtn = document.getElementById("BuyCupsBtn")
+            buyCupsBtn.innerHTML = `<img
+                                    src="images/coffee_cup.png"
+                                    alt="Buy Cups"
+                                    class="block mx-auto w-10 h-16 cursor-pointer"
+                                /> + 10000 Cups<br>(50💰)`;
+            updateStats();
+        }
+    }
+
+    function AutoBuyCup() {
+        setInterval(() => {
+            if (cups > 500) { return }
+            else if (gold >= BuyCupsPrice && AutoBuysCups && cups < 500) {
+                buyCups(CupsBuyQuantity, event);
+            }
+        }, 200);
+    }
+    //Automaticly buys you cups when you need some
+    function UnlockAutoBuyCups() {
+        if (gold >= 3000 && !AutoBuysCups) {
+            gold -= 2500;
+            AutoBuysCups = true;
+            AutoBuyCup();
+            document.getElementById("AutoBuyCups").classList.add("hidden");
+        }
+    }
+
+
+    // COFFEE
+
+    function buyCoffee(CoffeeBuyQuantity, event) {
+        if (gold >= BuyCoffeePrice) {
+            gold -= BuyCoffeePrice;
+            coffee += CoffeeBuyQuantity * 1000;
+            showFloatingNumber(CoffeeBuyQuantity, event, "brown");
+            updateStats();
+        }
+    }
+
+    // First upgrade
+    function reduceCoffeeCost() {
+        if (gold >= 500 && !reduceCoffeeCostUnlocked) {
+            gold -= 500;
+            BuyCoffeePrice = 2; // Réduction du coût du café
+            CoffeeBuyQuantity = 5
+            reduceCoffeeCostUnlocked = true;
+            document.getElementById("reduceCoffeeCostBtn").classList.add("hidden");
+            document.getElementById("reduceCoffeeCostBtn2").classList.remove("hidden");
+            // Changer le texte du bouton Buy Coffee
+            const buyCoffeeBtn = document.getElementById("BuyCoffeeBtn");
+            buyCoffeeBtn.innerHTML = `<img
+                            src="images/beans.jpg"
+                            alt="Buy Coffee"
+                            class="block mx-auto w-16 h-16 cursor-pointer"
+                        /> + 5L coffee<br>(10💰)`;
+            updateStats();
+        }
+    }
+    // Second upgrade   
+    function reduceCoffeeCost2() {
+        if (gold >= 2000 && !reduceCoffeeCostUnlocked2) {
+            gold -= 2000;
+            CoffeeBuyQuantity = 50;
+            document.getElementById("reduceCoffeeCostBtn2").classList.add("hidden");
+            document.getElementById("AutoBuyCoffee").classList.remove("hidden");
+            reduceCoffeeCostUnlocked2 = true;
+
+            const buyCoffeeBtn = document.getElementById("BuyCoffeeBtn");
+            if (buyCoffeeBtn) {
+                buyCoffeeBtn.innerHTML = `<img
+                        src="images/beans.jpg"
+                        alt="Buy Coffee"
+                        class="block mx-auto w-16 h-16 cursor-pointer"
+                    /> + 50L coffee<br>(10💰)`;
+            } else {
+                console.error("The buyCoffeeBtn was not found!");
+            }
+
+            updateStats();
+        }
+    }
+
+    function AutoBuyCoffee() {
+        setInterval(() => {
+            if (coffee > 500000);
+            else if (gold >= BuyCoffeePrice && AutoBuysCoffee && coffee < 500000) {
+                gold -= 2;
+                coffee += 50000;
+                buyCoffee(CoffeeBuyQuantity, event);
+            }
+        }, 200);
+    }
+    //Automaticly buys you coffee when you need some
+    function UnlockAutoBuyCoffee() {
+        if (gold >= 3000 && !AutoBuysCoffee)
+            gold -= 3000;
+        AutoBuysCoffee = true;
+        AutoBuyCoffee();
+        document.getElementById("AutoBuyCoffee").classList.add("hidden");
+    }
+
+
+    // SELL AUTOMATIC COFFEE PREPARED
+    setInterval(() => {
+        if (preparedCoffees <= 0) return; // Pas de café à vendre
+
+        // Génère un nombre aléatoire entre 0 et 1
+        const chanceToSell = Math.random();
+
+        // Détermine la quantité à vendre en fonction des probabilités
+        let quantityToSell = 0;
+        if (chanceToSell < 0.05) {
+            quantityToSell = 5; // 5% de chance de vendre 5 cafés
+        } else if (chanceToSell < 0.25) {
+            quantityToSell = 3; // 20% de chance de vendre 3 cafés
+        } else if (chanceToSell < 0.50) {
+            quantityToSell = 2; // 25% de chance de vendre 2 cafés
+        } else if (chanceToSell < 0.90) {
+            quantityToSell = 1; // 40% de chance de vendre 1 café
+        }
+
+        // Vérifie si suffisamment de cafés sont disponibles
+        if (preparedCoffees >= quantityToSell * Stand * Stores) {
+            preparedCoffees -= quantityToSell * Stand * Stores; // Réduit le stock
+            gold += CoffeePrice * quantityToSell * Stand * Stores; // Ajoute l'or gagné
+        } else if (preparedCoffees > 0 && preparedCoffees < quantityToSell * Stand * Stores) {
+            // Si pas assez de cafés, vend tout ce qui reste
+            gold += CoffeePrice * preparedCoffees;
+            preparedCoffees = 0;
+        }
+        console.log(quantityToSell * Stand * Stores, "nb de vente");
+        console.log(CoffeePrice * quantityToSell * Stand * Stores, "nb d'argent");
+        // Met à jour les statistiques affichées
+        updateStats();
+    }, 500);
+
+    function navigateTo(pageId) {
+        // Sélectionne toutes les pages
+        const pages = document.querySelectorAll(".hidden");
+
+        // Masque toutes les pages
+        pages.forEach(page => page.classList.remove("visible"));
+
+        // Affiche la page avec l'ID correspondant
+        document.getElementById(pageId).classList.add("visible");
+
+        // Si tu veux mettre à jour les stats pour la page Coffee Clicker
+        if (pageId === "coffeeClicker") {
+            updateStats(); // Remplace par ta logique de mise à jour des stats
+        }
+    }
+
+    // Show floating numbers
+    function showFloatingNumber(quantity, event, color = "black") {
+        const animationContainer = document.getElementById("animation-container");
+        const floatingNumber = document.createElement("div");
+
+        floatingNumber.className = "floating-number";
+        floatingNumber.textContent = `+${quantity}`;
+        floatingNumber.style.color = color;
+
+        if (event && event.currentTarget) {
+            const buttonRect = event.currentTarget.getBoundingClientRect();
+            const scrollX = window.scrollX;
+            const scrollY = window.scrollY;
+
+            floatingNumber.style.left = `${buttonRect.left + buttonRect.width / 2 + scrollX}px`;
+            floatingNumber.style.top = `${buttonRect.top - 20 + scrollY}px`;
+        } else {
+            floatingNumber.style.left = "50%";
+            floatingNumber.style.top = "50%";
+        }
+
+        floatingNumber.style.position = "absolute";
+        animationContainer.appendChild(floatingNumber);
+
+        floatingNumber.addEventListener("animationend", () => {
+            animationContainer.removeChild(floatingNumber);
+        });
+    }
+
+
+    function buyStores(quantity, event) {
+        if (gold >= StoresPrice) {
+            gold -= StoresPrice
+            Stores++
+            StoresPrice = Math.ceil(StoresPrice * 1.5);
+            const buyStoresbtn = document.getElementById("buyStores");
+            buyStoresbtn.innerHTML = `<img src="images/coffee_shop.png" alt="store"
+                                class="block mx-auto w-16 h-16 cursor-pointer" />
+                               Buy Stores<br>(${StoresPrice} 💰)`;
+            showFloatingNumber(1, event);
+        }
+        updateStats();
+
+    }
+
+    function buyStand(quantity, event) {
+        if (gold >= StandPrice) {
+            gold -= StandPrice
+            Stand++
+            StandPrice = Math.ceil(StandPrice * 1.5);
+            const buyStandsbtn = document.getElementById("buyStand");
+            buyStandsbtn.innerHTML = `<img src="images/coffee_stand.png" alt="stand"
+                                class="block mx-auto w-16 h-16 cursor-pointer" />
+                                Buy a coffee stand<br>(${StandPrice} 💰)`;
+            showFloatingNumber(1, event);
+        }
+        updateStats();
+
+    }
+
+    function finishGame() {
+        setInterval(() => {
+            if (totalCoffees < 5000) {
+                totalCoffees += 200;
+                updateStats();
+                checkJournal();
+                updateProgressBar();
+                document.getElementById("entryStore").classList.remove("hidden");
+                document.getElementById("entryStand").classList.remove("hidden");
+                document.getElementById("entryMachine").classList.remove("hidden");
+            }
+        }, 500);
+    }
+
+    function switchLanguage(language) {
+
+        if (language === 'fr') {
+            // Redirige vers la version française
+            window.location.href = 'index-fr.html';
+        } else if (language === 'en') {
+            // Redirige vers la version anglaise
+            window.location.href = 'index.html';
+        }
+    }
+
+    updateStats();
+</script>
+
+</html>
