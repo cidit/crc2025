@@ -81,7 +81,7 @@ public:
             _pid_speed.setInterval(poll_interval);
             _pid_speed.setPoint(0);
             _pid_speed.setPropOnError();
-            _pid_speed.setReverse(false);
+            _pid_speed.setReverse(true);
             // we set the PID output to a big range to make KP,KI,KD bigger
             // numbers. makes the tuning easier for Guillaume.
             _pid_speed.setOutputRange(-1000, 1000); // in rpms
