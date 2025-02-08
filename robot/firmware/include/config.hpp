@@ -51,7 +51,7 @@ void pmotors_config(PrecisionMotor *pmotors)
         pm._pid_angle.setK(0.80000, 0.00001, 0.02000);
         pm._pid_speed.setK(0.00000, 0.00000, 0.00000);
     };
-    /* PMOTOR #[5] config Poignet */ {
+    /* PMOTOR #[6] config Poignet */ {
         auto &pm = pmotors[6];
         pm._e.set_inverted(false);
         pm._m.set_inverted(false);
