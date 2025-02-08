@@ -41,11 +41,14 @@
     #define I_PB  6
     #define I_L   7
 
-#define VIT_BRAS_MS M_PI/2000.0 *0.1
+// Constants pour la rotation du bras
+#define VIT_BRAS_MS M_PI/2000.0 * 0.1
 #define LOW_STOP_BRAS 0.0
 #define HIGH_STOP_BRAS 3.14
 
-#define SPRINT(things) Serial.print(things)
+#define VIT_POIGNET_MS M_PI/2000.0 * 0.5
+#define LOW_STOP_POIGNET -2     //À REVOIR LES LIMITES DU POIGNETS
+#define HIGH_STOP_POIGNET 2
 
 enum RobotState{
     HORIZONTAL_FEED,
@@ -76,6 +79,9 @@ Motor motors[NB_PM] = {
     {CRC_PWM_2}, //Poignet
     {CRC_PWM_8}, //À Déterminé - Lanceur
 };
+
+
+//Pin 9, 10 et 11 PWM sont les pins pour les servos moteurs
 
 LinEncSpoof spoofs[NB_PM] = {
     {df[0], polling_timer}, //Swerve Right B 
@@ -122,6 +128,10 @@ SwerveModule swerve_left(pmotors[I_LAS], pmotors[I_LBS], pwm_enco_left);
 //----- Variables ----
 unsigned long last_time = millis();
 float angle_bras = 0;
+float angle_poignet = 0;
+
+bool start_received = false;
+
 //--------------------
 
 
@@ -134,6 +144,7 @@ void setup(){
     master_enco_spi_init();
     SPI.begin();
 
+    // TODO: Revoir les configs pour les moteurs aux index 4 et 5 pour les inverted et les PID settings.
     pmotors_config(pmotors);
     
     for (auto &pmotor : pmotors)
@@ -147,7 +158,20 @@ void setup(){
 }
 
 void loop(){
+    CrcLib::Update();
+    ctrl.update();
+
     polling_timer.update(millis());
+
+    // Hack tant qu'on doivent redémarrer le ALduino!!
+    if(!start_received) {
+        if(ctrl.buttons.Up) {
+            start_received = true;
+        }
+        else {
+            return;
+        }
+    }
 
     if (polling_timer.is_time())
     {
@@ -159,13 +183,15 @@ void loop(){
     unsigned long now = millis();
     unsigned long delta = now - last_time;
     last_time = now;
-    CrcLib::Update();
-    ctrl.update();
+    
+    
     polling_timer.update(now);
 
     for (auto &pmotor : pmotors)
     {
-        pmotor.update();
+        if(pmotor._name == "Poignet") {
+            pmotor.update();
+        }
     }
 
     if (polling_timer.is_time())
@@ -179,15 +205,7 @@ void loop(){
     }
 
 
-    
-
-    // for (auto &pmotor : pmotors)
-    // {
-    //     pmotor.update();
-    // }
-    
-    //CrcLib::SetPwmOutput(CRC_PWM_2, 128);
-    //rotation base bras
+    //ROTATION BRAS
     if(ctrl.gachettes.Left || ctrl.gachettes.Right) {
         if(ctrl.gachettes.Left) {
             //INWARD
@@ -206,6 +224,24 @@ void loop(){
 
         Serial.println(angle_bras);
     }
+
+    //ROTATION POIGNET
+    if(ctrl.buttons.LBumper || ctrl.buttons.RBumper) {
+        if(ctrl.buttons.LBumper) {
+            angle_poignet -= delta * VIT_POIGNET_MS;
+        }
+        else {
+            angle_poignet += delta * VIT_POIGNET_MS;
+        }
+
+        //Serial.println(ctrl.gachettes.Right * delta * (M_PI/1000.0));
+        //Serial.println(angle_poignet);
+        angle_poignet = constrain(angle_poignet, LOW_STOP_POIGNET, HIGH_STOP_POIGNET);
+        pmotors[I_PB].set_target_angle(angle_poignet);
+
+        Serial.println(angle_poignet);
+    }
+    
     
 
     // //Gestion des Inputs (Mise en position)
