@@ -18,7 +18,6 @@
 #include <Servo.h>
 #include <SPI.h>
 #include "util/timer.hpp"
-#include <config.hpp>
 //--------------------
 
 //----- Defines ------
@@ -100,14 +99,14 @@ GobuildaRotaryEncoder goencs[NB_PM] = {
 };
 
 PrecisionMotor pmotors[NB_PM] = {
-    {"Swerve Right B", motors[0], goencs[0], MAX_RPM_SWERVE}, //Swerve Right B 
-    {"Swerve Right A", motors[1], goencs[1], MAX_RPM_SWERVE}, //Swerve Right A
-    {"Swerve Left A", motors[2], goencs[2], MAX_RPM_SWERVE}, //Swerve Left A
-    {"Swerve Left B", motors[3], goencs[3], MAX_RPM_SWERVE}, //Swerve Left B
-    {"Bras Right", motors[4], goencs[4], MAX_RPM_BRAS}, //Bras Right
-    {"Bras Left", motors[5], goencs[5], MAX_RPM_BRAS}, //Bras Left
-    {"Poignet", motors[6], goencs[6], MAX_RPM_BRAS}, //Poignet
-    {"Lanceur", motors[7], goencs[7], MAX_RPM_LANCE}, //Lanceur
+    {motors[0], goencs[0], MAX_RPM_SWERVE}, //Swerve Right B 
+    {motors[1], goencs[1], MAX_RPM_SWERVE}, //Swerve Right A
+    {motors[2], goencs[2], MAX_RPM_SWERVE}, //Swerve Left A
+    {motors[3], goencs[3], MAX_RPM_SWERVE}, //Swerve Left B
+    {motors[4], goencs[4], MAX_RPM_BRAS}, //Bras Right
+    {motors[5], goencs[5], MAX_RPM_BRAS}, //Bras Left
+    {motors[6], goencs[6], MAX_RPM_BRAS}, //Poignet
+    {motors[7], goencs[7], MAX_RPM_LANCE}, //Lanceur
 };
 
 const auto MAX_PULSE_LEN = 4160.0;
@@ -127,21 +126,62 @@ float angle_bras = 0;
 
 //----- Main Prog ----
 
+void update_df()
+{
+    // TODO: for some reason, the values seem to be multiplied by 256
+    retrieve_df(df);
+    // here, we sorta patch the multiplied by 256 problem
+    // for (int i = 0; i < ENCO_NUM; i++)
+    // {
+    //     df[i] /= 256;
+    // }
+}
+
+String padLeft(String inString, uint16_t newLen, char c)
+{ // Pad a numeric string with spaces for output
+    while (inString.length() < newLen)
+    {
+        inString = String(c) + inString;
+    };
+    return inString;
+}
+
+
+String padRight(String inString, uint16_t newLen, char c)
+{ // Pad a numeric string with spaces for output
+    while (inString.length() < newLen)
+    {
+        inString = inString + String(c);
+    };
+    return inString;
+}
+
 void setup(){
     Serial.begin(115200);
-    CrcLib::Initialize();
+    //CrcLib::Initialize();
 
     master_enco_spi_init();
     SPI.begin();
 
-    pmotors_config(pmotors);
+    //Init Bras
+    pmotors[I_LAS]._pid_speed.setInterval(polling_timer._delay);
+    pmotors[I_LBS]._pid_speed.setInterval(polling_timer._delay);
+    pmotors[I_RAS]._pid_speed.setInterval(polling_timer._delay);
+    pmotors[I_RBS]._pid_speed.setInterval(polling_timer._delay);
+
+    pmotors[I_LB ]._pid_angle.setInterval(polling_timer._delay);
+    pmotors[I_LB ]._pid_angle.setK(1, 0, 0);
+    pmotors[I_RB ]._pid_angle.setInterval(polling_timer._delay);
+    pmotors[I_RB ]._pid_angle.setK(1, 0, 0);
+
+    pmotors[I_PB ]._pid_angle.setInterval(polling_timer._delay);
+    pmotors[I_L  ]._pid_speed.setInterval(polling_timer._delay);
     
-    for (auto &pmotor : pmotors)
-    {
-        pmotor._pid_angle.setInterval(polling_timer._delay);
-        pmotor.begin();
-        pmotor.enable(true);
-    }
+    // for (auto &pmotor : pmotors)
+    // {
+    //     pmotor.begin();
+    //     pmotor.enable(true);
+    // }
 
     Serial.println("End of setup");
 }
@@ -154,60 +194,76 @@ void loop(){
         retrieve_df(df);
     }
 
-
-    //Updates every object
-    unsigned long now = millis();
-    unsigned long delta = now - last_time;
-    last_time = now;
-    CrcLib::Update();
-    ctrl.update();
-    polling_timer.update(now);
-
-    for (auto &pmotor : pmotors)
-    {
-        pmotor.update();
-    }
-
+    //TESTING GOBILDA ENCS
     if (polling_timer.is_time())
     {
-        retrieve_df(df);
-        goencs[4].update();
-        goencs[5].update();
-        Serial.println("df"+ String(df[4])+"   Enco4: "+ String(spoofs[4].getLast())+ "      Go4: "+String(goencs[4].getLast().rads));
-        Serial.println("df"+ String(df[5])+"   Enco5: "+ String(spoofs[5].getLast())+ "      Go5: "+String(goencs[5].getLast().rads));
-        Serial.println();
+        for (auto i = 0; i < ENCO_NUM; i++)
+        {
+            goencs[i].update();
+            SPRINT("| e");
+            SPRINT(i);
+            SPRINT(" ");
+            SPRINT(String(goencs[i].getLast().rads, 1));
+            SPRINT(" ");
+            SPRINT(String(goencs[i].getLast().rpm, 1));
+            SPRINT(" ");
+            SPRINT(padLeft(String(goencs[i]._ie.getLast()), 3, '0'));
+        }
+        hexdump_df(df);
+        Serial.println("|");
     }
 
 
-    
+    // //Updates every object
+    // unsigned long now = millis();
+    // unsigned long delta = now - last_time;
+    // last_time = now;
+    //CrcLib::Update();
+    // ctrl.update();
+    // polling_timer.update(now);
 
-    // for (auto &pmotor : pmotors)
+    // // pmotors[I_LB].update();
+    // // pmotors[I_RB].update();
+
+    // if (polling_timer.is_time())
     // {
-    //     pmotor.update();
+    //     retrieve_df(df);
+    //     goencs[4].update();
+    //     goencs[5].update();
+    //     Serial.println("df"+ String(df[4])+"   Enco4: "+ String(spoofs[4].getLast())+ "      Go4: "+String(goencs[4].getLast().rads));
+    //     Serial.println("df"+ String(df[5])+"   Enco5: "+ String(spoofs[5].getLast())+ "      Go5: "+String(goencs[5].getLast().rads));
+    //     Serial.println();
     // }
-    
-    //CrcLib::SetPwmOutput(CRC_PWM_2, 128);
-    //rotation base bras
-    if(ctrl.gachettes.Left || ctrl.gachettes.Right) {
-        if(ctrl.gachettes.Left) {
-            //INWARD
-            angle_bras -= ctrl.gachettes.Left * delta * VIT_BRAS_MS;
-        }
-        else {
-            //OUTWARD
-            angle_bras += ctrl.gachettes.Right * delta * VIT_BRAS_MS;
-        }
 
-        //Serial.println(ctrl.gachettes.Right * delta * (M_PI/1000.0));
-        //Serial.println(angle_bras);
-        angle_bras = constrain(angle_bras, LOW_STOP_BRAS, HIGH_STOP_BRAS);
-        pmotors[I_LB].set_target_angle(angle_bras);
-        pmotors[I_RB].set_target_angle(angle_bras);
 
-        Serial.println(angle_bras);
-    }
     
 
+    // // for (auto &pmotor : pmotors)
+    // // {
+    // //     pmotor.update();
+    // // }
+    
+    // //CrcLib::SetPwmOutput(CRC_PWM_2, 128);
+    // //rotation base bras
+    // if(ctrl.gachettes.Left){
+    //     //IN
+    //     angle_bras -= ctrl.gachettes.Left * delta * VIT_BRAS_MS;
+    //     //Serial.println(ctrl.gachettes.Right * delta * (M_PI/1000.0));
+    //     //Serial.println(angle_bras);
+    //     angle_bras = constrain(angle_bras, LOW_STOP_BRAS, HIGH_STOP_BRAS);
+    //     //pmotors[I_LB].set_target_angle(-angle_bras);
+    //     pmotors[I_RB].set_target_angle(angle_bras);
+    // }
+    // else if(ctrl.gachettes.Right){
+    //     //OUT
+    //     angle_bras += ctrl.gachettes.Right * delta * VIT_BRAS_MS;
+    //     //Serial.println(ctrl.gachettes.Right * delta * (M_PI/1000.0));
+    //     //Serial.println(angle_bras);
+    //     angle_bras = constrain(angle_bras, LOW_STOP_BRAS, HIGH_STOP_BRAS);
+    //     //pmotors[I_LB].set_target_angle(-angle_bras);
+    //     pmotors[I_RB].set_target_angle(angle_bras);
+    // }
+    //Serial.println(angle_bras);
     // //Gestion des Inputs (Mise en position)
     // if(ctrl.buttons.A){ //Lanceur    
     //     // Positionne bras

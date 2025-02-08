@@ -39,7 +39,6 @@ public:
         auto constrained_power = constrain(power, -1.0, 1.0);
         _last_power = constrained_power;
         auto pwm = constrained_power * HALF_PWM_OUTPUT;
-        Serial.println(pwm);
         CrcLib::SetPwmOutput(_pin, _is_inverted ? -pwm : pwm);
     }
 

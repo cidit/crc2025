@@ -22,6 +22,8 @@ public:
         MATCH_SPEED
     };
 
+    String _name;
+
     Motor &_m;
     GobuildaRotaryEncoder &_e;
 
@@ -45,7 +47,7 @@ public:
      * check constructor for additionnal base expectations
      */
     PID_RT _pid_angle;
-    double _target_angle;
+    Angle _target_angle;
 
     // TODO: remove if integration with externally polled encoder works
     // double _tpt;
@@ -54,18 +56,20 @@ public:
     double _max_rpm;
 
     PrecisionMotor(
+        String name,
         Motor &m,
         GobuildaRotaryEncoder &e,
         // TODO: remove if integration with externally polled encoder works
         // double ticks_per_turn,
         double max_rpm)
-        : _m(m),
+        : _name(name),
+          _m(m),
           _e(e),
           _pid_speed(),
           _e_old1(0),
           _e_old2(0),
           _pid_angle(),
-          _target_angle(0),
+          _target_angle(Angle::from_rad(0)),
           // TODO: remove if integration with externally polled encoder works
           //   _tpt(ticks_per_turn),
           _mode(Mode::MATCH_ANGLE), // doesnt matter, pids are not started anyways
@@ -113,7 +117,9 @@ public:
         const auto speed_compute = _pid_speed.compute(_e.getLast().rpm);
         const auto angle_compute = _pid_angle.compute(
             Angle::travel(_e.getLast().rads, _target_angle));
-
+        if(_name == "Bras Right" || _name == "Bras Left") {
+            Serial.println(_name + " Comp:" + String(angle_compute) + "   Last:" + String(_e.getLast().rads)+ "   tar"+ String(_target_angle._radians));
+        }
         if (speed_compute && angle_compute)
         {
 #ifdef DEBUG
@@ -137,6 +143,7 @@ public:
         else if (angle_compute)
         {
             _m.set_power_ratio(_pid_angle.getOutput());
+            //Serial.println("out"+ String(_pid_angle.getOutput()));
         }
     }
 
@@ -176,7 +183,8 @@ public:
     {
         _mode = Mode::MATCH_ANGLE;
         // validate the angle before saving it
-        _target_angle = Angle::from_rad(angle)._radians;
+        _target_angle = Angle::from_rad(angle);
+        //Serial.println("inAng:"+ String(angle)+ "  tar"+ String(_target_angle._radians));
         _set_active_pid();
     }
 
