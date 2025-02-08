@@ -40,9 +40,21 @@
     #define I_PB  6
     #define I_L   7
 
+enum RobotState{
+    HORIZONTAL_FEED,
+    VERTICAL_FEED,
+    GROUND_FEED,
+    HORIZONTAL_POLL,
+    VERTICAL_POLL,
+    INVERTED_POLL,
+    LAUNCHING,
+    MOVING
+};
+
 //--------------------
 
 //----- Objects ------
+RobotState robot_state = MOVING;
 Controller ctrl; //La manette
 Timer polling_timer(ONE_SECOND / 1000); //Doit au moins être de 1ms
 int32_t df[NB_PM]; //Le dataframe qui reçoit les valeurs du ALDuino
@@ -101,55 +113,223 @@ SwerveModule swerve_left(pmotors[I_LAS], pmotors[I_LBS], pwm_enco_left);
 //--------------------
 
 //----- Variables ----
+unsigned long last_time = millis();
+float angle_bras = 0;
 //--------------------
 
 
 //----- Main Prog ----
+
+void update_df()
+{
+    // TODO: for some reason, the values seem to be multiplied by 256
+    retrieve_df(df);
+    // here, we sorta patch the multiplied by 256 problem
+    for (int i = 0; i < ENCO_NUM; i++)
+    {
+        df[i] /= 256;
+    }
+}
+
 void setup(){
     Serial.begin(115200);
     CrcLib::Initialize();
 
+    master_enco_spi_init();
+    SPI.begin();
+
     //Init Bras
-    pmotors[I_LB]._pid_angle.setInterval(polling_timer._delay);
-    pmotors[I_RB]._pid_angle.setInterval(polling_timer._delay);
-    pmotors[I_PB]._pid_angle.setInterval(polling_timer._delay);
-    pmotors[I_LB].begin();
-    pmotors[I_RB].begin();
-    pmotors[I_PB].begin();
-    pmotors[I_LB].enable(true);
-    pmotors[I_RB].enable(true);
-    pmotors[I_PB].enable(true);
+    pmotors[I_LAS]._pid_speed.setInterval(polling_timer._delay);
+    pmotors[I_LBS]._pid_speed.setInterval(polling_timer._delay);
+    pmotors[I_RAS]._pid_speed.setInterval(polling_timer._delay);
+    pmotors[I_RBS]._pid_speed.setInterval(polling_timer._delay);
+
+    pmotors[I_LB ]._pid_angle.setInterval(polling_timer._delay);
+    pmotors[I_LB ]._pid_angle.setK(1, 0, 0);
+    pmotors[I_RB ]._pid_angle.setInterval(polling_timer._delay);
+    pmotors[I_RB ]._pid_angle.setK(1, 0, 0);
+
+    pmotors[I_PB ]._pid_angle.setInterval(polling_timer._delay);
+    pmotors[I_L  ]._pid_speed.setInterval(polling_timer._delay);
+    
+    for (auto &pmotor : pmotors)
+    {
+        pmotor.begin();
+        pmotor.enable(true);
+    }
+
+    Serial.println("End of setup");
 }
 
 void loop(){
     //Updates every object
-        CrcLib::Update();
-        ctrl.update();
+    unsigned long now = millis();
+    unsigned long delta = now - last_time;
+    last_time = now;
+    CrcLib::Update();
+    ctrl.update();
+    polling_timer.update(now);
 
-        //Bras
-        pmotors[I_LB].update();
-        pmotors[I_RB].update();
-        pmotors[I_PB].update();
+    if (polling_timer.is_time())
+    {
+        update_df();
+    }
+
+    for (auto &pmotor : pmotors)
+    {
+        pmotor.update();
+    }
+
+    //CrcLib::SetPwmOutput(CRC_PWM_2, 128);
+    //rotation base bras
+    if(ctrl.gachettes.Left){
+        //IN
+        angle_bras -= ctrl.gachettes.Left * delta * (M_PI/1000.0);
+        //Serial.println(ctrl.gachettes.Right * delta * (M_PI/1000.0));
+        //Serial.println(angle_bras);
+        angle_bras = constrain(angle_bras, 0.0, 3.14);
+        pmotors[I_LB].set_target_angle(angle_bras);
+        pmotors[I_RB].set_target_angle(-angle_bras);
+    }
+    else if(ctrl.gachettes.Right){
+        //OUT
+        angle_bras += ctrl.gachettes.Right * delta * (M_PI/1000.0);
+        //Serial.println(ctrl.gachettes.Right * delta * (M_PI/1000.0));
+        //Serial.println(angle_bras);
+        angle_bras = constrain(angle_bras, 0.0, 3.14);
+        pmotors[I_LB].set_target_angle(angle_bras);
+        pmotors[I_RB].set_target_angle(-angle_bras);
+    }
     
-    //Gère les différents objects selon les inputs
-    lanceur();
-    swerve();
-    bras();
+    // //Gestion des Inputs (Mise en position)
+    // if(ctrl.buttons.A){ //Lanceur    
+    //     // Positionne bras
+    //     // Tourner poignet
+    //     // Active moteur
+    //     // Drop pièce
+    //     // Pousser pièce
+
+    // }
+    // else if(ctrl.buttons.B){ //Poteau Vertical
+
+    //     // Monte bras
+    //     // Tourner poignet  
+
+    // }
+    // else if(ctrl.buttons.Y){ //Poteau Inversé
+
+    //     // Placer bras
+    //     // Tourner poignet   
+
+    // }
+    // else if(ctrl.buttons.X){ //Poteau Horizontal     
+
+    //     // Placer bras
+    //     // Tourner poignet   
+
+    // }
+    // // else if(ctrl.buttons.Up){
+        
+    // // }
+    // // else if(ctrl.buttons.Down){
+
+    // // }
+    // // else if(ctrl.buttons.Left){
+
+    // // }
+    // // else if(ctrl.buttons.Right){
+
+    // // }
+    // else if(ctrl.buttons.LBumper){ //Distributeur Vertical      
+
+    //     // Positionner bras     
+    //     // Orienter Poignet 
+    // }
+    // else if(ctrl.buttons.RBumper){ //Distributeur Horizontal   
+
+    //     // Positionner bras     
+    //     // Orienter Poignet
+    // }
+    // else if(ctrl.buttons.RJoy){ //Distributeur Sol
+
+    //     // Descendre bras
+    //     // Bien orienter poignet
+    // }
+
+
+    // //Trigger Gachette
+    // if(ctrl.gachettes.Left >= 0){ //End action
+    //     switch (robot_state)
+    //     {
+    //     case RobotState::MOVING:
+    //         //No-Op
+    //         break;
+            
+    //     case RobotState::HORIZONTAL_FEED:
+            
+    //         break;
+
+    //     case RobotState::VERTICAL_FEED:
+            
+    //         break;
+
+    //     case RobotState::GROUND_FEED:
+            
+    //         break;
+
+    //     case RobotState::HORIZONTAL_POLL:
+            
+    //         break;
+
+    //     case RobotState::VERTICAL_POLL:
+            
+    //         break;
+    //     case RobotState::INVERTED_POLL:
+            
+    //         break;
+    //     case RobotState::LAUNCHING:
+            
+    //         break;
+        
+    //     default:
+    //         break;
+    //     }
+    // }
+    // else if(ctrl.gachettes.Right >= 0){ //Trigger actions
+    //     switch (robot_state)
+    //     {
+    //     case RobotState::MOVING:
+    //         //No-Op
+    //         break;
+            
+    //     case RobotState::HORIZONTAL_FEED:
+            
+    //         break;
+
+    //     case RobotState::VERTICAL_FEED:
+            
+    //         break;
+
+    //     case RobotState::GROUND_FEED:
+            
+    //         break;
+
+    //     case RobotState::HORIZONTAL_POLL:
+            
+    //         break;
+
+    //     case RobotState::VERTICAL_POLL:
+            
+    //         break;
+    //     case RobotState::INVERTED_POLL:
+            
+    //         break;
+    //     case RobotState::LAUNCHING:
+            
+    //         break;
+        
+    //     default:
+    //         break;
+    //     }
+    // }
 }
-//--------------------
-
-/// @brief Logique du lanceur
-void lanceur(){
-
-}
-
-/// @brief Logique des swerves
-void swerve(){
-
-}
-
-/// @brief Logique du bras
-void bras(){
-
-}
-//--------------------

@@ -21,17 +21,22 @@ public:
 
     struct Buttons{
         bool X = false;
-        bool T = false;
-        bool C = false;
-        bool R = false;
+        bool Y = false;
+        bool A = false;
+        bool B = false;
         bool Up = false;
         bool Down = false;
         bool Left = false;
         bool Right = false;
+        bool LBumper = false;
+        bool RBumper = false;
+        bool LJoy = false;
+        bool RJoy = true;
     };
 
     struct Gachettes{
-        int i; //Placeholder
+        float Right;
+        float Left;
     };
 
     //Joysticks
@@ -40,6 +45,9 @@ public:
 
     //Buttons
     Buttons buttons;
+
+    //Gachettes
+    Gachettes gachettes;
 
     /// @brief Constructor
     Controller() {}
@@ -92,13 +100,22 @@ public:
 
     /// @brief Get values of buttons
     void readButtons(){
-        buttons.X = CrcLib::ReadDigitalChannel(BUTTON::COLORS_DOWN);
-        buttons.T = CrcLib::ReadDigitalChannel(BUTTON::COLORS_UP);
-        buttons.C = CrcLib::ReadDigitalChannel(BUTTON::COLORS_LEFT);
-        buttons.R = CrcLib::ReadDigitalChannel(BUTTON::COLORS_RIGHT);
+        buttons.A = CrcLib::ReadDigitalChannel(BUTTON::COLORS_DOWN);
+        buttons.Y = CrcLib::ReadDigitalChannel(BUTTON::COLORS_UP);
+        buttons.X = CrcLib::ReadDigitalChannel(BUTTON::COLORS_LEFT);
+        buttons.B = CrcLib::ReadDigitalChannel(BUTTON::COLORS_RIGHT);
         buttons.Up = CrcLib::ReadDigitalChannel(BUTTON::ARROW_UP);
         buttons.Down = CrcLib::ReadDigitalChannel(BUTTON::ARROW_DOWN);
         buttons.Left = CrcLib::ReadDigitalChannel(BUTTON::ARROW_LEFT);
         buttons.Right = CrcLib::ReadDigitalChannel(BUTTON::ARROW_RIGHT);
+        buttons.LJoy = CrcLib::ReadDigitalChannel(BUTTON::HATL);
+        buttons.RJoy = CrcLib::ReadDigitalChannel(BUTTON::HATR);
+        buttons.LBumper = CrcLib::ReadDigitalChannel(BUTTON::L1);
+        buttons.RBumper = CrcLib::ReadDigitalChannel(BUTTON::R1);
+
+        //Quand le bouton est relacher la valeur est -128 et une fois enfoncer la valeur est 127
+        //Mapping entre 0 et 1
+        gachettes.Left = (CrcLib::ReadAnalogChannel(ANALOG::GACHETTE_L)+128.0 )/256.0;
+        gachettes.Right = (CrcLib::ReadAnalogChannel(ANALOG::GACHETTE_R)+128.0) /256.0;
     }
 };
