@@ -20,17 +20,16 @@ spi master. expects a slave to be uploaded to the arduino.
 #include <drives/swerve_module.hpp>
 #include <controller.hpp>
 #include "math/vectors.hpp"
-
-int32_t enco_values[ENCO_NUM];
+#include "config.hpp"
 
 Decodeur cmd(&Serial);
 bool read_mode = true, controller_mode = false;
-Timer print_timer(ONE_SECOND / 40);
-Timer poll_timer(ONE_SECOND / 100);
+Timer print_timer(ONE_SECOND / 20);
+Timer poll_timer(ONE_SECOND / 40);
 
 const size_t NUM_MOTORS = 4;
 
-int32_t df[ENCO_NUM];
+dataframe_t df;
 
 LinEncSpoof spoofs[ENCO_NUM] = {
     {df[0], poll_timer}, // right high
@@ -46,7 +45,7 @@ LinEncSpoof spoofs[ENCO_NUM] = {
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
     {spoofs[0], 145.1 * 2.5, poll_timer},
     {spoofs[1], 145.1 * 2.5, poll_timer},
-    {spoofs[2], 145.1 * 2.5, poll_timer, true},
+    {spoofs[2], 145.1 * 2.5, poll_timer},
     {spoofs[3], 145.1 * 2.5, poll_timer},
     {spoofs[4], 145.1 * 2.5, poll_timer},
     {spoofs[5], 145.1 * 2.5, poll_timer},
@@ -69,32 +68,21 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
 };
 
 const auto MAX_PULSE_LEN = 4160.0;
-PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, 0.0, poll_timer); // TODO: get right pin
+PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, 0.0, poll_timer);
 PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, 0.0, poll_timer);
 
 SwerveModule swerve_right(
-    pmotors[0],
     pmotors[1],
+    pmotors[0],
     pwm_enco_right);
 
 SwerveModule swerve_left(
-    pmotors[3],
     pmotors[2],
+    pmotors[3],
     pwm_enco_left);
 
 // should always be between 0 and NUM_MOTORS
 size_t currently_selected_swerve = 0; // 0=right, 1=left, 2=controller(both, cant tune)
-
-void update_df()
-{
-    // TODO: for some reason, the values seem to be multiplied by 256
-    retrieve_df(df);
-    // here, we sorta patch the multiplied by 256 problem
-    for (int i = 0; i < ENCO_NUM; i++)
-    {
-        df[i] /= 256;
-    }
-}
 
 // PID_RT &get_current_pid_to_tune(PrecisionMotor pmotor)
 // {
@@ -132,14 +120,23 @@ void execute_commands()
         auto selected_swerve = cmd.getArg(0);
         if (selected_swerve == 0 || selected_swerve == 1)
         {
+            swerve.enable(false);
             currently_selected_swerve = selected_swerve;
+            auto &new_swerve = get_swerve(currently_selected_swerve);
+            new_swerve.enable(true);
             controller_mode = false;
         }
-        if (selected_swerve == 2)
-        {
-            controller_mode = true;
-        }
+        // if (selected_swerve == 2)
+        // {
+        //     controller_mode = true;
+        // }
 
+        break;
+    }
+    case 'N':
+    {
+        // reverse the direction of the encoder
+        swerve._e.set_inverted(!swerve._e._inverted);
         break;
     }
     case 'K':
@@ -182,32 +179,42 @@ void execute_commands()
         read_mode = !read_mode;
         break;
     }
+    case 'X':
+    {
+        // TODO: generate report
+        break;
+    }
     }
 }
 
 void setup()
 {
     Serial.begin(115200);
-
     CrcLib::Initialize();
-
     master_enco_spi_init();
     SPI.begin();
+
+    // fixing the same interval for the motors as configuring them.
+    for (auto &pmotor : pmotors)
+    {
+        pmotor._pid_angle.setInterval(poll_timer._delay);
+        pmotor._pid_speed.setInterval(poll_timer._delay);
+    }
+    pmotors_config(pmotors);
+
     {
         swerve_right.begin();
-        swerve_right._pma._pid_speed.setK(0.60000, 0.00001, 0.12000);
-        swerve_right._pma._pid_speed.setInterval(poll_timer._delay);
-        swerve_right._pmb._pid_speed.setK(0.60000, 0.00001, 0.15500);
-        swerve_right._pmb._pid_speed.setInterval(poll_timer._delay);
-        swerve_right.enable(true);
+        swerve_right._pid.setInterval(poll_timer._delay);
+        swerve_right._e.set_inverted(true);
 
         swerve_left.begin();
-        swerve_left._pma._pid_speed.setK(0.60000, 0.00001, 0.12000);
-        swerve_left._pma._pid_speed.setInterval(poll_timer._delay);
-        swerve_left._pmb._pid_speed.setK(0.60000, 0.00001, 0.15500);
-        swerve_left._pmb._pid_speed.setInterval(poll_timer._delay);
-        swerve_left.enable(true);
+        swerve_left._pid.setInterval(poll_timer._delay);
+        swerve_right._e.set_inverted(true);
     }
+
+
+    auto &swerve = get_swerve(currently_selected_swerve);
+    swerve.enable(true);
 
     Serial.println("Setup Done");
 }
@@ -223,7 +230,7 @@ void loop()
 
     if (poll_timer.is_time())
     {
-        update_df();
+        retrieve_df(df);
     }
 
     swerve_right.update();
@@ -233,7 +240,7 @@ void loop()
     {
         auto &swerve = get_swerve(currently_selected_swerve);
 
-        SPRINT(currently_selected_swerve == 0? "[R]": "[L]");
+        SPRINT(currently_selected_swerve == 0 ? "[R]" : "[L]");
 
         SEPARATOR;
         // SPRINT(" ANGLE ");
