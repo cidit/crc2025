@@ -22,7 +22,7 @@ void hexdump_df(dataframe_t &df)
 }
 
 static const SPISettings SPI_AL_CRC_SETTINGS(
-    500000,
+    100000,
     MSBFIRST,
     SPI_MODE0);
 
