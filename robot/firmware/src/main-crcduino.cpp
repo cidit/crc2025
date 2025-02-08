@@ -46,9 +46,9 @@
 #define LOW_STOP_BRAS 0.0
 #define HIGH_STOP_BRAS 3.14
 
-#define VIT_POIGNET_MS M_PI/2000.0 * 0.5
-#define LOW_STOP_POIGNET -2     //À REVOIR LES LIMITES DU POIGNETS
-#define HIGH_STOP_POIGNET 2
+#define VIT_POIGNET_MS M_PI/2000.0 * 1.0 
+#define LOW_STOP_POIGNET -4     //À REVOIR LES LIMITES DU POIGNETS
+#define HIGH_STOP_POIGNET 4
 
 enum RobotState{
     HORIZONTAL_FEED,
@@ -80,16 +80,13 @@ Motor motors[NB_PM] = {
     {CRC_PWM_8}, //À Déterminé - Lanceur
 };
 
-
-//Pin 9, 10 et 11 PWM sont les pins pour les servos moteurs
-
 LinEncSpoof spoofs[NB_PM] = {
     {df[0], polling_timer}, //Swerve Right B 
     {df[1], polling_timer}, //Swerve Right A
     {df[2], polling_timer}, //Swerve Left A
     {df[3], polling_timer}, //Swerve Left B
     {df[4], polling_timer}, //Bras Right
-    {df[5], polling_timer}, //Bras Left
+    {df[4], polling_timer}, //Bras Left  -- On utilise 2 fois le 4 au lieu du 5.
     {df[6], polling_timer}, //Poignet
     {df[7], polling_timer}, //Lanceur
 };
@@ -100,7 +97,7 @@ GobuildaRotaryEncoder goencs[NB_PM] = {
     {spoofs[2], TICKS_RATIO_SWERVE, polling_timer, true}, //Swerve Left A
     {spoofs[3], TICKS_RATIO_SWERVE, polling_timer}, //Swerve Left B
     {spoofs[4], TICKS_RATIO_BRAS, polling_timer}, //Bras Right
-    {spoofs[5], TICKS_RATIO_BRAS, polling_timer}, //Bras Left
+    {spoofs[4], TICKS_RATIO_BRAS, polling_timer}, //Bras Left
     {spoofs[6], TICKS_RATIO_BRAS, polling_timer}, //Poignet
     {spoofs[7], TICKS_RATIO_LANCE, polling_timer}, //Lanceur
 };
@@ -123,6 +120,10 @@ PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, 0.0, polling_timer);
 SwerveModule swerve_right(pmotors[I_RAS], pmotors[I_RBS], pwm_enco_right);
 SwerveModule swerve_left(pmotors[I_LAS], pmotors[I_LBS], pwm_enco_left);
 
+//Pin 9, 10 et 11 PWM sont les pins pour les servos moteurs
+Servo servo1;
+Servo servo2;
+Servo servo3;
 //--------------------
 
 //----- Variables ----
@@ -146,6 +147,9 @@ void setup(){
 
     // TODO: Revoir les configs pour les moteurs aux index 4 et 5 pour les inverted et les PID settings.
     pmotors_config(pmotors);
+    servo1.attach(CRC_PWM_9, 1000, 2000);
+    servo2.attach(CRC_PWM_10, 1000, 2000);
+    servo3.attach(CRC_PWM_11, 1000, 2000);
     
     for (auto &pmotor : pmotors)
     {
@@ -189,7 +193,7 @@ void loop(){
 
     for (auto &pmotor : pmotors)
     {
-        if(pmotor._name == "Poignet") {
+        if(pmotor._name == "Poignet" || pmotor._name == "Bras Right" || pmotor._name == "Bras Left") {
             pmotor.update();
         }
     }
@@ -242,7 +246,25 @@ void loop(){
         Serial.println(angle_poignet);
     }
     
-    
+    //GRABBER
+    if(ctrl.buttons.A){
+        //Serial.println("X");
+        servo1.write(2000);
+        servo2.write(2000);
+        servo3.write(2000);
+    }
+    else if(ctrl.buttons.B){
+        //Serial.println("T");
+        servo1.write(1000);
+        servo2.write(1000);
+        servo3.write(1000);
+    }
+    else{
+        //Serial.println("Stop");
+        servo1.write(1500);
+        servo2.write(1500);
+        servo3.write(1500);
+    }
 
     // //Gestion des Inputs (Mise en position)
     // if(ctrl.buttons.A){ //Lanceur    

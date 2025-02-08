@@ -117,9 +117,7 @@ public:
         const auto speed_compute = _pid_speed.compute(_e.getLast().rpm);
         const auto angle_compute = _pid_angle.compute(
             Angle::travel(_e.getLast().rads, _target_angle));
-        if(_name == "Poignet") {
-            Serial.println(_name + " Comp:" + String(angle_compute) + "   Last:" + String(_e.getLast().rads)+ "   tar"+ String(_target_angle._radians));
-        }
+        
         if (speed_compute && angle_compute)
         {
 #ifdef DEBUG
@@ -144,6 +142,9 @@ public:
         {
             _m.set_power_ratio(_pid_angle.getOutput());
             //Serial.println("out"+ String(_pid_angle.getOutput()));
+            if(_name == "Bras Right" || _name == "Bras Left") {
+                Serial.println(_name + " - Last:" + String(_e.getLast().rads)+ "   tar"+ String(_target_angle._radians) + ", power: " + String(_pid_angle.getOutput()));
+            }
         }
     }
 
