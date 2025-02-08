@@ -4,6 +4,7 @@
 #include "CrcRemoteState.h"
 #include "CrcLib.h"
 #include "CrcXbee.h"
+#include "util/polyfill.hpp"
 
 /**
  * largely based off of @squid's controller
@@ -18,6 +19,16 @@ public:
         double angleDeg = 0;
         double angleRad = 0;
     };
+
+    /**
+     * this struct's angle field gets updated if it's
+     * raw values' norm is 0.
+     */
+    struct joystick
+    {
+        Vec2D xy;
+        double angle;
+    } j1, j2;
 
     struct Buttons{
         bool X = false;
@@ -57,9 +68,14 @@ public:
     }
 
     void update() override {
-        calculateJoys();
-        readButtons();
+        _raw_last = _raw_current;
+        _raw_current = CrcLib::_crcXbee.State();
     }
+
+//     void update() override {
+//         calculateJoys();
+//         readButtons();
+//     }
 
     /// @brief Get and calculate values for the joysticks
     void calculateJoys(){
