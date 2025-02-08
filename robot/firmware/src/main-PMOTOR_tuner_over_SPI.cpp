@@ -25,7 +25,7 @@ int32_t enco_values[ENCO_NUM];
 
 Decodeur cmd(&Serial);
 bool read_mode = true;
-Timer print_timer(ONE_SECOND / 100);
+Timer print_timer(ONE_SECOND / 40);
 Timer poll_timer(ONE_SECOND / 40);
 
 const size_t NUM_MOTORS = 4;
@@ -46,8 +46,8 @@ LinEncSpoof spoofs[ENCO_NUM] = {
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
     {spoofs[0], 145.1 * 5, poll_timer, true},
     {spoofs[1], 145.1 * 5, poll_timer},
-    {spoofs[2], 145.1 * 5, poll_timer, true},
-    {spoofs[3], 145.1 * 5, poll_timer},
+    {spoofs[2], 145.1 * 3.55, poll_timer, true},
+    {spoofs[3], 145.1 * 3.55, poll_timer},
     {spoofs[4], 145.1 * 5, poll_timer},
     {spoofs[5], 145.1 * 5, poll_timer},
     {spoofs[6], 145.1 * 5, poll_timer},
@@ -78,26 +78,7 @@ void configure_motors()
         pmotor._pid_angle.setInterval(poll_timer._delay);
         pmotor._pid_speed.setInterval(poll_timer._delay);
         pmotor.begin();
-        // pmotor.enable(true);
     }
-}
-
-void setup()
-{
-    Serial.begin(115200);
-
-    CrcLib::Initialize();
-
-    master_enco_spi_init();
-    SPI.begin();
-
-    pmotors_config(pmotors);
-    configure_motors();
-
-    auto &pm = get_pmotor(currently_selected_pmotor_idx);
-    pm.enable(true);
-
-    Serial.println("Setup Done");
 }
 
 PID_RT &get_current_pid_to_tune(PrecisionMotor &pmotor)
@@ -249,6 +230,25 @@ void execute_commands()
     }
     }
 }
+
+void setup()
+{
+    Serial.begin(115200);
+
+    CrcLib::Initialize();
+
+    master_enco_spi_init();
+    SPI.begin();
+
+    pmotors_config(pmotors);
+    configure_motors();
+
+    auto &pm = get_pmotor(currently_selected_pmotor_idx);
+    pm.enable(true);
+
+    Serial.println("Setup Done");
+}
+
 
 void loop()
 {
