@@ -1,0 +1,24 @@
+0
+encoder reversed?: 1
+motor reversed?:   1
+pid angle: Kp: 0.60000 Ki: 0.00100 Kd: 0.01000
+pid speed: Kp: 0.00000 Ki: 0.00000 Kd: 0.00000
+
+1
+encoder reversed?: 1
+motor reversed?:   1
+pid angle: Kp: 0.60000 Ki: 0.00000 Kd: 0.00000
+pid speed: Kp: 0.00000 Ki: 0.00000 Kd: 0.00000
+
+2
+encoder reversed?: 0
+motor reversed?:   1
+pid angle: Kp: 0.60000 Ki: 0.00000 Kd: 0.00000
+pid speed: Kp: 0.00000 Ki: 0.00000 Kd: 0.00000
+
+3
+encoder reversed?: 0
+motor reversed?:   0
+pid angle: Kp: 0.60000 Ki: 0.00000 Kd: 0.00000
+pid speed: Kp: 0.00000 Ki: 0.00000 Kd: 0.00000
+

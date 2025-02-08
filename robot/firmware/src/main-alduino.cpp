@@ -4,26 +4,10 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include "util/print.hpp"
 #include "communication/enco_peripherals.hpp"
-#include <Encoder.h>
-
-void spi_slave_crazy_init()
-{
-    // FROM: https://github.com/MrScrith/arduino_due/blob/master/spi_slave.ino
-    NVIC_ClearPendingIRQ(SPI0_IRQn);
-    NVIC_EnableIRQ(SPI0_IRQn);
-    SPI.begin(SS);
-    REG_SPI0_CR = SPI_CR_SWRST; // reset SPI
-
-    // Setup interrupt
-    REG_SPI0_IDR = SPI_IDR_TDRE | SPI_IDR_MODF | SPI_IDR_OVRES | SPI_IDR_NSSR | SPI_IDR_TXEMPTY | SPI_IDR_UNDES;
-    REG_SPI0_IER = SPI_IER_RDRF;
-
-    // Setup the SPI registers.
-    REG_SPI0_CR = SPI_CR_SPIEN;   // enable SPI
-    REG_SPI0_MR = SPI_MR_MODFDIS; // slave and no modefault
-    REG_SPI0_CSR = SPI_MODE0;     // DLYBCT=0, DLYBS=0, SCBR=0, 8 bit transfer
-}
+#include "sensors/gobuilda_rotary_enc.hpp"
+#include "sensors/gobuilda_rotary_enc_data.hpp"
 
 Encoder e[ENCO_NUM] = {
     Encoder(38, 36), // right high
@@ -35,7 +19,7 @@ Encoder e[ENCO_NUM] = {
     Encoder(50, 24),
     Encoder(52, 22)};
 
-byte df[sizeof(int32_t) * ENCO_NUM];
+dataframe_t df;
 
 int df_idx = 0;
 
@@ -47,22 +31,27 @@ void setup()
 
 void loop()
 {
+    // reset the idx if slave is deselected
+    if (df_idx != 0 && digitalRead(SS) == HIGH) {
+        df_idx = 0;
+    }
 
     // update dataframe
-    auto df_enco_vals = (int32_t *)df;
     for (byte i = 0; i < ENCO_NUM; i++)
     {
-        df_enco_vals[i] = e[i].read();
+        df[i] = e[i].read();
     }
 }
 
 void SPI0_Handler()
 {
-    // MUST READ EVEN IF UNUSED
-    // how it would normally be: `byte read_value = SPI0->SPI_RDR & SPI_RDR_RD_Msk;`
-    (void) (SPI0->SPI_RDR & SPI_RDR_RD_Msk);
+    byte read_value = SPI0->SPI_RDR & SPI_RDR_RD_Msk;
+    if (read_value == 0x0F) {
+        df_idx = 0;
+    }
 
-    SPI0->SPI_TDR = (df[df_idx]);
+    auto raw = reinterpret_cast<byte*>(df);
+    SPI0->SPI_TDR = (raw[df_idx]);
 
     if (++df_idx == DF_LEN)
     {

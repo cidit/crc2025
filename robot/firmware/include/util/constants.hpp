@@ -1,6 +1,7 @@
 #pragma once
 
-const uint32_t ONE_SECOND = 1000;
+constexpr uint32_t ONE_SECOND = 1000;
+constexpr double EPSILON = 0.000001; // used as tolerance in floating point math
 
 
 #ifdef PLTFRM_ESP32

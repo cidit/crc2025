@@ -11,7 +11,7 @@ spi master. expects a slave to be uploaded to the arduino.
 #include "util/timer.hpp"
 #include "util/print.hpp"
 
-Timer poll_timer(ONE_SECOND / 10000);
+Timer poll_timer(ONE_SECOND / 1000);
 
 int32_t df[ENCO_NUM];
 
@@ -27,14 +27,14 @@ LinEncSpoof spoofs[ENCO_NUM] = {
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
-    {spoofs[0], 145.1 * 2.5, poll_timer},
-    {spoofs[1], 145.1 * 2.5, poll_timer},
-    {spoofs[2], 145.1 * 2.5, poll_timer},
-    {spoofs[3], 145.1 * 2.5, poll_timer},
-    {spoofs[4], 145.1 * 2.5, poll_timer},
-    {spoofs[5], 145.1 * 2.5, poll_timer},
-    {spoofs[6], 145.1 * 2.5, poll_timer},
-    {spoofs[7], 145.1 * 2.5, poll_timer},
+    {spoofs[0], 145.1 * 5, poll_timer},
+    {spoofs[1], 145.1 * 5, poll_timer},
+    {spoofs[2], 145.1 * 5, poll_timer},
+    {spoofs[3], 145.1 * 5, poll_timer},
+    {spoofs[4], 145.1 * 5, poll_timer},
+    {spoofs[5], 145.1 * 5, poll_timer},
+    {spoofs[6], 145.1 * 5, poll_timer},
+    {spoofs[7], 145.1 * 5, poll_timer},
 };
 
 void setup()
@@ -44,24 +44,13 @@ void setup()
     SPI.begin();
 }
 
-void update_df()
-{
-    // TODO: for some reason, the values seem to be multiplied by 256
-    retrieve_df(df);
-    // here, we sorta patch the multiplied by 256 problem
-    for (int i = 0; i < ENCO_NUM; i++)
-    {
-        df[i] /= 256;
-    }
-}
-
 void loop()
 {
     poll_timer.update(millis());
 
     if (poll_timer.is_time())
     {
-        update_df();
+        retrieve_df(df);
     }
 
     // // TESTING DATAFRAME
@@ -103,11 +92,13 @@ void loop()
             SPRINT("| e");
             SPRINT(i);
             SPRINT(" ");
-            SPRINT(goencs[i].getLast().rads);
+            SPRINT(String(goencs[i].getLast().rads, 1));
             SPRINT(" ");
-            SPRINT(goencs[i].getLast().rpm);
+            SPRINT(String(goencs[i].getLast().rpm, 1));
             SPRINT(" ");
+            SPRINT(padLeft(String(goencs[i]._ie.getLast()), 3, '0'));
         }
+        hexdump_df(df);
         Serial.println("|");
     }
 }

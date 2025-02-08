@@ -71,7 +71,6 @@ public:
         _is_inverted = inverted;
     }
 
-private:
     int _pin;
     bool _is_inverted;
 };

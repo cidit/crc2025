@@ -112,4 +112,14 @@ public:
             length*sin(rads)
         );
     }
+
+    Vec2D rotate_by(double rads) {
+        double cosTheta = cos(rads);
+        double sinTheta = sin(rads);
+
+        double newX = _x * cosTheta - _y * sinTheta;
+        double newY = _x * sinTheta + _y * cosTheta;
+
+        return Vec2D(newX, newY);
+    }
 };
