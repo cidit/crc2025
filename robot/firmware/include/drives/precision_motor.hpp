@@ -10,8 +10,9 @@
 #include "util/lifecycle.hpp"
 #include "util/timer.hpp"
 #include "util/misc.hpp"
+#include "util/display_name.hpp"
 
-class PrecisionMotor : public Lifecycle
+class PrecisionMotor : public Lifecycle, public IDisplayName
 {
 public:
     static const uint32_t DEFAULT_POLL_FREQ = 50; // hz
@@ -103,6 +104,10 @@ public:
 
     PrecisionMotor(const PrecisionMotor &) = delete;
     PrecisionMotor &operator=(const PrecisionMotor &) = delete;
+
+    String display_name() {
+        return _name;
+    }
 
     void begin() override
     {
