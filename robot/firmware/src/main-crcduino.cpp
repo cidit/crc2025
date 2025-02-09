@@ -115,7 +115,7 @@ PrecisionMotor pmotors[NB_PM] = {
 };
 
 const auto MAX_PULSE_LEN = 4160.0;
-PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, 0.0, polling_timer); // TODO: get right pin
+PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, 0.0, polling_timer);
 PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, 0.0, polling_timer);
 
 SwerveModule swerve_right(pmotors[I_RAS], pmotors[I_RBS], pwm_enco_right);

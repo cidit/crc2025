@@ -24,7 +24,7 @@ Motor motor(CRC_PWM_7);
 Encoder enco(CRC_I2C_SCL, CRC_DIG_5);
 EncoderWrapper enco_wrapped(enco, polling_timer);
 GobuildaRotaryEncoder roenco(enco_wrapped, 145.1 * 2.5, polling_timer, true);
-PrecisionMotor pmotor(motor, roenco, 400.);
+PrecisionMotor pmotor("PrecisionMotor #1", motor, roenco, 400.);
 
 void setup()
 {

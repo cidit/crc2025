@@ -10,6 +10,7 @@
 #include <Decodeur.h>
 #include <PID_RT.h>
 #include "util/print.hpp"
+#include "sensors/paul_stroffregen_enco_sensor_wrapper.hpp"
 
 Decodeur cmd(&Serial);
 bool read_mode = true;
@@ -21,13 +22,15 @@ Timer print_timer(ONE_SECOND / 10), polling_timer(ONE_SECOND / 50);
 #ifdef SWERVE_A
 Motor motorA(CRC_PWM_1);
 Encoder encoA(CRC_I2C_SDA, CRC_DIG_4);
-GobuildaRotaryEncoder goencoA(encoA, 145.1 * 2.5, polling_timer, true);
-PrecisionMotor pmotorA(motorA, goencoA, 400);
+EncoderWrapper encoAwrap(encoA, polling_timer);
+GobuildaRotaryEncoder goencoA(encoAwrap, 145.1 * 2.5, polling_timer, true);
+PrecisionMotor pmotorA("pmotorA", motorA, goencoA, 400);
 
 Motor motorB(CRC_PWM_7);
 Encoder encoB(CRC_ENCO_A, CRC_DIG_2);
-GobuildaRotaryEncoder goencoB(encoB, 145.1 * 2.5, polling_timer);
-PrecisionMotor pmotorB(motorB, goencoB, 400);
+EncoderWrapper encoBwrap(encoB, polling_timer);
+GobuildaRotaryEncoder goencoB(encoBwrap, 145.1 * 2.5, polling_timer);
+PrecisionMotor pmotorB("pmotorB", motorB, goencoB, 400);
 
 const auto MAX_PULSE_LEN = 4160.0;
 PwmRotaryEncoder pwm_enco(CRC_DIG_1, MAX_PULSE_LEN, 0.0, polling_timer);

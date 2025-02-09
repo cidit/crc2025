@@ -54,20 +54,28 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
     {spoofs[7], 145.1 * 5, poll_timer},
 };
 
-Motor motors[NUM_MOTORS] = {
-    {CRC_PWM_4, true},
-    {CRC_PWM_3},
-    {CRC_PWM_1},
-    {CRC_PWM_7},
+
+Motor motors[NB_PM] = {
+    {CRC_PWM_7}, // Swerve Right B
+    {CRC_PWM_1}, // Swerve Right A
+    {CRC_PWM_3}, // Swerve Left A
+    {CRC_PWM_4}, // Swerve Left B
+    {CRC_PWM_5}, // Bras Right
+    {CRC_PWM_6}, // Bras Left
+    {CRC_PWM_2}, // Poignet
+    {CRC_PWM_8}, // À Déterminé - Lanceur
 };
 
-PrecisionMotor pmotors[NUM_MOTORS] = {
-    {motors[0], goencs[0], 400.},
-    {motors[1], goencs[1], 400.},
-    {motors[2], goencs[2], 400.},
-    {motors[3], goencs[3], 400.},
+PrecisionMotor pmotors[NB_PM] = {
+    {"Swerve Right B", motors[0], goencs[0], MAX_RPM_SWERVE}, // Swerve Right B
+    {"Swerve Right A", motors[1], goencs[1], MAX_RPM_SWERVE}, // Swerve Right A
+    {"Swerve Left A", motors[2], goencs[2], MAX_RPM_SWERVE},  // Swerve Left A
+    {"Swerve Left B", motors[3], goencs[3], MAX_RPM_SWERVE},  // Swerve Left B
+    {"Bras Right", motors[4], goencs[4], MAX_RPM_BRAS},       // Bras Right
+    {"Bras Left", motors[5], goencs[5], MAX_RPM_BRAS},        // Bras Left
+    {"Poignet", motors[6], goencs[6], MAX_RPM_BRAS},          // Poignet
+    {"Lanceur", motors[7], goencs[7], MAX_RPM_LANCE},         // Lanceur
 };
-
 // should always be between 0 and NUM_MOTORS
 size_t currently_selected_pmotor_idx = 0;
 
