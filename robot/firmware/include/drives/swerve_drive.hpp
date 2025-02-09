@@ -1,11 +1,12 @@
 #pragma once
 #include "util/lifecycle.hpp"
+#include "util/display_name.hpp"
 #include "drives/swerve_module.hpp"
 #include "util/constants.hpp"
 
 struct swerve_drive_heading
 {
-    swerve_heading swerve_heading;
+    swerve_heading heading;
     double rotation; // in rpms
 };
 
@@ -21,7 +22,7 @@ public:
     SwerveDrive(SwerveModule &right, SwerveModule &left)
         : _r(right),
           _l(left),
-          _target{.swerve_heading = {.direction = 0, .velocity = 0}, .rotation = 0},
+          _target{.heading = {.direction = 0, .velocity = 0}, .rotation = 0},
           _enabled(false)
     {
         // no-op
@@ -45,8 +46,8 @@ public:
     {
         // determine the cartesian values of the target
         auto target_as_vect = Vec2D::from_polar(
-            _target.swerve_heading.direction,
-            _target.swerve_heading.velocity);
+            _target.heading.direction,
+            _target.heading.velocity);
 
         // determine the strength of the rotation 
         auto right_rot_as_vec = Vec2D(0, -_target.rotation);
@@ -61,8 +62,8 @@ public:
                                        .norm();
         
         // average the target and rotations to find the resulting angle
-        auto right_direction = (_target.swerve_heading.direction + right_rot_as_vec.angle()) / 2;
-        auto left_direction = (_target.swerve_heading.direction + left_rot_as_vec.angle()) / 2;        
+        auto right_direction = (_target.heading.direction + right_rot_as_vec.angle()) / 2;
+        auto left_direction = (_target.heading.direction + left_rot_as_vec.angle()) / 2;        
 
         // rescale the norms if they exceed their maximum rpms (which would cause the other to lag behind)
         if (_r.get_max_linear_velocity() < right_resultant_norm) {
