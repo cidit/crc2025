@@ -3,7 +3,7 @@
 constexpr uint32_t ONE_SECOND = 1000;
 constexpr double EPSILON = 0.000001; // used as tolerance in floating point math
 
-constexpr uint8_t HALF_PWM_OUTPUT = 127;
+constexpr uint8_t HALF_PWM_OUTPUT = 128;
 
 
 //----- Defines ------
