@@ -4,7 +4,6 @@
 #include "CrcRemoteState.h"
 #include "CrcLib.h"
 #include "CrcXbee.h"
-#include "util/polyfill.hpp"
 
 /**
  * largely based off of @squid's controller
@@ -49,6 +48,8 @@ public:
         float Right;
         float Left;
     };
+
+    CrcUtility::RemoteState _raw_last, _raw_current;
 
     //Joysticks
     Joy joyLeft;

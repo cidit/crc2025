@@ -401,7 +401,9 @@ private:
 
     static CrcUtility::CrcNeo _crcNeo;
 
-    static CrcUtility::CrcXbee _crcXbee;
+    // POLYFILL extended the visibility of the _crcXbee
+    public: static CrcUtility::CrcXbee _crcXbee;
+    private:
 
     static CrcUtility::CrcBuzz _crcBuzz;
 };
