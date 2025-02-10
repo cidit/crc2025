@@ -55,7 +55,7 @@ public:
      * the the angle error (in radians, plus or minus) at which the translation speed
      * will be taken into account in the swerve.
      */
-    static constexpr auto STEERING_TOLERANCE = .1;
+    static constexpr auto STEERING_TOLERANCE = .3;
 
     PrecisionMotor &_pma, &_pmb;
 
@@ -90,7 +90,7 @@ public:
           _mtwr(motor_to_wheel_ratio),
           _enabled(false)
     {
-        _pid.setInterval(ONE_SECOND / PrecisionMotor::DEFAULT_POLL_FREQ); // we use the same poll freq as the motor because why not
+        _pid.setInterval(_e._polling_timer._delay); // we use the same poll freq as the motor because why not
         _pid.setPoint(0);
         _pid.setPropOnError();
         _pid.setReverse(true);
@@ -109,8 +109,6 @@ public:
     void update() override
     {
         _e.update();
-        _pma.update();
-        _pmb.update();
         const auto oprev = get_oprev_result();
 
         if (!_pid.compute(oprev.travel))
@@ -150,6 +148,10 @@ public:
                 wheel_velocity + (angular_velocity / 2)   // clockwise
             );
         }
+
+        // put this at the end because we want the pmotors to get the up to date info as soon as possible, instead of next update.
+        _pma.update();
+        _pmb.update();
     }
 
     /**

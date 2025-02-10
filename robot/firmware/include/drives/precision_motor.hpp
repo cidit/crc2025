@@ -83,7 +83,7 @@ public:
         {
             /* setting up speed pid */
             _pid_speed.setK(0, 0, 0);
-            _pid_speed.setInterval(poll_interval);
+            _pid_speed.setInterval(_e._polling_timer._delay);
             _pid_speed.setPoint(0);
             _pid_speed.setPropOnError();
             _pid_speed.setReverse(true);
@@ -94,7 +94,7 @@ public:
         {
             /* setting up angle pid */
             _pid_angle.setK(0, 0, 0);
-            _pid_angle.setInterval(poll_interval);
+            _pid_angle.setInterval(_e._polling_timer._delay);
             _pid_angle.setPoint(0);
             _pid_angle.setPropOnError();
             _pid_angle.setReverse(true);

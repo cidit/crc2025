@@ -21,14 +21,11 @@ spi master. expects a slave to be uploaded to the arduino.
 #include "math/vectors.hpp"
 #include "config.hpp"
 
-int32_t enco_values[ENCO_NUM];
 
 Decodeur cmd(&Serial);
 bool read_mode = true;
 Timer print_timer(ONE_SECOND / 40);
-Timer poll_timer(ONE_SECOND / 40);
-
-
+Timer poll_timer(ONE_SECOND / 200);
 dataframe_t df;
 
 LinEncSpoof spoofs[ENCO_NUM] = {

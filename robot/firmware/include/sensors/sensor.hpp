@@ -7,7 +7,6 @@ class Sensor : public Lifecycle
 {
 protected:
     Measure _last;
-    const Timer &_polling_timer;
     Sensor(Measure last_default_val, const Timer &polling_timer)
         : _last(last_default_val),
           _polling_timer(polling_timer) {}
@@ -16,6 +15,7 @@ protected:
     Sensor &operator=(const Sensor &) = delete;
 
 public:
+    const Timer &_polling_timer;
     virtual void begin() = 0;
     virtual bool sample(Measure &out) = 0;
     virtual ~Sensor() = default;

@@ -22,18 +22,20 @@ spi master. expects a slave to be uploaded to the arduino.
 #include "math/vectors.hpp"
 #include "config.hpp"
 
+
 Decodeur cmd(&Serial);
-bool read_mode = true, controller_mode = false;
-Timer print_timer(ONE_SECOND / 20);
-Timer poll_timer(ONE_SECOND / 40);
+bool read_mode = true, controller_mode;
+Timer print_timer(ONE_SECOND / 80);
+Timer poll_timer(ONE_SECOND / 200);
+Timer swerve_timer(ONE_SECOND/ 100);
 
 dataframe_t df;
 
 LinEncSpoof spoofs[ENCO_NUM] = {
-    {df[0], poll_timer}, // right high
-    {df[1], poll_timer}, // right low (ITS INVERTED!)
-    {df[2], poll_timer}, // left low
-    {df[3], poll_timer}, // left high
+    {df[0], poll_timer}, // swerve right b
+    {df[1], poll_timer}, // swerve right a
+    {df[2], poll_timer}, // swerve left a
+    {df[3], poll_timer}, // swerve left b
     {df[4], poll_timer},
     {df[5], poll_timer},
     {df[6], poll_timer},
@@ -41,9 +43,9 @@ LinEncSpoof spoofs[ENCO_NUM] = {
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
-    {spoofs[0], 145.1 * 5, poll_timer},
+    {spoofs[0], 145.1 * 5, poll_timer, true},
     {spoofs[1], 145.1 * 5, poll_timer},
-    {spoofs[2], 145.1 * 3.55, poll_timer},
+    {spoofs[2], 145.1 * 3.55, poll_timer, true},
     {spoofs[3], 145.1 * 3.55, poll_timer},
     {spoofs[4], 145.1 * 5, poll_timer},
     {spoofs[5], 145.1 * 5, poll_timer},
@@ -53,10 +55,10 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
 
 
 Motor motors[NUM_MOTORS] = {
-    {CRC_PWM_7}, // Swerve Right B
-    {CRC_PWM_1}, // Swerve Right A
-    {CRC_PWM_3}, // Swerve Left A
-    {CRC_PWM_4}, // Swerve Left B
+    { CRC_PWM_4}, // Swerve Right B
+    { CRC_PWM_3}, // Swerve Right A
+    {CRC_PWM_1}, // Swerve Left A
+    {CRC_PWM_7}, // Swerve Left B
     {CRC_PWM_5}, // Bras Right
     {CRC_PWM_6}, // Bras Left
     {CRC_PWM_2}, // Poignet
@@ -74,9 +76,11 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
     {"Lanceur", motors[7], goencs[7], MAX_RPM_LANCE},         // Lanceur
 };
 
+
+
 const auto MAX_PULSE_LEN = 4160.0;
-PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, 0.0, poll_timer);
-PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, 0.0, poll_timer);
+PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, 0.0, swerve_timer);
+PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, 0.0, swerve_timer);
 
 SwerveModule swerve_right(
     pmotors[1],
@@ -231,6 +235,7 @@ void loop()
     auto now = millis();
     print_timer.update(now);
     poll_timer.update(now);
+    swerve_timer.update(now);
     CrcLib::Update();
     cmd.refresh();
     execute_commands();
