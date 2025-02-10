@@ -20,7 +20,6 @@ spi master. expects a slave to be uploaded to the arduino.
 #include "math/vectors.hpp"
 #include "config.hpp"
 
-
 Decodeur cmd(&Serial);
 bool read_mode = true;
 Timer print_timer(ONE_SECOND / 40);
@@ -49,10 +48,9 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
     {spoofs[7], 145.1 * 5, poll_timer},
 };
 
-
 Motor motors[NUM_MOTORS] = {
-    { CRC_PWM_4}, // Swerve Right B
-    { CRC_PWM_3}, // Swerve Right A
+    {CRC_PWM_4}, // Swerve Right B
+    {CRC_PWM_3}, // Swerve Right A
     {CRC_PWM_1}, // Swerve Left A
     {CRC_PWM_7}, // Swerve Left B
     {CRC_PWM_5}, // Bras Right
@@ -71,9 +69,6 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
     {"Poignet", motors[6], goencs[6], MAX_RPM_BRAS},          // Poignet
     {"Lanceur", motors[7], goencs[7], MAX_RPM_LANCE},         // Lanceur
 };
-
-
-
 
 // should always be between 0 and NUM_MOTORS
 size_t currently_selected_pmotor_idx = 0;
@@ -255,7 +250,6 @@ void setup()
 
     Serial.println("Setup Done");
 }
-
 
 void loop()
 {
