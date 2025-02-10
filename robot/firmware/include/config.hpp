@@ -13,29 +13,29 @@ void pmotors_config(PrecisionMotor *pmotors)
 		auto &pm = pmotors[0];
 		pm._e.set_inverted(true);
 		pm._m.set_inverted(true);
-		pm._pid_angle.setK(0.60000, 0.00000, 0.01000);
-		pm._pid_speed.setK(0.5, 0.00000, 0.0000);
+		pm._pid_angle.setK(0.60000, 0.000001, 0.1000);
+		pm._pid_speed.setK(0.6, 0.000001, 0.10000);
 	};
 	/* PMOTOR #[1] config */ {
 		auto &pm = pmotors[1];
 		pm._e.set_inverted(true);
 		pm._m.set_inverted(true);
-		pm._pid_angle.setK(0.60000, 0.00000, 0.01000);
-		pm._pid_speed.setK(0.5, 0.00000, 0.000);
+		pm._pid_angle.setK(0.60000, 0.000001, 0.1000);
+		pm._pid_speed.setK(0.6, 0.000001, 0.1000);
 	};
 	/* PMOTOR #[2] config */ {
 		auto &pm = pmotors[2];
 		pm._e.set_inverted(false);
 		pm._m.set_inverted(true);
-		pm._pid_angle.setK(0.60000, 0.00000, 0.01000);
-		pm._pid_speed.setK(0.5, 0.00000, 0.000);
+		pm._pid_angle.setK(0.60000, 0.000001, 0.1000);
+		pm._pid_speed.setK(0.6, 0.000001, 0.1000);
 	};
 	/* PMOTOR #[3] config */ {
 		auto &pm = pmotors[3];
 		pm._e.set_inverted(true);
 		pm._m.set_inverted(true);
-		pm._pid_angle.setK(0.60000, 0.00000, 0.01000);
-		pm._pid_speed.setK(0.5, 0.00000, 0.00);
+		pm._pid_angle.setK(0.60000, 0.000001, 0.1000);
+		pm._pid_speed.setK(0.6, 0.000001, 0.100);
 	};    
     /* PMOTOR #[4] config Bras Droit */ {
         auto &pm = pmotors[4];
