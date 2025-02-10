@@ -28,7 +28,6 @@ bool read_mode = true;
 Timer print_timer(ONE_SECOND / 40);
 Timer poll_timer(ONE_SECOND / 40);
 
-const size_t NUM_MOTORS = 4;
 
 dataframe_t df;
 
@@ -55,7 +54,7 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
 };
 
 
-Motor motors[NB_PM] = {
+Motor motors[NUM_MOTORS] = {
     {CRC_PWM_7}, // Swerve Right B
     {CRC_PWM_1}, // Swerve Right A
     {CRC_PWM_3}, // Swerve Left A
@@ -66,7 +65,7 @@ Motor motors[NB_PM] = {
     {CRC_PWM_8}, // À Déterminé - Lanceur
 };
 
-PrecisionMotor pmotors[NB_PM] = {
+PrecisionMotor pmotors[NUM_MOTORS] = {
     {"Swerve Right B", motors[0], goencs[0], MAX_RPM_SWERVE}, // Swerve Right B
     {"Swerve Right A", motors[1], goencs[1], MAX_RPM_SWERVE}, // Swerve Right A
     {"Swerve Left A", motors[2], goencs[2], MAX_RPM_SWERVE},  // Swerve Left A

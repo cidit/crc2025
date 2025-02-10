@@ -29,7 +29,7 @@
 #define MAX_RPM_SWERVE 400
 #define MAX_RPM_LANCE 1150
 
-#define NB_PM 8 
+#define NUM_MOTORS 8 
     //Index in array (Selon les branchements sur le ALDuino)
     #define I_LAS 2
     #define I_LBS 3
@@ -63,9 +63,9 @@ enum RobotState{
 RobotState robot_state = MOVING;
 Controller ctrl; //La manette
 Timer polling_timer(ONE_SECOND / 1000); //Doit au moins être de 1ms
-int32_t df[NB_PM]; //Le dataframe qui reçoit les valeurs du ALDuino
+int32_t df[NUM_MOTORS]; //Le dataframe qui reçoit les valeurs du ALDuino
 
-Motor motors[NB_PM] = {
+Motor motors[NUM_MOTORS] = {
     {CRC_PWM_7}, //Swerve Right B
     {CRC_PWM_1}, //Swerve Right A
     {CRC_PWM_3}, //Swerve Left A
@@ -76,7 +76,7 @@ Motor motors[NB_PM] = {
     {CRC_PWM_8}, //À Déterminé - Lanceur
 };
 
-LinEncSpoof spoofs[NB_PM] = {
+LinEncSpoof spoofs[NUM_MOTORS] = {
     {df[0], polling_timer}, //Swerve Right B 
     {df[1], polling_timer}, //Swerve Right A
     {df[2], polling_timer}, //Swerve Left A
@@ -87,7 +87,7 @@ LinEncSpoof spoofs[NB_PM] = {
     {df[7], polling_timer}, //Lanceur
 };
 
-GobuildaRotaryEncoder goencs[NB_PM] = {
+GobuildaRotaryEncoder goencs[NUM_MOTORS] = {
     {spoofs[0], TICKS_RATIO_SWERVE, polling_timer}, //Swerve Right B 
     {spoofs[1], TICKS_RATIO_SWERVE, polling_timer}, //Swerve Right A
     {spoofs[2], TICKS_RATIO_SWERVE, polling_timer, true}, //Swerve Left A
@@ -98,7 +98,7 @@ GobuildaRotaryEncoder goencs[NB_PM] = {
     {spoofs[7], TICKS_RATIO_LANCE, polling_timer}, //Lanceur
 };
 
-PrecisionMotor pmotors[NB_PM] = {
+PrecisionMotor pmotors[NUM_MOTORS] = {
     {motors[0], goencs[0], MAX_RPM_SWERVE}, //Swerve Right B 
     {motors[1], goencs[1], MAX_RPM_SWERVE}, //Swerve Right A
     {motors[2], goencs[2], MAX_RPM_SWERVE}, //Swerve Left A

@@ -15,7 +15,7 @@ constexpr uint8_t HALF_PWM_OUTPUT = 128;
 #define MAX_RPM_SWERVE 400
 #define MAX_RPM_LANCE 1150
 
-#define NB_PM 8
+#define NUM_MOTORS 8
 // Index in array (Selon les branchements sur le ALDuino)
 #define I_LAS 2
 #define I_LBS 3
