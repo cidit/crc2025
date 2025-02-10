@@ -208,7 +208,7 @@ void execute_commands()
         for (size_t i = 0; i < NUM_MOTORS; i++)
         {
             auto &pm = get_pmotor(i);
-            Serial.println("/* PMOTOR #[" + String(i) + "] config */ {");
+            Serial.println("/* PMOTOR #[" + String(i) + "] "+ pm.display_name() + " config */ {");
             Serial.println("\tauto &pm = pmotors[" + String(i) + "];");
             Serial.println("\tpm._e.set_inverted(" + String(pm._e._is_inverted ? "true" : "false") + ");");
             Serial.println("\tpm._m.set_inverted(" + String(pm._m._is_inverted ? "true" : "false") + ");");
