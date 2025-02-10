@@ -16,7 +16,6 @@ spi master. expects a slave to be uploaded to the arduino.
 #include "util/timer.hpp"
 #include "util/print.hpp"
 #include <drives/precision_motor.hpp>
-#include <controller.hpp>
 #include "util/looped.hpp"
 #include "math/vectors.hpp"
 #include "config.hpp"
