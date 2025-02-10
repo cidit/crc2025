@@ -32,10 +32,10 @@ Timer poll_timer(ONE_SECOND / 40);
 dataframe_t df;
 
 LinEncSpoof spoofs[ENCO_NUM] = {
-    {df[0], poll_timer},
-    {df[1], poll_timer},
-    {df[2], poll_timer},
-    {df[3], poll_timer},
+    {df[0], poll_timer}, // swerve right b
+    {df[1], poll_timer}, // swerve right a
+    {df[2], poll_timer}, // swerve left a
+    {df[3], poll_timer}, // swerve left b
     {df[4], poll_timer},
     {df[5], poll_timer},
     {df[6], poll_timer},
@@ -55,10 +55,10 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
 
 
 Motor motors[NUM_MOTORS] = {
-    {CRC_PWM_7}, // Swerve Right B
-    {CRC_PWM_1}, // Swerve Right A
-    {CRC_PWM_3}, // Swerve Left A
-    {CRC_PWM_4}, // Swerve Left B
+    { CRC_PWM_4}, // Swerve Right B
+    { CRC_PWM_3}, // Swerve Right A
+    {CRC_PWM_1}, // Swerve Left A
+    {CRC_PWM_7}, // Swerve Left B
     {CRC_PWM_5}, // Bras Right
     {CRC_PWM_6}, // Bras Left
     {CRC_PWM_2}, // Poignet
@@ -75,6 +75,10 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
     {"Poignet", motors[6], goencs[6], MAX_RPM_BRAS},          // Poignet
     {"Lanceur", motors[7], goencs[7], MAX_RPM_LANCE},         // Lanceur
 };
+
+
+
+
 // should always be between 0 and NUM_MOTORS
 size_t currently_selected_pmotor_idx = 0;
 
