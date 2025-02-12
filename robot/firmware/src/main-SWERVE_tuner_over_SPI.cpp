@@ -18,16 +18,15 @@ spi master. expects a slave to be uploaded to the arduino.
 #include "util/looped.hpp"
 #include <drives/precision_motor.hpp>
 #include <drives/swerve_module.hpp>
-#include <controller.hpp>
 #include "math/vectors.hpp"
 #include "config.hpp"
 
 
 Decodeur cmd(&Serial);
 bool read_mode = true, controller_mode;
-Timer print_timer(ONE_SECOND / 80);
-Timer poll_timer(ONE_SECOND / 200);
-Timer swerve_timer(ONE_SECOND/ 100);
+Timer print_timer(ONE_SECOND / 20);
+Timer poll_timer(ONE_SECOND / 20);
+Timer swerve_timer(ONE_SECOND / 20);
 
 dataframe_t df;
 
@@ -43,9 +42,9 @@ LinEncSpoof spoofs[ENCO_NUM] = {
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
-    {spoofs[0], 145.1 * 5, poll_timer, true},
+    {spoofs[0], 145.1 * 5, poll_timer},
     {spoofs[1], 145.1 * 5, poll_timer},
-    {spoofs[2], 145.1 * 3.55, poll_timer, true},
+    {spoofs[2], 145.1 * 3.55, poll_timer},
     {spoofs[3], 145.1 * 3.55, poll_timer},
     {spoofs[4], 145.1 * 5, poll_timer},
     {spoofs[5], 145.1 * 5, poll_timer},
@@ -215,12 +214,14 @@ void setup()
 
     {
         swerve_right.begin();
-        swerve_right._pid.setInterval(poll_timer._delay);
+        swerve_right._pid.setInterval(swerve_timer._delay);
         swerve_right._e.set_inverted(true);
+        swerve_right._pid.setK(150,0,100);
 
         swerve_left.begin();
-        swerve_left._pid.setInterval(poll_timer._delay);
-        swerve_right._e.set_inverted(true);
+        swerve_left._pid.setInterval(swerve_timer._delay);
+        swerve_left._e.set_inverted(true);
+        swerve_left._pid.setK(150,0,100);
     }
 
 
@@ -252,53 +253,40 @@ void loop()
     {
         auto &swerve = get_swerve(currently_selected_swerve);
 
+        print_battery();
+
         SPRINT(currently_selected_swerve == 0 ? "[R]" : "[L]");
-
         SEPARATOR;
-        // SPRINT(" ANGLE ");
-        // SPRINT("c:");
+
         SPRINT(String(swerve._e.getLast().rads));
-        // SPRINT(" ");
-        // SPRINT("t:" + String(swerve._target.direction));
-        // SPRINT(" ");
 
         SEPARATOR;
-
         auto oprev = swerve.get_oprev_result();
-        // SPRINT(" OPREV ");
         SPRINT(oprev.reverse ? "Y" : "N");
-        // SPRINT(" ");
-        // SPRINT(padLeft(String(oprev.travel), 5, '+'));
-        // SPRINT(" ");
-
         SEPARATOR;
 
-        // SPRINT(" SPEED ");
-        // SPRINT("lin:" + padLeft(String(swerve.get_linear_velocity(), 1), 6, '_'));
-        // SPRINT(" ");
-        // SPRINT("ang:" + padLeft(String(swerve.get_angular_velocity(), 1), 6, '_'));
-        // SPRINT(" ");
-        // SPRINT("w:" + padLeft(String(swerve.get_wheel_rpm(), 1), 6, '_')); // TODO: re-add when implemented
+        SPRINT(swerve.get_angular_velocity());
+        SPRINT(" * ");
+        SPRINT(swerve._target.velocity*swerve._mtwr);
+        SEPARATOR;
+
         SPRINT(" ");
         SPRINT("[A] S:" + padLeft(String(swerve._pma._e.getLast().rpm, 1), 6, '\''));
         SPRINT("  T:" + padLeft(String(swerve._pma._pid_speed.getSetPoint(), 1), 6, '\''));
         SPRINT("  (" + String(swerve._pma._m.get_power()) + ")");
         SEPARATOR;
+        
         SPRINT("[B] S:" + padLeft(String(swerve._pmb._e.getLast().rpm, 1), 6, '\''));
         SPRINT("  T:" + padLeft(String(swerve._pmb._pid_speed.getSetPoint(), 1), 6, '\''));
         SPRINT("  (" + String(swerve._pmb._m.get_power()) + ")");
         SPRINT(" ");
-
         SEPARATOR;
 
-        // SPRINT(" ");
-        // SPRINT("s:" + String(swerve._pid.getSetPoint()) + "rad");
         SPRINT(" ");
         SPRINT("i:" + padLeft(String(swerve._pid.getInput()), 5, '+') + "rad");
         SPRINT(" ");
         SPRINT("o:" + padLeft(String(swerve._pid.getOutput(), 1), 7, '_') + "rpm");
         SPRINT(" ");
-
         SEPARATOR;
 
         SPRINT(" K ");
@@ -308,7 +296,6 @@ void loop()
         SPRINT(" ");
         SPRINT(String(swerve._pid.getKd(), 5));
         SPRINT(" ");
-
         SEPARATOR;
 
         Serial.println();
