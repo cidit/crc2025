@@ -56,8 +56,6 @@ public:
     bool _enabled;
     double _max_rpm;
 
-    double _output_pid_angle;
-
     PrecisionMotor(
         String name,
         Motor &m,
@@ -147,8 +145,7 @@ public:
         }
         else if (angle_compute)
         {
-            _output_pid_angle = _pid_angle.getOutput();
-            _m.set_power_ratio(_output_pid_angle);
+            _m.set_power_ratio(_pid_angle.getOutput());
             //Serial.println("out"+ String(_pid_angle.getOutput()));
             if(_name == "Bras Right" || _name == "Bras Left") {
                 Serial.println(_name + " - Last:" + String(_e.getLast().rads)+ "   tar"+ String(_target_angle._radians) + ", power: " + String(_pid_angle.getOutput()));
