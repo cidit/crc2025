@@ -111,15 +111,21 @@ public:
         _e.update();
         const auto oprev = get_oprev_result();
 
-        if (!_pid.compute(oprev.travel))
+        if (_pid.compute(oprev.travel))
         {
-            return;
+            _update_pmotor_instructions(oprev);
         }
 
-        const auto wheel_velocity = abs(oprev.travel) > STEERING_TOLERANCE
-                                 ? 0
-                                 : get_linear_velocity();
-        // const auto wheel_velocity = 0; // TODO: dbg test
+        // put this at the end because we want the pmotors to get the up to date info as soon as possible, instead of next update.
+        _pma.update();
+        _pmb.update();
+    }
+
+    void _update_pmotor_instructions(const oprev_result &oprev) {
+         // const auto wheel_velocity = abs(oprev.travel) > STEERING_TOLERANCE
+        //                          ? 0
+        //                          : get_linear_velocity();
+        const auto wheel_velocity = cos(oprev.travel) * _target.velocity * _mtwr;
 
         // TODO: this doesnt deal with oprev
         // TODO: nvm, it should deal with oprev. validate.
@@ -132,26 +138,21 @@ public:
         b=v−(Δω/2)
         */
         const auto angular_velocity = get_angular_velocity(); // rpms
-
         // TODO: remove if obsolete
         if (!oprev.reverse)
         {
             _set_speeds(
-                wheel_velocity + (angular_velocity / 2), // in fw, clockwise
-                -wheel_velocity + (angular_velocity / 2) // counter clockwise
+                -wheel_velocity + (angular_velocity / 2), // in fw, clockwise
+                wheel_velocity + (angular_velocity / 2) // counter clockwise
             );
         }
         else
         {
             _set_speeds(
-                -wheel_velocity + (angular_velocity / 2), // in bckw, counter clockwise
-                wheel_velocity + (angular_velocity / 2)   // clockwise
+                wheel_velocity + (angular_velocity / 2), // in bckw, counter clockwise
+                -wheel_velocity + (angular_velocity / 2)   // clockwise
             );
         }
-
-        // put this at the end because we want the pmotors to get the up to date info as soon as possible, instead of next update.
-        _pma.update();
-        _pmb.update();
     }
 
     /**
