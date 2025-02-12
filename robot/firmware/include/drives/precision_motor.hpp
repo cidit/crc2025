@@ -49,8 +49,6 @@ public:
     PID_RT _pid_angle;
     Angle _target_angle;
 
-    // TODO: remove if integration with externally polled encoder works
-    // double _tpt;
     Mode _mode;
     bool _enabled;
     double _max_rpm;
@@ -59,8 +57,6 @@ public:
         String name,
         Motor &m,
         GobuildaRotaryEncoder &e,
-        // TODO: remove if integration with externally polled encoder works
-        // double ticks_per_turn,
         double max_rpm)
         : _name(name),
           _m(m),
@@ -70,8 +66,6 @@ public:
           _e_old2(0),
           _pid_angle(),
           _target_angle(Angle::from_rad(0)),
-          // TODO: remove if integration with externally polled encoder works
-          //   _tpt(ticks_per_turn),
           _mode(Mode::MATCH_ANGLE), // doesnt matter, pids are not started anyways
           _enabled(false),
           _max_rpm(max_rpm)
@@ -130,11 +124,6 @@ public:
             return;
         }
 
-        // TODO: remove if integration with externally polled encoder works
-        // if (speed_compute || angle_compute)
-        // {
-        //     _update_l2ev();
-        // }
         if (speed_compute)
         {
             const auto new_power = _m.get_power() + _pid_output_to_percentage(_pid_speed);
@@ -149,29 +138,6 @@ public:
             }
         }
     }
-
-    // TODO: remove if integration with externally polled encoder works
-    // double get_current_rpm()
-    // {
-    //     // FIXME: will not output correct values if PM is not enabled
-    //     // because _update_l2ev() never gets called.
-    //     const auto interval = _mode == Mode::MATCH_SPEED
-    //                               ? _pid_speed.getInterval()
-    //                               : _pid_angle.getInterval();
-    //     if (interval == 0) {
-    //         return 0;
-    //     }
-    //     const auto hz = ONE_SECOND / interval;
-    //     const auto delay_mins = hz * 60;
-    //     return delay_mins * (_delta_ticks() / _tpt);
-    // }
-
-    // TODO: remove if integration with externally polled encoder works
-    // double get_current_angle()
-    // {
-    //     const auto e_curr = _e.read();
-    //     return Angle::from_ratio(e_curr / _tpt)._radians;
-    // }
 
     void set_target_rpm(const float target_rpm)
     {
@@ -205,22 +171,6 @@ public:
             _m.set_power_ratio(0);
         }
     }
-
-    // TODO: remove if integration with externally polled encoder works
-    // /**
-    //  * update last 2 encoder vals
-    //  */
-    // void _update_l2ev()
-    // {
-    //     _e_old2 = _e_old1;
-    //     _e_old1 = _e.read();
-    // }
-
-    // TODO: remove if integration with externally polled encoder works
-    // int32_t _delta_ticks()
-    // {
-    //     return _e_old1 - _e_old2;
-    // }
 
     double _pid_output_to_percentage(PID_RT &pid)
     {

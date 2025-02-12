@@ -58,9 +58,6 @@ public:
     static constexpr auto STEERING_TOLERANCE = .3;
 
     PrecisionMotor &_pma, &_pmb;
-
-    // TODO: remove if externally polled absolute encoder works
-    // pin_t _e_p;
     PwmRotaryEncoder &_e;
     PID_RT _pid; // for angular velocity of swerve
     swerve_heading _target;
@@ -70,8 +67,6 @@ public:
     SwerveModule(
         PrecisionMotor &pma,
         PrecisionMotor &pmb,
-        // TODO: remove if externally polled absolute encoder works
-        // pwm abs_enco_pin,
         PwmRotaryEncoder &enco,
         /**
          * the motor to wheel ratio is how many turns the wheel does
@@ -82,15 +77,13 @@ public:
         double motor_to_wheel_ratio = 2. / 3.)
         : _pma(pma),
           _pmb(pmb),
-          // TODO: remove if externally polled absolute encoder works
-          //   _e_p(abs_enco_pin),
           _e(enco),
           _pid(),
           _target{.direction = 0, .velocity = 0},
           _mtwr(motor_to_wheel_ratio),
           _enabled(false)
     {
-        _pid.setInterval(_e._polling_timer._delay); // we use the same poll freq as the motor because why not
+        _pid.setInterval(_e._polling_timer._delay);
         _pid.setPoint(0);
         _pid.setPropOnError();
         _pid.setReverse(true);
@@ -122,13 +115,12 @@ public:
     }
 
     void _update_pmotor_instructions(const oprev_result &oprev) {
+        // TODO: come back to the steering tolerance thing
          // const auto wheel_velocity = abs(oprev.travel) > STEERING_TOLERANCE
         //                          ? 0
         //                          : get_linear_velocity();
         const auto wheel_velocity = cos(oprev.travel) * _target.velocity * _mtwr;
 
-        // TODO: this doesnt deal with oprev
-        // TODO: nvm, it should deal with oprev. validate.
         /*
         FORWARD KINEMATICS
         linear velocity: v=(a+b)/2
@@ -138,7 +130,7 @@ public:
         b=v−(Δω/2)
         */
         const auto angular_velocity = get_angular_velocity(); // rpms
-        // TODO: remove if obsolete
+
         if (!oprev.reverse)
         {
             _set_speeds(
@@ -174,8 +166,6 @@ public:
     oprev_result get_oprev_result()
     {
         const auto t_angle = _target.direction;
-        // TODO: remove if externally polled absolute encoder works
-        // const auto c_angle = get_current_angle();
         const auto c_angle = _e.getLast().rads;
         const auto travel = Angle::travel(c_angle, t_angle);
         return apply_oprev_optimisation(travel);
@@ -206,15 +196,6 @@ public:
         // TODO: verify if this is actually correct
         return (_pma._max_rpm + _pmb._max_rpm) * _mtwr;
     }
-
-    // TODO: remove if externally polled absolute encoder works
-    // double get_current_angle()
-    // {
-    //     // TODO: handle the encoder externally so that the pulse length can be ajusted if need be.
-    //     const const auto MAX_PULSE_LEN = 4160.0;
-    //     const double pulse = pulseIn(_e_p, HIGH, MAX_PULSE_LEN * 2); // TODO: if there are issues later, check the pulseIn
-    //     return (pulse / MAX_PULSE_LEN) * (2 * M_PI);
-    // }
 
     void enable(const bool enable)
     {
