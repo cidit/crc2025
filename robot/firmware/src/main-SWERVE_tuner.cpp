@@ -8,7 +8,7 @@
 #include <Servo.h>
 #include <Decodeur.h>
 #include <PID_RT.h>
-#include "util/print.hpp"
+#include "util/print_crc_extras.hpp"
 #include "sensors/paul_stroffregen_enco_sensor_wrapper.hpp"
 
 Decodeur cmd(&Serial);
