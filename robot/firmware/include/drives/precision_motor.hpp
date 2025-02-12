@@ -15,7 +15,6 @@
 class PrecisionMotor : public Lifecycle, public IDisplayName
 {
 public:
-    static const uint32_t DEFAULT_POLL_FREQ = 50; // hz
 
     enum class Mode
     {
@@ -78,8 +77,6 @@ public:
           _max_rpm(max_rpm)
     {
         // setting sane defaults for our pids
-
-        const auto poll_interval = ONE_SECOND / DEFAULT_POLL_FREQ;
         {
             /* setting up speed pid */
             _pid_speed.setK(0, 0, 0);
