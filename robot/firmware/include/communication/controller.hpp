@@ -67,8 +67,8 @@ public:
         color_up, color_down, color_left, color_right,
         hat_left, hat_right,
         logo, select, start,
-        left_1, right_1;    // boutons des gachettes
-    double left_2, right_2; // gachettes
+        left_bumper, right_bumper;    // boutons des gachettes
+    double left_trigger, right_trigger; // gachettes
     Joystick joystick_left, joystick_right;
 
     /// @brief Constructor
@@ -91,10 +91,10 @@ public:
         logo = Bouton(_raw.logo);
         select = Bouton(_raw.select);
         start = Bouton(_raw.start);
-        left_1 = Bouton(_raw.L1);
-        right_1 = Bouton(_raw.R1);
-        left_2 = 0;
-        right_2 = 0;
+        left_bumper = Bouton(_raw.L1);
+        right_bumper = Bouton(_raw.R1);
+        left_trigger = 0;
+        right_trigger = 0;
         joystick_left = {.xy = {0, 0}, .angle = 0};
         joystick_right = {.xy = {0, 0}, .angle = 0};
     }
@@ -115,11 +115,11 @@ public:
         hat_right.refresh();
         logo.refresh();
         select.refresh();
-        left_1.refresh();
-        right_1.refresh();
+        left_bumper.refresh();
+        right_bumper.refresh();
 
-        left_2 = (_raw.gachetteG + HALF_PWM_OUTPUT) / HALF_PWM_OUTPUT;
-        right_2 = (_raw.gachetteD + HALF_PWM_OUTPUT) / HALF_PWM_OUTPUT;
+        left_trigger = (_raw.gachetteG + HALF_PWM_OUTPUT) / HALF_PWM_OUTPUT;
+        right_trigger = (_raw.gachetteD + HALF_PWM_OUTPUT) / HALF_PWM_OUTPUT;
 
         joystick_left = _update_joystick(_raw.joystick1X, _raw.joystick1Y, joystick_left);
         joystick_right = _update_joystick(_raw.joystick2X, _raw.joystick2Y, joystick_right);
