@@ -9,7 +9,7 @@ spi master. expects a slave to be uploaded to the arduino.
 #include "communication/enco_peripherals.hpp"
 #include "util/constants.hpp"
 #include "util/timer.hpp"
-#include "util/print.hpp"
+#include "util/print_crc_extras.hpp"
 
 Timer poll_timer(ONE_SECOND / 20);
 

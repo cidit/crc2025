@@ -3,7 +3,6 @@
 #include <Encoder.h>
 #include <drives/precision_motor.hpp>
 #include <drives/swerve_module.hpp>
-#include <controller.hpp>
 #include "util/looped.hpp"
 #include "math/vectors.hpp"
 #include <Servo.h>
