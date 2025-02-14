@@ -100,7 +100,9 @@ private:
     bool _communicationValid = false;
 
     // Last state of the remote
-    RemoteState _state;
+    public: RemoteState _state;
+
+    private:
 
     void HandleInit(AtCommandResponse* rx);
 };

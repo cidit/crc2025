@@ -65,7 +65,7 @@ public:
     void update() override
     {
         _raw = CrcLib::_crcXbee.State();
-
+        _patch_raw();
         arrow_up.refresh();
         arrow_down.refresh();
         arrow_right.refresh();
@@ -81,20 +81,35 @@ public:
         left_bumper.refresh();
         right_bumper.refresh();
 
-        left_trigger = (_raw.gachetteG + HALF_PWM_OUTPUT) / HALF_PWM_OUTPUT;
-        right_trigger = (_raw.gachetteD + HALF_PWM_OUTPUT) / HALF_PWM_OUTPUT;
+        left_trigger = double(_raw.gachetteG + HALF_PWM_OUTPUT) / HALF_PWM_OUTPUT;
+        right_trigger = double(_raw.gachetteD + HALF_PWM_OUTPUT) / HALF_PWM_OUTPUT;
 
         joystick_left = _update_joystick(_raw.joystick1X, _raw.joystick1Y, joystick_left);
         joystick_right = _update_joystick(_raw.joystick2X, _raw.joystick2Y, joystick_right);
     }
 
-    Joystick _update_joystick(int8_t x, int8_t y, const Joystick &old_state)
+    /// apply corrections to the inputs
+    void _patch_raw() {
+        // fixed analog channels the same way crclib does it under the hood
+        _raw.joystick1X -= 128;
+        _raw.joystick1Y -= 128;
+        _raw.joystick2X -= 128;
+        _raw.joystick2Y -= 128;
+        _raw.gachetteD -= 128;
+        _raw.gachetteG -= 128;
+
+        //  /!\   y values of joysticks are inverted for some reason
+        _raw.joystick1Y = -_raw.joystick1Y;
+        _raw.joystick2Y = -_raw.joystick2Y;
+    }
+
+    Joystick _update_joystick(double x, double y, const Joystick &old_state)
     {
         auto xy_vec = Vec2D(x / HALF_PWM_OUTPUT,
                             y / HALF_PWM_OUTPUT);
         auto norm = xy_vec.norm();
         constexpr auto CTLR_DEADZONE = 0.15;
-        auto in_deadzone = abs(xy_vec.norm()) < CTLR_DEADZONE;
+        auto in_deadzone = abs(norm) < CTLR_DEADZONE;
 
         return in_deadzone
                    // on conserve le vieil angle et on met xy à 0
