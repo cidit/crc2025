@@ -76,40 +76,40 @@ Motor motors[NUM_MOTORS] = {
     {CRC_PWM_3}, // Swerve Left A
     {CRC_PWM_4}, // Swerve Left B
     {CRC_PWM_5}, // Bras Right
-    {CRC_PWM_6}, // Bras Left
+    {CRC_PWM_6, true}, // Bras Left => On verse pour être a l'opposé du moteur droit
     {CRC_PWM_2}, // Poignet
     {CRC_PWM_8}, // À Déterminé - Lanceur
 };
 
-LinEncSpoof spoofs[NUM_MOTORS] = {
+LinEncSpoof spoofs[NUM_MOTORS-1] = {
     {df[0], polling_timer}, // Swerve Right B
     {df[1], polling_timer}, // Swerve Right A
     {df[2], polling_timer}, // Swerve Left A
     {df[3], polling_timer}, // Swerve Left B
     {df[4], polling_timer}, // Bras Right
-    {df[4], polling_timer}, // Bras Left  -- On utilise 2 fois le 4 au lieu du 5.
+    //{df[4], polling_timer}, // Bras Left  -- On se base sur le moteur droit
     {df[6], polling_timer}, // Poignet
     {df[7], polling_timer}, // Lanceur
 };
 
-GobuildaRotaryEncoder goencs[NUM_MOTORS] = {
+GobuildaRotaryEncoder goencs[NUM_MOTORS-1] = {
     {spoofs[0], TICKS_RATIO_SWERVE, polling_timer},       // Swerve Right B
     {spoofs[1], TICKS_RATIO_SWERVE, polling_timer},       // Swerve Right A
     {spoofs[2], TICKS_RATIO_SWERVE, polling_timer, true}, // Swerve Left A
     {spoofs[3], TICKS_RATIO_SWERVE, polling_timer},       // Swerve Left B
     {spoofs[4], TICKS_RATIO_BRAS, polling_timer},         // Bras Right
-    {spoofs[4], TICKS_RATIO_BRAS, polling_timer},         // Bras Left
+    //{spoofs[4], TICKS_RATIO_BRAS, polling_timer},         // Bras Left   -- On se base sur le moteur droit
     {spoofs[6], TICKS_RATIO_BRAS, polling_timer},         // Poignet
     {spoofs[7], TICKS_RATIO_LANCE, polling_timer},        // Lanceur
 };
 
-PrecisionMotor pmotors[NUM_MOTORS] = {
+PrecisionMotor pmotors[NUM_MOTORS-1] = {
     {"Swerve Right B", motors[0], goencs[0], MAX_RPM_SWERVE}, // Swerve Right B
     {"Swerve Right A", motors[1], goencs[1], MAX_RPM_SWERVE}, // Swerve Right A
     {"Swerve Left A", motors[2], goencs[2], MAX_RPM_SWERVE},  // Swerve Left A
     {"Swerve Left B", motors[3], goencs[3], MAX_RPM_SWERVE},  // Swerve Left B
     {"Bras Right", motors[4], goencs[4], MAX_RPM_BRAS},       // Bras Right
-    {"Bras Left", motors[5], goencs[5], MAX_RPM_BRAS},        // Bras Left
+    //{"Bras Left", motors[5], goencs[5], MAX_RPM_BRAS},        // Bras Left    -- On se base sur le moteur droit
     {"Poignet", motors[6], goencs[6], MAX_RPM_BRAS},          // Poignet
     {"Lanceur", motors[7], goencs[7], MAX_RPM_LANCE},         // Lanceur
 };
@@ -201,14 +201,14 @@ void loop()
             pmotor.update();
         }
     }
-
-    if (polling_timer.is_time())
+    //Update le moteur gauche
+    motors[I_LB].set_power(pmotors[I_RB]._pid_angle.getOutput());
     {
         retrieve_df(df);
         goencs[4].update();
-        goencs[5].update();
+        //goencs[5].update();
         Serial.println("df" + String(df[4]) + "   Enco4: " + String(spoofs[4].getLast()) + "      Go4: " + String(goencs[4].getLast().rads));
-        Serial.println("df" + String(df[5]) + "   Enco5: " + String(spoofs[5].getLast()) + "      Go5: " + String(goencs[5].getLast().rads));
+        //Serial.println("df" + String(df[5]) + "   Enco5: " + String(spoofs[5].getLast()) + "      Go5: " + String(goencs[5].getLast().rads));
         Serial.println();
     }
 
@@ -229,7 +229,7 @@ void loop()
         // Serial.println(ctrl.gachettes.Right * delta * (M_PI/1000.0));
         // Serial.println(angle_bras);
         angle_bras = constrain(angle_bras, LOW_STOP_BRAS, HIGH_STOP_BRAS);
-        pmotors[I_LB].set_target_angle(angle_bras);
+         //pmotors[I_LB].set_target_angle(angle_bras);
         pmotors[I_RB].set_target_angle(angle_bras);
 
         Serial.println(angle_bras);
