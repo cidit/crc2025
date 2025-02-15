@@ -76,20 +76,22 @@ public:
         joyRight.x = -roundf(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X) / 12.80) / 10.0;
         joyRight.y = roundf(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y) / 12.80) / 10.0;
 
+
+        constexpr auto DEADZONE = 0.15;
         // On enleve le dead zone au centre du joy
-        if (joyLeft.x < 0.15 && joyLeft.x > -0.15)
+        if (joyLeft.x < DEADZONE && joyLeft.x > -DEADZONE)
         {
             joyLeft.x = 0;
         }
-        if (joyLeft.y < 0.15 && joyLeft.y > -0.15)
+        if (joyLeft.y < DEADZONE && joyLeft.y > -DEADZONE)
         {
             joyLeft.y = 0;
         }
-        if (joyRight.x < 0.15 && joyRight.x > -0.15)
+        if (joyRight.x < DEADZONE && joyRight.x > -DEADZONE)
         {
             joyRight.x = 0;
         }
-        if (joyRight.y < 0.15 && joyRight.y > -0.15)
+        if (joyRight.y < DEADZONE && joyRight.y > -DEADZONE)
         {
             joyRight.y = 0;
         }
