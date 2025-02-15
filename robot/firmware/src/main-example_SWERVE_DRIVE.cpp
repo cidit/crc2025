@@ -83,8 +83,8 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
 };
 
 const auto MAX_PULSE_LEN = 4160.0;
-PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, M_PI_2, swerve_timer);
-PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, M_PI_2 + .30, swerve_timer);
+PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, -1.07, swerve_timer);
+PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, -2.10 , swerve_timer);
 
 SwerveModule swerve_right(
     pmotors[1],
@@ -153,8 +153,6 @@ void loop()
     if (heartbeat_timer.is_time())
     {
         SPRINT('\n');
-        CrcLib::PrintControllerState();
-        SPRINT('\n');
     }
 
     // SEPARATOR;
@@ -191,29 +189,21 @@ void loop()
         {
             Serial.println("no com");
         }
-        // pwm_enco_left.update();
-        // pwm_enco_right.update();
+        pwm_enco_left.update();
+        pwm_enco_right.update();
         SPRINT("L: ");
         SPRINT(pwm_enco_left.getLast().rads);
         SEPARATOR;
         SPRINT("R: ");
         SPRINT(pwm_enco_right.getLast().rads);
         SEPARATOR;
-        Serial.print(ctlr._raw.joystick1X);
-        SEPARATOR;
-        Serial.print(ctlr._raw.joystick1Y);
-        SEPARATOR;
-        Serial.print(ctlr._raw.joystick2X);
-        SEPARATOR;
-        Serial.print(ctlr._raw.joystick2Y);
-        SEPARATOR;
         Serial.println();
     }
 
-    swerve_drive.set_target({.heading = {
-                                 .direction = translation.angle(),
-                                 .velocity = translation.norm() * 50,
-                             },
-                             .rotation = howmuch_to_turn * 50});
-    swerve_drive.update();
+    // swerve_drive.set_target({.heading = {
+    //                              .direction = translation.angle(),
+    //                              .velocity = translation.norm() * 50,
+    //                          },
+    //                          .rotation = howmuch_to_turn * 50});
+    // swerve_drive.update();
 }
