@@ -79,9 +79,14 @@ public:
         // Calcul de la norm
         joyLeft.norm = constrain(sqrt(sq(joyLeft.x) + sq(joyLeft.y)), -1.0, 1.0);
         joyRight.norm = constrain(sqrt(sq(joyRight.x) + sq(joyRight.y)), -1.0, 1.0);
+        
+        if (!CrcLib::IsCommValid()) {
+            joyLeft.x = joyLeft.y = joyRight.x = joyRight.y = 0;
+            return;
+        }
 
         // On enleve le dead zone au centre du joy
-        constexpr auto DEADZONE = 0.45;
+        constexpr auto DEADZONE = 0.65;
         if (abs(joyLeft.norm) < DEADZONE) {
             joyLeft.x = joyLeft.y = joyLeft.norm = 0;
         }
