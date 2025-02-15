@@ -26,7 +26,7 @@ spi master. expects a slave to be uploaded to the arduino.
 #include <drives/swerve_module.hpp>
 #include "math/vectors.hpp"
 #include "config.hpp"
-#include "communication/experimental_controller.hpp"
+#include "communication/controller.hpp"
 
 Decodeur cmd(&Serial);
 Controller ctlr;
@@ -159,35 +159,35 @@ void loop()
     SEPARATOR;
     print_battery();
     SEPARATOR;
-    Serial.print(ctlr.left_bumper.isPressed());
+    Serial.print(ctlr.buttons.LBumper);
     // Serial.print(ctlr.joystick_left.angle);
     SEPARATOR;
-    Serial.print(ctlr.left_trigger);
+    Serial.print(ctlr.gachettes.Left);
     // Serial.print(ctlr.joystick_left.xy.norm());
     SEPARATOR;
-    Serial.print(ctlr.right_bumper.isPressed());
+    Serial.print(ctlr.buttons.LBumper);
     // Serial.print(ctlr.joystick_left.angle);
     SEPARATOR;
-    Serial.print(ctlr.right_trigger);
+    Serial.print(ctlr.gachettes.Right);
     // Serial.print(ctlr.joystick_left.xy.norm());
     SEPARATOR;
     SEPARATOR;
-    Serial.print(ctlr.joystick_left.angle);
+    Serial.print(ctlr.joyRight.angleRad);
     SEPARATOR;
-    Serial.print(ctlr.joystick_left.xy.norm());
+    Serial.print(ctlr.joyRight.norm);
     SEPARATOR;
-    Serial.print(ctlr.joystick_left.angle);
+    Serial.print(ctlr.joyLeft.angleRad);
     SEPARATOR;
-    Serial.print(ctlr.joystick_left.xy.norm());
-    SEPARATOR;
-    SEPARATOR;
-    Serial.print(ctlr._raw.joystick1X);
-    SEPARATOR;
-    Serial.print(ctlr._raw.joystick1Y);
-    SEPARATOR;
-    Serial.print(ctlr._raw.joystick2X);
-    SEPARATOR;
-    Serial.print(ctlr._raw.joystick2Y);
+    Serial.print(ctlr.joyLeft.norm);
+    // SEPARATOR;
+    // SEPARATOR;
+    // Serial.print(ctlr._raw.joystick1X);
+    // SEPARATOR;
+    // Serial.print(ctlr._raw.joystick1Y);
+    // SEPARATOR;
+    // Serial.print(ctlr._raw.joystick2X);
+    // SEPARATOR;
+    // Serial.print(ctlr._raw.joystick2Y);
     SEPARATOR;
     Serial.println();
 
@@ -195,8 +195,8 @@ void loop()
         Serial.println("no com");
     }
 
-    auto howmuch_to_turn = ctlr.joystick_right.xy.norm();
-    auto translation = ctlr.joystick_left;
+    auto howmuch_to_turn = ctlr.joyRight.norm;
+    auto translation = Vec2D(ctlr.joyRight.x, ctlr.joyRight.y);
 
     // swerve_drive.set_target({
     //     .heading = {
@@ -205,5 +205,5 @@ void loop()
     //     },
     //     .rotation = howmuch_to_turn
     // });
-    // swerve_drive.update();
+    swerve_drive.update();
 }
