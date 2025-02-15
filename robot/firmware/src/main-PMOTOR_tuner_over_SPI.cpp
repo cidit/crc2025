@@ -22,8 +22,8 @@ spi master. expects a slave to be uploaded to the arduino.
 
 Decodeur cmd(&Serial);
 bool read_mode = true;
-Timer print_timer(ONE_SECOND / 40);
-Timer poll_timer(ONE_SECOND / 200);
+Timer print_timer(ONE_SECOND / 20);
+Timer poll_timer(ONE_SECOND / 20);
 dataframe_t df;
 
 LinEncSpoof spoofs[ENCO_NUM] = {
