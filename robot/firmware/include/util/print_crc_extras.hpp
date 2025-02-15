@@ -46,6 +46,10 @@ void print_battery()
     static bool blink_seen = true;
     auto volatge = CrcLib::GetBatteryVoltage();
     auto voltage_percent = (volatge - CHARGE_0_PERCENT) / CHARGE_USABLE_RANGE;
+    if (voltage_percent < 0) {
+        SPRINT("!!!!");
+        return;
+    }
 
     String displayable_voltage = padLeft(String(int(voltage_percent * 100)), 3, ' ') + '%';
 
