@@ -100,8 +100,17 @@ public:
         left_trigger = double(_raw.gachetteG + HALF_PWM_OUTPUT) / 255;
         right_trigger = double(_raw.gachetteD + HALF_PWM_OUTPUT) / 255;
 
-        joystick_left = _update_joystick(_raw.joystick1X, _raw.joystick1Y, joystick_left);
-        joystick_right = _update_joystick(_raw.joystick2X, _raw.joystick2Y, joystick_right);
+        if (CrcLib::IsCommValid())
+        {
+
+            joystick_left = _update_joystick(_raw.joystick1X, _raw.joystick1Y, joystick_left);
+            joystick_right = _update_joystick(_raw.joystick2X, _raw.joystick2Y, joystick_right);
+        }
+        else
+        {
+            joystick_left.xy = Vec2D(0, 0);
+            joystick_right.xy = Vec2D(0, 0);
+        }
     }
 
     /// apply corrections to the inputs
