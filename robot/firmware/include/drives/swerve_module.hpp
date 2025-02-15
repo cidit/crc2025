@@ -116,10 +116,10 @@ public:
 
     void _update_pmotor_instructions(const oprev_result &oprev) {
         // TODO: come back to the steering tolerance thing
-         // const auto wheel_velocity = abs(oprev.travel) > STEERING_TOLERANCE
-        //                          ? 0
-        //                          : get_linear_velocity();
-        const auto wheel_velocity = cos(oprev.travel) * _target.velocity * _mtwr;
+         const auto wheel_velocity = abs(oprev.travel) > STEERING_TOLERANCE
+                                 ? 0
+                                 : get_linear_velocity();
+        // const auto wheel_velocity = cos(oprev.travel) * _target.velocity * _mtwr;
 
         /*
         FORWARD KINEMATICS
