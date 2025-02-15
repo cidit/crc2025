@@ -77,6 +77,7 @@ public:
         joyRight.y = roundf(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y) / 12.80) / 10.0;
 
 
+        // TODO: this removes the deadzone manhattan style, but doesnt cartesian style. (i.e. we have a square deadzone)
         constexpr auto DEADZONE = 0.15;
         // On enleve le dead zone au centre du joy
         if (joyLeft.x < DEADZONE && joyLeft.x > -DEADZONE)
