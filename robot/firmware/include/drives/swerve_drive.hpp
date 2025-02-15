@@ -80,7 +80,7 @@ public:
         // update swerve module targets
         _r.set_target({
             .direction = right_direction,
-            .velocity = right_resultant_norm
+            .velocity = -right_resultant_norm
         });
         _l.set_target({
             .direction = left_direction,
