@@ -92,7 +92,7 @@ SwerveModule swerve_left(
     pwm_enco_left);
 
 // should always be between 0 and NUM_MOTORS
-size_t currently_selected_swerve = 0; // 0=right, 1=left, 2=controller(both, cant tune)
+size_t currently_selected_swerve = 1; // 0=right, 1=left, 2=controller(both, cant tune)
 
 // PID_RT &get_current_pid_to_tune(PrecisionMotor pmotor)
 // {
