@@ -54,4 +54,8 @@ public:
         _inverted = inverted;
     }
 
+    void set_offset(double offset_rads) {
+        _offset = offset_rads;
+    }
+
 };
