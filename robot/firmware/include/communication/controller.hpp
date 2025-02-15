@@ -76,25 +76,17 @@ public:
         joyRight.x = -roundf(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_X) / 12.80) / 10.0;
         joyRight.y = roundf(CrcLib::ReadAnalogChannel(ANALOG::JOYSTICK2_Y) / 12.80) / 10.0;
 
+        // Calcul de la norm
+        joyLeft.norm = constrain(sqrt(sq(joyLeft.x) + sq(joyLeft.y)), -1.0, 1.0);
+        joyRight.norm = constrain(sqrt(sq(joyRight.x) + sq(joyRight.y)), -1.0, 1.0);
 
-        // TODO: this removes the deadzone manhattan style, but doesnt cartesian style. (i.e. we have a square deadzone)
-        constexpr auto DEADZONE = 0.15;
         // On enleve le dead zone au centre du joy
-        if (joyLeft.x < DEADZONE && joyLeft.x > -DEADZONE)
-        {
-            joyLeft.x = 0;
+        constexpr auto DEADZONE = 0.45;
+        if (abs(joyLeft.norm) < DEADZONE) {
+            joyLeft.x = joyLeft.y = joyLeft.norm = 0;
         }
-        if (joyLeft.y < DEADZONE && joyLeft.y > -DEADZONE)
-        {
-            joyLeft.y = 0;
-        }
-        if (joyRight.x < DEADZONE && joyRight.x > -DEADZONE)
-        {
-            joyRight.x = 0;
-        }
-        if (joyRight.y < DEADZONE && joyRight.y > -DEADZONE)
-        {
-            joyRight.y = 0;
+        if (abs(joyRight.norm) < DEADZONE) {
+            joyRight.x = joyRight.y = joyRight.norm = 0;
         }
 
         // Calcul de l'angle, ne calcule pas si le joy est au centre
@@ -109,9 +101,6 @@ public:
             joyRight.angleDeg = joyRight.angleRad * 180.0 / M_PI;
         }
 
-        // Calcul de la norm
-        joyLeft.norm = constrain(sqrt(sq(joyLeft.x) + sq(joyLeft.y)), -1.0, 1.0);
-        joyRight.norm = constrain(sqrt(sq(joyRight.x) + sq(joyRight.y)), -1.0, 1.0);
     }
 
     /// @brief Get values of buttons
