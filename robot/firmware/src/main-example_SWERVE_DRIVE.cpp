@@ -84,7 +84,7 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
 
 const auto MAX_PULSE_LEN = 4160.0;
 PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, M_PI_2, swerve_timer);
-PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, M_PI_2 +.30, swerve_timer);
+PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, M_PI_2 + .30, swerve_timer);
 
 SwerveModule swerve_right(
     pmotors[1],
@@ -181,16 +181,6 @@ void loop()
     // SEPARATOR;
     // Serial.print(ctlr.joyLeft.norm);
     // SEPARATOR;
-    // SEPARATOR;
-    // Serial.print(ctlr._raw.joystick1X);
-    // SEPARATOR;
-    // Serial.print(ctlr._raw.joystick1Y);
-    // SEPARATOR;
-    // Serial.print(ctlr._raw.joystick2X);
-    // SEPARATOR;
-    // Serial.print(ctlr._raw.joystick2Y);
-    // SEPARATOR;
-    // Serial.println();
 
     auto howmuch_to_turn = ctlr.joyRight.norm;
     auto translation = Vec2D(ctlr.joyLeft.x, ctlr.joyLeft.y);
@@ -208,13 +198,22 @@ void loop()
         SEPARATOR;
         SPRINT("R: ");
         SPRINT(pwm_enco_right.getLast().rads);
+        SEPARATOR;
+        Serial.print(ctlr._raw.joystick1X);
+        SEPARATOR;
+        Serial.print(ctlr._raw.joystick1Y);
+        SEPARATOR;
+        Serial.print(ctlr._raw.joystick2X);
+        SEPARATOR;
+        Serial.print(ctlr._raw.joystick2Y);
+        SEPARATOR;
         Serial.println();
     }
 
     swerve_drive.set_target({.heading = {
                                  .direction = translation.angle(),
-                                 .velocity = translation.norm() * 150,
+                                 .velocity = translation.norm() * 50,
                              },
-                             .rotation = howmuch_to_turn});
+                             .rotation = howmuch_to_turn * 50});
     swerve_drive.update();
 }
