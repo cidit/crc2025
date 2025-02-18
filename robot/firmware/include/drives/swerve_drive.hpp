@@ -13,6 +13,7 @@ struct swerve_drive_heading
 class SwerveDrive : public Lifecycle
 {
 public:
+    // the "left" module is forwards facing, whereas the right module is backwards facing. important in calculations
     SwerveModule &_r, &_l;
 
     swerve_drive_heading _target;
@@ -49,43 +50,49 @@ public:
             _target.heading.direction,
             _target.heading.velocity);
 
-        // determine the strength of the rotation 
-        auto right_rot_as_vec = Vec2D(0, -_target.rotation);
-        auto left_rot_as_vec = Vec2D(0, _target.rotation);
+
+        // the reference frames for each swerve is rotated by 90* compared to the robot's
+        auto target_left_module = target_as_vect.rotate_by(-M_PI_2);
+        auto target_right_module = target_as_vect.rotate_by(M_PI_2);
+
+
+        // determine the strength of the rotation. (if rotation is positive, rotate clockwise)
+        auto rot_as_vec = Vec2D(_target.rotation, 0);
 
         // average the target and the rotation vectors to find the resulting norm
-        auto right_resultant_norm = Vec2D((target_as_vect.x() + right_rot_as_vec.x()) / 2,
-                                          (target_as_vect.y() + right_rot_as_vec.y()) / 2)
-                                        .norm();
-        auto left_resultant_norm = Vec2D((target_as_vect.x() + left_rot_as_vec.x()) / 2,
-                                         (target_as_vect.y() + left_rot_as_vec.y()) / 2)
-                                       .norm();
-        
+        auto left_resultant = Vec2D((target_left_module.x() + rot_as_vec.x()) / 2,
+                                         (target_left_module.y() + rot_as_vec.y()) / 2);
+        auto right_resultant = Vec2D((target_right_module.x() + rot_as_vec.x()) / 2,
+                                          (target_right_module.y() + rot_as_vec.y()) / 2);
+
+
+        auto left_norm = left_resultant.norm();
+        auto right_norm = right_resultant.norm();
+
         // average the target and rotations to find the resulting angle
-        auto right_direction = (_target.heading.direction + right_rot_as_vec.angle()) / 2;
-        auto left_direction = (_target.heading.direction + left_rot_as_vec.angle()) / 2;        
+        // auto left_direction = (_target.heading.direction + rot_as_vec.angle()) / 2;
+        // auto right_direction = (Angle::from_rad(_target.heading.direction - M_PI)._radians + rot_as_vec.angle()) / 2;
+
 
         // rescale the norms if they exceed their maximum rpms (which would cause the other to lag behind)
-        if (_r.get_max_linear_velocity() < right_resultant_norm) {
-            auto ratio = _r.get_max_linear_velocity()/right_resultant_norm;
-            right_resultant_norm = _r.get_max_linear_velocity();
-            left_resultant_norm *= ratio;
+        if (_l.get_max_linear_velocity() < left_norm)
+        {
+            auto ratio = _l.get_max_linear_velocity() / left_norm;
+            left_norm = _l.get_max_linear_velocity();
+            left_norm *= ratio;
         }
-        if (_l.get_max_linear_velocity() < left_resultant_norm) {
-            auto ratio = _l.get_max_linear_velocity()/left_resultant_norm;
-            left_resultant_norm = _l.get_max_linear_velocity();
-            right_resultant_norm *= ratio;
+        if (_r.get_max_linear_velocity() < right_norm)
+        {
+            auto ratio = _r.get_max_linear_velocity() / right_norm;
+            right_norm = _r.get_max_linear_velocity();
+            right_norm *= ratio;
         }
 
         // update swerve module targets
-        _r.set_target({
-            .direction = right_direction,
-            .velocity = -right_resultant_norm
-        });
-        _l.set_target({
-            .direction = left_direction,
-            .velocity = left_resultant_norm
-        });
+        _l.set_target({.direction = left_resultant.angle(),
+                       .velocity = left_norm});
+        _r.set_target({.direction = right_resultant.angle(),
+                       .velocity = right_norm});
 
         // update swerve modules
         _r.update();

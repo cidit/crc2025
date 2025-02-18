@@ -78,8 +78,8 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
 
 
 const auto MAX_PULSE_LEN = 4160.0;
-PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, 0.0, swerve_timer);
-PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, 0.0, swerve_timer);
+PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, -1.07, swerve_timer);
+PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, -2.10 + 1.05, swerve_timer);
 
 SwerveModule swerve_right(
     pmotors[1],
@@ -91,8 +91,11 @@ SwerveModule swerve_left(
     pmotors[3],
     pwm_enco_left);
 
+// only used to apply the configuration to the swerve modules
+SwerveDrive sd(swerve_right, swerve_left);
+
 // should always be between 0 and NUM_MOTORS
-size_t currently_selected_swerve = 1; // 0=right, 1=left, 2=controller(both, cant tune)
+size_t currently_selected_swerve = 0; // 0=right, 1=left, 2=controller(both, cant tune)
 
 // PID_RT &get_current_pid_to_tune(PrecisionMotor pmotor)
 // {
@@ -214,15 +217,17 @@ void setup()
 
     {
         swerve_right.begin();
+        swerve_left.begin();
+        
         swerve_right._pid.setInterval(swerve_timer._delay);
         swerve_right._e.set_inverted(true);
         swerve_right._pid.setK(150,0,100);
 
-        swerve_left.begin();
         swerve_left._pid.setInterval(swerve_timer._delay);
         swerve_left._e.set_inverted(true);
         swerve_left._pid.setK(150,0,100);
     }
+    swerve_config(sd);
 
 
     auto &swerve = get_swerve(currently_selected_swerve);

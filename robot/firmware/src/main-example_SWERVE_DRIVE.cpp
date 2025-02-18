@@ -26,7 +26,7 @@ spi master. expects a slave to be uploaded to the arduino.
 #include <drives/swerve_module.hpp>
 #include "math/vectors.hpp"
 #include "config.hpp"
-#include "communication/controller.hpp"
+#include "communication/experimental_controller.hpp"
 
 Decodeur cmd(&Serial);
 Controller ctlr;
@@ -84,7 +84,7 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
 
 const auto MAX_PULSE_LEN = 4160.0;
 PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, -1.07, swerve_timer);
-PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, -2.10 , swerve_timer);
+PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, -2.10, swerve_timer);
 
 SwerveModule swerve_right(
     pmotors[1],
@@ -122,14 +122,11 @@ void setup()
     swerve_drive.begin();
     {
         swerve_drive._r._pid.setInterval(swerve_timer._delay);
-        swerve_drive._r._e.set_inverted(true);
-        swerve_drive._r._pid.setK(150, 0, 100);
         swerve_drive._l._pid.setInterval(swerve_timer._delay);
-        swerve_drive._l._e.set_inverted(true);
-        swerve_drive._l._pid.setK(150, 0, 100);
     }
-    swerve_drive.enable(true);
+    swerve_config(swerve_drive);
 
+    swerve_drive.enable(true);
     Serial.println("Setup Done");
 }
 
@@ -155,55 +152,72 @@ void loop()
         SPRINT('\n');
     }
 
-    // SEPARATOR;
-    // print_battery();
-    // SEPARATOR;
-    // Serial.print(ctlr.buttons.LBumper);
-    // // Serial.print(ctlr.joystick_left.angle);
-    // SEPARATOR;
-    // Serial.print(ctlr.gachettes.Left);
-    // // Serial.print(ctlr.joystick_left.xy.norm());
-    // SEPARATOR;
-    // Serial.print(ctlr.buttons.LBumper);
-    // // Serial.print(ctlr.joystick_left.angle);
-    // SEPARATOR;
-    // Serial.print(ctlr.gachettes.Right);
-    // // Serial.print(ctlr.joystick_left.xy.norm());
-    // SEPARATOR;
-    // SEPARATOR;
-    // Serial.print(ctlr.joyRight.angleRad);
-    // SEPARATOR;
-    // Serial.print(ctlr.joyRight.norm);
-    // SEPARATOR;
-    // Serial.print(ctlr.joyLeft.angleRad);
-    // SEPARATOR;
-    // Serial.print(ctlr.joyLeft.norm);
-    // SEPARATOR;
-
-    auto howmuch_to_turn = ctlr.joyRight.norm;
-    auto translation = Vec2D(ctlr.joyLeft.x, ctlr.joyLeft.y);
+    auto howmuch_to_turn = ctlr.joystick_right.xy.x();
+    auto translation = ctlr.joystick_left.xy;
 
     if (print_timer.is_time())
     {
+        // pwm_enco_left.update();
+        // pwm_enco_right.update();
         if (!CrcLib::IsCommValid())
         {
             Serial.println("no com");
         }
-        pwm_enco_left.update();
-        pwm_enco_right.update();
+        SEPARATOR;
+        print_battery();
+        SEPARATOR;
+
         SPRINT("L: ");
         SPRINT(pwm_enco_left.getLast().rads);
+        SPRINT(" [");
+        SPRINT(swerve_drive._l._target.direction);
+        SPRINT(", ");
+        SPRINT(swerve_drive._l._target.velocity);
+        SPRINT("]");
         SEPARATOR;
+
         SPRINT("R: ");
         SPRINT(pwm_enco_right.getLast().rads);
+        SPRINT(" [");
+        SPRINT(swerve_drive._r._target.direction);
+        SPRINT(", ");
+        SPRINT(swerve_drive._r._target.velocity);
+        SPRINT("]");
         SEPARATOR;
+
+        // SPRINT(" L:");
+        // SPRINT(" A:");
+        // SPRINT(ctlr.joystick_left.angle);
+        // SPRINT(" N:");
+        // SPRINT(ctlr.joystick_left.xy.norm());
+        // SPRINT(" T:");
+        // SPRINT(ctlr.left_trigger);
+        // SPRINT(" B:");
+        // SPRINT(ctlr.left_bumper.isPressed());
+        // SEPARATOR;
+
+        // SPRINT(" R:");
+        // SPRINT(" A:");
+        // SPRINT(ctlr.joystick_right.angle);
+        // SPRINT(" N:");
+        // SPRINT(ctlr.joystick_right.xy.norm());
+        // SPRINT(" T:");
+        // SPRINT(ctlr.right_trigger);
+        // SPRINT(" B:");
+        // SPRINT(ctlr.right_bumper.isPressed());
+        // SEPARATOR;
+
+        SPRINT("HMTT:" + String(howmuch_to_turn));
+        SPRINT(" X:" + String(translation.x()));
+        SPRINT(" Y:" + String(translation.y()));
+
         Serial.println();
     }
 
-    // swerve_drive.set_target({.heading = {
-    //                              .direction = translation.angle(),
-    //                              .velocity = translation.norm() * 50,
-    //                          },
-    //                          .rotation = howmuch_to_turn * 50});
-    // swerve_drive.update();
+    swerve_drive.set_target({.heading = {
+                                 .direction = translation.angle(),
+                                 .velocity = translation.norm() * 100,
+                             },
+                             .rotation = howmuch_to_turn * 100});
+    swerve_drive.update();
 }
