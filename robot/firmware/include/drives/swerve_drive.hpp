@@ -52,8 +52,8 @@ public:
 
 
         // the reference frames for each swerve is rotated by 90* compared to the robot's
-        auto target_left_module = target_as_vect.rotate_by(-M_PI_2);
-        auto target_right_module = target_as_vect.rotate_by(M_PI_2);
+        auto target_left_module = target_as_vect.rotate_by(M_PI_2);
+        auto target_right_module = target_as_vect.rotate_by(-M_PI_2);
 
 
         // determine the strength of the rotation. (if rotation is positive, rotate clockwise)
