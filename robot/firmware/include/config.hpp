@@ -76,7 +76,7 @@ void swerve_config(SwerveDrive &sd)
 	sd._l._e.set_inverted(true);
 	sd._l._pid.setK(150, 0, 100);
 
-	sd._r._e.set_offset(-2.10 + 1.05);
+	sd._r._e.set_offset(-0.62 + M_PI);
 	sd._r._e.set_inverted(true);
 	sd._r._pid.setK(150, 0, 100);
 }
