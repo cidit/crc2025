@@ -26,7 +26,6 @@ int register_address = NAVX_REG_YAW_L;
 void loop()
 {
   CrcLib::Update();
-  int i = 0;
   /* Transmit I2C data request */
   Wire.beginTransmission(NAVX_SENSOR_DEVICE_I2C_ADDRESS_7BIT); // Begin transmitting to navX-Sensor
   Wire.write(register_address);                                // Sends starting register address
@@ -37,7 +36,7 @@ void loop()
   Wire.beginTransmission(NAVX_SENSOR_DEVICE_I2C_ADDRESS_7BIT);              // Begin transmitting to navX-Sensor
   Wire.requestFrom(NAVX_SENSOR_DEVICE_I2C_ADDRESS_7BIT, NUM_BYTES_TO_READ); // Send number of bytes to read
   delay(1);
-  while (Wire.available())
+  for (size_t i = 0; Wire.available(); i++)
   { // Read data (slave may send less than requested)
     data[i++] = Wire.read();
   }
