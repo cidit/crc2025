@@ -47,7 +47,7 @@
 #define I_L 7
 
 // Constants pour la rotation du bras
-#define VIT_BRAS_MS M_PI / 2000.0 * 0.7
+#define VIT_BRAS_MS M_PI / 2000.0 * 1.3
 #define LOW_STOP_BRAS 0.0
 #define HIGH_STOP_BRAS 3.14
 #define VIT_POIGNET_MS M_PI / 1000.0 * 2
@@ -93,14 +93,14 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
 };
 
 Motor motors[NUM_MOTORS] = {
-    {CRC_PWM_10}, // Swerve Right A
-    {CRC_PWM_9},  // Swerve Right B
+    {CRC_PWM_4}, // Swerve Right A
+    {CRC_PWM_3},  // Swerve Right B
     {CRC_PWM_11}, // Swerve Left A
     {CRC_PWM_12}, // Swerve Left B
     {CRC_PWM_5},  // Bras Right
-    {CRC_PWM_8},  // Bras Left
+    {CRC_PWM_2},  // Bras Left
     {CRC_PWM_6},  // Poignet
-    {CRC_PWM_7},  // Lanceur
+    {CRC_PWM_1},  // Lanceur
 };
 
 PrecisionMotor pmotors[NUM_MOTORS] = {
@@ -126,7 +126,7 @@ SwerveDrive swerve_drive(swerve_right, swerve_left);
 Servo servo_manipulator_1; // PWM11
 Servo servo_manipulator_2; // PWM12
 Servo servo_manipulator_3; // PWM3
-// Servo servo_lanceur;       // PWM2
+Servo servo_lanceur;       // PWM2
 //--------------------
 
 //----- Variables ----
@@ -188,9 +188,9 @@ void controller_arms_handler()
 
     // ##### ROTATION POIGNET ######
     // if (ctrl.color_up.isOnPress() || ctrl.color_down.isOnPress())
-    if (ctrl.buttons.LBumper || ctrl.buttons.RBumper)
+    if (ctrl.buttons.A || ctrl.buttons.Y)
     {
-        if (ctrl.buttons.LBumper)
+        if (ctrl.buttons.A)
         {
             angle_poignet -= delta * VIT_POIGNET_MS;
         }
@@ -209,14 +209,14 @@ void controller_arms_handler()
     // #############################
 
     // ########## GRABBER ##########
-    if (ctrl.buttons.A)
+    if (ctrl.buttons.RBumper)
     {
         Serial.println("X");
         servo_manipulator_1.write(2000);
         servo_manipulator_2.write(2000);
         servo_manipulator_3.write(2000);
     }
-    else if (ctrl.buttons.B)
+    else if (ctrl.buttons.LBumper)
     {
         Serial.println("T");
         servo_manipulator_1.write(1000);
@@ -274,19 +274,19 @@ void controller_tank_handler()
     // if (ctrl.arrow_up.isOnPress())
     {
         Serial.println("up");
-        pmotors[I_LAS]._m.set_power_ratio(0.6);
-        pmotors[I_LBS]._m.set_power_ratio(-0.6);
-        pmotors[I_RAS]._m.set_power_ratio(-0.6);
-        pmotors[I_RBS]._m.set_power_ratio(0.6);
+        pmotors[I_LAS]._m.set_power_ratio(0.60);
+        pmotors[I_LBS]._m.set_power_ratio(-0.60);
+        pmotors[I_RAS]._m.set_power_ratio(-0.75);
+        pmotors[I_RBS]._m.set_power_ratio(0.75);
     }
     if (exctrl._raw.arrowLeft)
     // if (ctrl.arrow_left.isOnPress())
     {
         Serial.println("left");
-        pmotors[I_LAS]._m.set_power_ratio(-0.4);
-        pmotors[I_LBS]._m.set_power_ratio(0.4);
-        pmotors[I_RAS]._m.set_power_ratio(-0.4);
-        pmotors[I_RBS]._m.set_power_ratio(0.4);
+        pmotors[I_LAS]._m.set_power_ratio(-0.75);
+        pmotors[I_LBS]._m.set_power_ratio(0.75);
+        pmotors[I_RAS]._m.set_power_ratio(-0.75);
+        pmotors[I_RBS]._m.set_power_ratio(0.75);
     }
     if (exctrl._raw.arrowDown)
     // if (ctrl.arrow_down.isOnPress())
@@ -296,19 +296,19 @@ void controller_tank_handler()
         // pmotors[I_LBS].set_target_rpm(-200);
         // pmotors[I_RAS].set_target_rpm(-200);
         // pmotors[I_RBS].set_target_rpm(200);
-        pmotors[I_LAS]._m.set_power_ratio(-0.6);
-        pmotors[I_LBS]._m.set_power_ratio(0.6);
-        pmotors[I_RAS]._m.set_power_ratio(0.6);
-        pmotors[I_RBS]._m.set_power_ratio(-0.6);
+        pmotors[I_LAS]._m.set_power_ratio(-0.65);
+        pmotors[I_LBS]._m.set_power_ratio(0.65);
+        pmotors[I_RAS]._m.set_power_ratio(0.75);
+        pmotors[I_RBS]._m.set_power_ratio(-0.75);
     }
     if (exctrl._raw.arrowRight)
     // if (ctrl.arrow_right.isOnPress())
     {
         Serial.println("right");
-        pmotors[I_LAS]._m.set_power_ratio(0.4);
-        pmotors[I_LBS]._m.set_power_ratio(-0.4);
-        pmotors[I_RAS]._m.set_power_ratio(0.4);
-        pmotors[I_RBS]._m.set_power_ratio(-0.4);
+        pmotors[I_LAS]._m.set_power_ratio(0.75);
+        pmotors[I_LBS]._m.set_power_ratio(-0.75);
+        pmotors[I_RAS]._m.set_power_ratio(0.75);
+        pmotors[I_RBS]._m.set_power_ratio(-0.75);
     }
 
 
@@ -316,7 +316,21 @@ void controller_tank_handler()
 
 void controller_launcher_handler()
 {
-    // TODO: do this
+    //start laucher spin
+    if(ctrl.buttons.X){
+        Serial.println("spinning");
+        pmotors[I_L]._m.set_power_ratio(-0.5);
+    }
+
+    //feed laucher
+    if(ctrl.buttons.B){
+        Serial.println("feeding");
+        servo_lanceur.write(80);
+    }
+    if(!ctrl.buttons.B){
+        servo_lanceur.write(180);
+    }
+
 }
 
 void update_arms()
@@ -338,6 +352,7 @@ void update_arms()
 void update_launcher()
 {
     // TODO: do this
+    pmotors[I_L].update();
 }
 
 void update_tank()
@@ -361,10 +376,10 @@ void setup()
     // {
     //     alduino_reset();
     // }t les PID settings.
-    servo_manipulator_1.attach(CRC_PWM_3, 1000, 2000);
-    servo_manipulator_2.attach(CRC_PWM_4, 1000, 2000);
-    servo_manipulator_3.attach(CRC_PWM_2, 1000, 2000);
-    // servo_lanceur.attach(CRC_PWM_1, 1000, 2000); // TODO: pas 360
+    servo_manipulator_1.attach(CRC_PWM_7, 1000, 2000);
+    servo_manipulator_2.attach(CRC_PWM_9, 1000, 2000);
+    servo_manipulator_3.attach(CRC_PWM_10, 1000, 2000);
+    servo_lanceur.attach(CRC_PWM_8); // TODO: pas 360
 
     alduino_reset();
     // swerve_drive.ben();
