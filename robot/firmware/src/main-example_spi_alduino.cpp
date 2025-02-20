@@ -19,7 +19,8 @@ Encoder e[ENCO_NUM] = {
     Encoder(46, 28),
     Encoder(48, 26),
     Encoder(50, 24),
-    Encoder(52, 22)};
+    Encoder(52, 22),
+};
 
 dataframe_t df;
 
@@ -36,9 +37,10 @@ void setup()
 void loop()
 {
     print_timer.update(millis());
-    
+
     // reset the idx if slave is deselected
-    if (df_idx != 0 && digitalRead(SS) == HIGH) {
+    if (df_idx != 0 && digitalRead(SS) == HIGH)
+    {
         df_idx = 0;
     }
 
@@ -62,10 +64,13 @@ void loop()
             SPRINT(" ");
         }
         Serial.println('|');
-        auto raw = reinterpret_cast<byte*>(df);
-        for (size_t i = 0; i < DF_LEN; i++) {
-            if (i%4==0) Serial.print(" ");
-            if (raw[i] < 10) Serial.print("0");
+        auto raw = reinterpret_cast<byte *>(df);
+        for (size_t i = 0; i < DF_LEN; i++)
+        {
+            if (i % 4 == 0)
+                Serial.print(" ");
+            if (raw[i] < 10)
+                Serial.print("0");
             Serial.print(raw[i], HEX);
         }
         Serial.println("");
@@ -81,15 +86,16 @@ void SPI0_Handler()
     // {
 
     // MUST READ EVEN IF UNUSED
-    // how it would normally be: 
+    // how it would normally be:
     byte read_value = SPI0->SPI_RDR & SPI_RDR_RD_Msk;
-    if (read_value == 0x0F) {
+    if (read_value == 0x0F)
+    {
         df_idx = 0;
         // SPI0->SPI_TDR = 0; // send garbage
         // return;
     }
     // (void) (SPI0->SPI_RDR & SPI_RDR_RD_Msk);
-    
+
     //     if (recv == 0x01) {
     //         // 0x01 is what we decided restarts the transmission.
     //         df_idx = 0;
@@ -99,7 +105,7 @@ void SPI0_Handler()
     // Send something to receive something
     // if (status & SPI_SR_TDRE)
     // {
-    auto raw = reinterpret_cast<byte*>(df);
+    auto raw = reinterpret_cast<byte *>(df);
     SPI0->SPI_TDR = (raw[df_idx]);
     // }
 

@@ -42,24 +42,6 @@ public:
         CrcLib::SetPwmOutput(_pin, _is_inverted ? -pwm : pwm);
     }
 
-    /**
-     * @deprecated kept around for backward compatibility. use `set_power_ratio`
-     * // TODO: once this function gets removed, rename `set_power_ratio` to `set_power`
-     *
-     *
-     * Sets the speed.
-     * @param power a double between -128 and 127. will immediatly modify the speed of the motor.
-     */
-    void set_power(double power)
-    {
-        power = constrain(power, -128.0, 127.0);
-
-        // Change sign if inverted
-        power = _is_inverted ? -power : power;
-
-        CrcLib::SetPwmOutput(_pin, power);
-    }
-
     double get_power()
     {
         return _last_power;

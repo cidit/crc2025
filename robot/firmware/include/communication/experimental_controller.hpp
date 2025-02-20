@@ -10,7 +10,7 @@
 /**
  * largely based off of @squid's controller
  */
-class Controller : public Lifecycle
+class ExController : public Lifecycle
 {
 public:
     /**
@@ -34,9 +34,9 @@ public:
     Joystick joystick_left, joystick_right;
 
     /// @brief Constructor
-    Controller() {}
-    Controller(const Controller &) = delete;
-    Controller &operator=(const Controller &) = delete;
+    ExController() {}
+    ExController(const ExController &) = delete;
+    ExController &operator=(const ExController &) = delete;
 
     void begin() override
     {

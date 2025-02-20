@@ -3,60 +3,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include "sensors/gobuilda_rotary_enc_data.hpp"
-
-constexpr auto ENCO_NUM = 8;
-using dataframe_t = int32_t[ENCO_NUM];
-constexpr auto DF_LEN = sizeof(dataframe_t);
-
-void hexdump_df(dataframe_t &df)
-{
-    auto raw = reinterpret_cast<byte *>(df);
-    for (size_t i = 0; i < DF_LEN; i++)
-    {
-        if (i % 4 == 0)
-            Serial.print(" ");
-        if (raw[i] < 10)
-            Serial.print("0");
-        Serial.print(raw[i], HEX);
-    }
-}
-
-static const SPISettings SPI_AL_CRC_SETTINGS(
-    100000,
-    MSBFIRST,
-    SPI_MODE0);
-
-#ifndef ARDUINO_SAM_DUE
-
-void master_enco_spi_init()
-{
-    pinMode(SS, OUTPUT);
-    digitalWrite(SS, HIGH);
-}
-
-/**
- * retrieves a dataframe.
- * the dataframe should always be updated before it's dependents are themselves updated
- */
-void retrieve_df(int32_t df[ENCO_NUM])
-{
-    auto buff = (byte *)df;
-
-    SPI.beginTransaction(SPI_AL_CRC_SETTINGS);
-    digitalWrite(SS, LOW); // INITIATE COMM WITH SLAVE
-
-    SPI.transfer(0x0F); // sync
-    // SPI.transfer(0x00); // trash the first byte i guess???
-
-    for (byte i = 0; i < DF_LEN; i++)
-    {
-        buff[i] = SPI.transfer(0x00); // 0x00 is just random data. we need to send something to receive something.
-    }
-
-    digitalWrite(SS, HIGH); // END COMM
-    SPI.endTransaction();
-}
-#else
+#include "enco_peripherals_common.hpp"
 
 void spi_slave_crazy_init()
 {
@@ -102,5 +49,3 @@ void spi_slave_crazy_init()
     REG_SPI0_MR = SPI_MR_MODFDIS; // slave and no modefault
     REG_SPI0_CSR = SPI_MODE0;     // DLYBCT=0, DLYBS=0, SCBR=0, 8 bit transfer
 }
-
-#endif

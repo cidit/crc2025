@@ -11,7 +11,7 @@ spi master. expects a slave to be uploaded to the arduino.
 #include <CrcLib.h>
 #include <sensors/lin_enco_spoof.hpp>
 #include <sensors/gobuilda_rotary_enc.hpp>
-#include "communication/enco_peripherals.hpp"
+#include "communication/enco_peripherals_uno.hpp"
 #include "util/constants.hpp"
 #include "util/timer.hpp"
 #include "util/print_crc_extras.hpp"
@@ -24,24 +24,25 @@ Decodeur cmd(&Serial);
 bool read_mode = true;
 Timer print_timer(ONE_SECOND / 20);
 Timer poll_timer(ONE_SECOND / 20);
+
 dataframe_t df;
 
 LinEncSpoof spoofs[ENCO_NUM] = {
-    {df[0], poll_timer}, // swerve right b
-    {df[1], poll_timer}, // swerve right a
-    {df[2], poll_timer}, // swerve left a
-    {df[3], poll_timer}, // swerve left b
-    {df[4], poll_timer},
-    {df[5], poll_timer},
-    {df[6], poll_timer},
-    {df[7], poll_timer},
+    {df[0], poll_timer}, // swerve r a
+    {df[1], poll_timer}, // swerv r b
+    {df[2], poll_timer}, // arm left
+    {df[3], poll_timer}, // launcher
+    {df[4], poll_timer}, // wrist
+    {df[5], poll_timer}, // arm right
+    {df[6], poll_timer}, // swerve l a
+    {df[7], poll_timer}, // swerve l b
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
-    {spoofs[0], 145.1 * 5, poll_timer, true},
+    {spoofs[0], 145.1 * 5, poll_timer},
     {spoofs[1], 145.1 * 5, poll_timer},
-    {spoofs[2], 145.1 * 3.55, poll_timer, true},
-    {spoofs[3], 145.1 * 3.55, poll_timer},
+    {spoofs[2], 145.1 * 5, poll_timer},
+    {spoofs[3], 145.1 * 5, poll_timer},
     {spoofs[4], 145.1 * 5, poll_timer},
     {spoofs[5], 145.1 * 5, poll_timer},
     {spoofs[6], 145.1 * 5, poll_timer},
@@ -49,25 +50,25 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
 };
 
 Motor motors[NUM_MOTORS] = {
-    {CRC_PWM_4}, // Swerve Right B
-    {CRC_PWM_3}, // Swerve Right A
-    {CRC_PWM_1}, // Swerve Left A
-    {CRC_PWM_7}, // Swerve Left B
-    {CRC_PWM_5}, // Bras Right
-    {CRC_PWM_6}, // Bras Left
-    {CRC_PWM_2}, // Poignet
-    {CRC_PWM_8}, // À Déterminé - Lanceur
+    {CRC_PWM_10}, // Swerve Right A
+    {CRC_PWM_9},  // Swerve Right B
+    {CRC_PWM_11}, // Swerve Left A
+    {CRC_PWM_12}, // Swerve Left B
+    {CRC_PWM_5},  // Bras Right
+    {CRC_PWM_8},  // Bras Left
+    {CRC_PWM_6},  // Poignet
+    {CRC_PWM_7},  // Lanceur
 };
 
 PrecisionMotor pmotors[NUM_MOTORS] = {
-    {"Swerve Right B", motors[0], goencs[0], MAX_RPM_SWERVE}, // Swerve Right B
-    {"Swerve Right A", motors[1], goencs[1], MAX_RPM_SWERVE}, // Swerve Right A
-    {"Swerve Left A", motors[2], goencs[2], MAX_RPM_SWERVE},  // Swerve Left A
-    {"Swerve Left B", motors[3], goencs[3], MAX_RPM_SWERVE},  // Swerve Left B
-    {"Bras Right", motors[4], goencs[4], MAX_RPM_BRAS},       // Bras Right
-    {"Bras Left", motors[5], goencs[5], MAX_RPM_BRAS},        // Bras Left
-    {"Poignet", motors[6], goencs[6], MAX_RPM_BRAS},          // Poignet
-    {"Lanceur", motors[7], goencs[7], MAX_RPM_LANCE},         // Lanceur
+    {"Swerve Right A", motors[0], goencs[0], MAX_RPM_SWERVE},
+    {"Swerve Right B", motors[1], goencs[1], MAX_RPM_SWERVE},
+    {"Swerve Left A", motors[2], goencs[6], MAX_RPM_SWERVE},
+    {"Swerve Left B", motors[3], goencs[7], MAX_RPM_SWERVE},
+    {"Bras Right", motors[4], goencs[5], MAX_RPM_BRAS},
+    {"Bras Left", motors[5], goencs[2], MAX_RPM_BRAS},
+    {"Poignet", motors[6], goencs[4], MAX_RPM_BRAS},
+    {"Lanceur", motors[7], goencs[3], MAX_RPM_LANCE},
 };
 
 // should always be between 0 and NUM_MOTORS
@@ -102,6 +103,11 @@ void execute_commands()
 
     switch (toupper(cmd.getCommand()))
     {
+    case '\'':
+    {
+        alduino_reset();
+        break;
+    }
     case 'Z':
     {
         // change which motor is selected. disable the currently selected motor and enables the selected one
@@ -208,7 +214,7 @@ void execute_commands()
         for (size_t i = 0; i < NUM_MOTORS; i++)
         {
             auto &pm = get_pmotor(i);
-            Serial.println("/* PMOTOR #[" + String(i) + "] "+ pm.display_name() + " config */ {");
+            Serial.println("/* PMOTOR #[" + String(i) + "] " + pm.display_name() + " config */ {");
             Serial.println("\tauto &pm = pmotors[" + String(i) + "];");
             Serial.println("\tpm._e.set_inverted(" + String(pm._e._is_inverted ? "true" : "false") + ");");
             Serial.println("\tpm._m.set_inverted(" + String(pm._m._is_inverted ? "true" : "false") + ");");
@@ -248,6 +254,7 @@ void setup()
     auto &pm = get_pmotor(currently_selected_pmotor_idx);
     pm.enable(true);
 
+    alduino_reset();
     Serial.println("Setup Done");
 }
 
@@ -259,6 +266,14 @@ void loop()
     CrcLib::Update();
     cmd.refresh();
     execute_commands();
+
+    if (cmd.isAvailable())
+    {
+        if (cmd.getCommand() == '\'')
+        {
+            alduino_reset();
+        }
+    }
 
     if (poll_timer.is_time())
     {

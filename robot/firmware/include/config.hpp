@@ -1,6 +1,6 @@
 #pragma once
 
-#include <communication/enco_peripherals.hpp>
+#include <communication/enco_peripherals_uno.hpp>
 #include <drives/precision_motor.hpp>
 #include <drives/swerve_drive.hpp>
 
@@ -9,14 +9,14 @@
  */
 void pmotors_config(PrecisionMotor *pmotors)
 {
-	/* PMOTOR #[0] Swerve Right B config */ {
+	/* PMOTOR #[0] Swerve Right A config */ {
 		auto &pm = pmotors[0];
 		pm._e.set_inverted(true);
 		pm._m.set_inverted(true);
 		pm._pid_angle.setK(0.60000, 0.00000, 0.08000);
 		pm._pid_speed.setK(0.60000, 0.00000, 0.07000);
 	};
-	/* PMOTOR #[1] Swerve Right A config */ {
+	/* PMOTOR #[1] Swerve Right B config */ {
 		auto &pm = pmotors[1];
 		pm._e.set_inverted(true);
 		pm._m.set_inverted(true);
@@ -25,7 +25,7 @@ void pmotors_config(PrecisionMotor *pmotors)
 	};
 	/* PMOTOR #[2] Swerve Left A config */ {
 		auto &pm = pmotors[2];
-		pm._e.set_inverted(false);
+		pm._e.set_inverted(true);
 		pm._m.set_inverted(true);
 		pm._pid_angle.setK(0.60000, 0.00000, 0.08000);
 		pm._pid_speed.setK(0.60000, 0.00000, 0.07000);
@@ -40,14 +40,14 @@ void pmotors_config(PrecisionMotor *pmotors)
 	/* PMOTOR #[4] Bras Right config */ {
 		auto &pm = pmotors[4];
 		pm._e.set_inverted(true);
-		pm._m.set_inverted(false);
-		pm._pid_angle.setK(0.80000, 0.00001, 0.02000); ///-------------------
+		pm._m.set_inverted(true);
+		pm._pid_angle.setK(0.80000, 0.00001, 0.02000);
 		pm._pid_speed.setK(0.00000, 0.00000, 0.00000);
 	};
-	/* PMOTOR #[5] Bras Left config */ { // Not Used
+	/* PMOTOR #[5] Bras Left config */ {
 		auto &pm = pmotors[5];
 		pm._e.set_inverted(false);
-		pm._m.set_inverted(true);
+		pm._m.set_inverted(false);
 		pm._pid_angle.setK(0.80000, 0.00001, 0.02000);
 		pm._pid_speed.setK(0.00000, 0.00000, 0.00000);
 	};
@@ -55,15 +55,16 @@ void pmotors_config(PrecisionMotor *pmotors)
 		auto &pm = pmotors[6];
 		pm._e.set_inverted(false);
 		pm._m.set_inverted(false);
-		pm._pid_angle.setK(0.80000, 0.00100, 0.00100);
+		pm._pid_angle.setK(0.60000, 0.00100, 0.00100);
+		// pm._pid_angle.setK(0.05000, 0.00001, 0.00100);
 		pm._pid_speed.setK(0.00000, 0.00000, 0.00000);
 	};
 	/* PMOTOR #[7] Lanceur config */ {
 		auto &pm = pmotors[7];
 		pm._e.set_inverted(false);
 		pm._m.set_inverted(false);
-		pm._pid_angle.setK(0.00000, 0.00000, 0.00000);
-		pm._pid_speed.setK(0.00000, 0.00000, 0.00000);
+		pm._pid_angle.setK(0.8, 0.00000, 0.00000);
+		pm._pid_speed.setK(0.80000, 0.00100, 0.00100); // TODO
 	};
 }
 

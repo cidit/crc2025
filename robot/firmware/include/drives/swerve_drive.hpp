@@ -55,6 +55,10 @@ public:
         auto target_left_module = target_as_vect.rotate_by(M_PI_2);
         auto target_right_module = target_as_vect.rotate_by(-M_PI_2);
 
+        // ORIGINAL -  if older fix doesnt work, its because of math angle semantics being counter clockwise by default, i think
+        // auto target_left_module = target_as_vect.rotate_by(-M_PI_2);
+        // auto target_right_module = target_as_vect.rotate_by(M_PI_2);
+
 
         // determine the strength of the rotation. (if rotation is positive, rotate clockwise)
         auto rot_as_vec = Vec2D(_target.rotation, 0);
