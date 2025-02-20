@@ -64,7 +64,7 @@ void pmotors_config(PrecisionMotor *pmotors)
 		pm._e.set_inverted(false);
 		pm._m.set_inverted(false);
 		pm._pid_angle.setK(0.8, 0.00000, 0.00000);
-		pm._pid_speed.setK(0.80000, 0.00100, 0.00100); // TODO
+		pm._pid_speed.setK(10.0000, 0.00100, 0.300); // TODO
 	};
 }
 
