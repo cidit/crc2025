@@ -161,7 +161,6 @@ void controller_arms_handler()
     last_time = now;
 
     // ####### ROTATION BRAS #######
-    // if (ctrl.joystick_right.xy.y() != 0)
     if (ctrl.gachettes.Left || ctrl.gachettes.Right)
     {
         if (ctrl.gachettes.Left)
@@ -187,7 +186,6 @@ void controller_arms_handler()
     // #############################
 
     // ##### ROTATION POIGNET ######
-    // if (ctrl.color_up.isOnPress() || ctrl.color_down.isOnPress())
     if (ctrl.buttons.LBumper || ctrl.buttons.RBumper)
     {
         if (ctrl.buttons.LBumper)
@@ -400,12 +398,17 @@ void loop()
     unsigned long now = millis();
     poll_timer.update(now);
 
+    // servo_manipulator_1.writeMicroseconds(2000);
+    // //servo_manipulator_2.writeMicroseconds(2000);
+    // //servo_manipulator_3.writeMicroseconds(2000);
+    // return ;
+
     if (poll_timer.is_time())
     {
         retrieve_df(df);
-        // for (auto& go : goencs){
-        //     go.update();
-        // }
+        for (auto& go : goencs){
+            go.update();
+        }
         // goencs[4].update(); // TODO: should not be necessary. should happen automatically when the pmotors update below -f
         // goencs[5].update();
     }
@@ -427,5 +430,5 @@ void loop()
     // swerve_drive.update();
 #else
     update_tank();
-#endif;
+#endif
 }
