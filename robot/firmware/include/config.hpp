@@ -41,14 +41,14 @@ void pmotors_config(PrecisionMotor *pmotors)
 		auto &pm = pmotors[4];
 		pm._e.set_inverted(true);
 		pm._m.set_inverted(true);
-		pm._pid_angle.setK(0.80000, 0.00001, 0.02000);
+		pm._pid_angle.setK(0.77500, 0.00001, 0.01700);
 		pm._pid_speed.setK(0.00000, 0.00000, 0.00000);
 	};
 	/* PMOTOR #[5] Bras Left config */ {
 		auto &pm = pmotors[5];
 		pm._e.set_inverted(false);
 		pm._m.set_inverted(false);
-		pm._pid_angle.setK(0.80000, 0.00001, 0.02000);
+		pm._pid_angle.setK(0.77500, 0.00001, 0.01700);
 		pm._pid_speed.setK(0.00000, 0.00000, 0.00000);
 	};
 	/* PMOTOR #[6] Poignet config */ {

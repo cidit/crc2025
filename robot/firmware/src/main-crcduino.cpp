@@ -21,6 +21,7 @@
 #include "util/timer.hpp"
 #include <config.hpp>
 #include <Decodeur.h>
+#include "math.h"
 //--------------------
 
 //----- Defines ------
@@ -47,12 +48,12 @@
 #define I_L 7
 
 // Constants pour la rotation du bras
-#define VIT_BRAS_MS M_PI / 2000.0 * 1.3
+#define VIT_BRAS_MS M_PI / 4000.0 * 1.2
 #define LOW_STOP_BRAS 0.0
 #define HIGH_STOP_BRAS 3.14
 #define VIT_POIGNET_MS M_PI / 1000.0 * 2
-#define LOW_STOP_POIGNET -6 // À REVOIR LES LIMITES DU POIGNETS
-#define HIGH_STOP_POIGNET 6
+#define LOW_STOP_POIGNET -14 // À REVOIR LES LIMITES DU POIGNETS
+#define HIGH_STOP_POIGNET 0
 
 //--------------------
 
@@ -161,17 +162,17 @@ void controller_arms_handler()
     last_time = now;
 
     // ####### ROTATION BRAS #######
-    if (ctrl.gachettes.Left || ctrl.gachettes.Right)
+    if (exctrl.left_trigger || exctrl.right_trigger)
     {
-        if (ctrl.gachettes.Left)
+        if (exctrl.left_trigger)
         {
             // INWARD
-            angle_bras -= ctrl.gachettes.Left * delta * VIT_BRAS_MS;
+            angle_bras -= powf(1.0+exctrl.left_trigger, 2) * delta * VIT_BRAS_MS;
         }
         else
         {
             // OUTWARD
-            angle_bras += ctrl.gachettes.Right * delta * VIT_BRAS_MS;
+            angle_bras += powf(1.0+exctrl.right_trigger, 2) * delta * VIT_BRAS_MS;
         }
 
         // Serial.println(ctrl.gachettes.Right * delta * (M_PI/1000.0));
