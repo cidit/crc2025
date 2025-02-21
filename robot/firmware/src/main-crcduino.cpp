@@ -67,7 +67,7 @@ ExController exctrl;
 Decodeur cmd(&Serial);
 
 // Timer print_timer(ONE_SECOND / 20);
-Timer poll_timer(ONE_SECOND / 20);
+Timer poll_timer(ONE_SECOND / 20), print_timer(ONE_SECOND/20);
 
 dataframe_t df;
 
@@ -94,7 +94,7 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
 };
 
 Motor motors[NUM_MOTORS] = {
-    {CRC_PWM_4}, // Swerve Right A
+    {CRC_PWM_4},  // Swerve Right A
     {CRC_PWM_3},  // Swerve Right B
     {CRC_PWM_11}, // Swerve Left A
     {CRC_PWM_12}, // Swerve Left B
@@ -167,19 +167,19 @@ void controller_arms_handler()
         if (exctrl.left_trigger)
         {
             // INWARD
-            angle_bras -= powf(1.0+exctrl.left_trigger, 2) * delta * VIT_BRAS_MS;
+            angle_bras -= powf(1.0 + exctrl.left_trigger, 2) * delta * VIT_BRAS_MS;
         }
         else
         {
             // OUTWARD
-            angle_bras += powf(1.0+exctrl.right_trigger, 2) * delta * VIT_BRAS_MS;
+            angle_bras += powf(1.0 + exctrl.right_trigger, 2) * delta * VIT_BRAS_MS;
         }
 
         // Serial.println(ctrl.gachettes.Right * delta * (M_PI/1000.0));
         // Serial.println(angle_bras);
         // angle_bras = constrain(angle_bras, LOW_STOP_BRAS, HIGH_STOP_BRAS);
         pmotors[I_LB].set_target_angle(angle_bras);
-        //pmotors[I_LB].set_target_angle(angle_bras);
+        // pmotors[I_LB].set_target_angle(angle_bras);
         pmotors[I_RB].set_target_angle(angle_bras);
 
         Serial.println(angle_bras);
@@ -205,7 +205,7 @@ void controller_arms_handler()
         pmotors[I_PB].set_target_angle(angle_poignet);
 
         Serial.println(angle_poignet);
-    } 
+    }
     // #############################
 
     // ########## GRABBER ##########
@@ -225,7 +225,6 @@ void controller_arms_handler()
     }
     else
     {
-        Serial.println("stop");
         servo_manipulator_1.write(1500);
         servo_manipulator_2.write(1500);
         servo_manipulator_3.write(1500);
@@ -247,21 +246,10 @@ void controller_arms_handler()
 
 void controller_tank_handler()
 {
-    uint8_t total_presses = 0;
-    // if (ctrl.arrow_right.isOnPress())
-    if (exctrl._raw.arrowUp)
-        total_presses += 1;
-    // if (ctrl.arrow_left.isOnPress())
-    if (exctrl._raw.arrowLeft)
-        total_presses += 1;
-    // if (ctrl.arrow_down.isOnPress())
-    if (exctrl._raw.arrowDown)
-        total_presses += 1;
-    // if (ctrl.arrow_right.isOnPress())
-    if (exctrl._raw.arrowRight)
-        total_presses += 1;
 
-    if (total_presses > 1 || total_presses == 0)
+    auto dir = exctrl.joystick_left.xy;
+
+    if (dir.norm() < EPSILON)
     {
         pmotors[I_LAS]._m.set_power_ratio(0);
         pmotors[I_LBS]._m.set_power_ratio(0);
@@ -270,67 +258,187 @@ void controller_tank_handler()
         return;
     }
 
-    if (exctrl._raw.arrowUp)
-    // if (ctrl.arrow_up.isOnPress())
+    double right_power, left_power;
+
+    // LEFTSIDE
+    if (dir.angle() >= Angle::from_rad(0)._radians &&
+        dir.angle() <= Angle::from_rad(M_PI_2)._radians)
     {
-        Serial.println("up");
-        pmotors[I_LAS]._m.set_power_ratio(0.60);
-        pmotors[I_LBS]._m.set_power_ratio(-0.60);
-        pmotors[I_RAS]._m.set_power_ratio(-0.75);
-        pmotors[I_RBS]._m.set_power_ratio(0.75);
+        // top right
+        left_power = 1;
     }
-    if (exctrl._raw.arrowLeft)
-    // if (ctrl.arrow_left.isOnPress())
+    else if (dir.angle() >= Angle::from_rad(M_PI)._radians &&
+             dir.angle() <= Angle::from_rad(M_PI_2 + M_PI)._radians)
     {
-        Serial.println("left");
-        pmotors[I_LAS]._m.set_power_ratio(-0.75);
-        pmotors[I_LBS]._m.set_power_ratio(0.75);
-        pmotors[I_RAS]._m.set_power_ratio(-0.75);
-        pmotors[I_RBS]._m.set_power_ratio(0.75);
+        // bottom left
+        left_power = -1;
     }
-    if (exctrl._raw.arrowDown)
-    // if (ctrl.arrow_down.isOnPress())
+    else
     {
-        Serial.println("down");
-        // pmotors[I_LAS].set_target_rpm(200);
-        // pmotors[I_LBS].set_target_rpm(-200);
-        // pmotors[I_RAS].set_target_rpm(-200);
-        // pmotors[I_RBS].set_target_rpm(200);
-        pmotors[I_LAS]._m.set_power_ratio(-0.65);
-        pmotors[I_LBS]._m.set_power_ratio(0.65);
-        pmotors[I_RAS]._m.set_power_ratio(0.75);
-        pmotors[I_RBS]._m.set_power_ratio(-0.75);
+        if (dir.angle() >= Angle::from_rad(M_PI_2)._radians &&
+            dir.angle() <= Angle::from_rad(M_PI)._radians)
+        {
+            // top left
+
+            // auto angle = M_PI_2 - (dir.angle() - M_PI_2);
+            auto angle =(dir.angle() - M_PI_2);
+            // 0 A M_PI_2 -> 100 A -100
+            // auto power = ((angle *2)/M_PI_2) -1;
+            auto power = ((angle *-2)/M_PI_2) +1;
+            left_power = power;
+
+        }
+        if (dir.angle() >= Angle::from_rad(M_PI_2 + M_PI)._radians &&
+            dir.angle() <= Angle::from_rad(2 * M_PI)._radians)
+        {
+            // bottom right
+            auto angle = dir.angle() - (M_PI_2 + M_PI);
+            // 0 A M_PI_2 -> -100 A 100
+            auto power = ((angle *2)/M_PI_2) -1;
+            left_power = power;
+        }
     }
-    if (exctrl._raw.arrowRight)
-    // if (ctrl.arrow_right.isOnPress())
+
+    // RIGHTSIDE
+
+    if (dir.angle() >= Angle::from_rad(M_PI_2)._radians &&
+        dir.angle() <= Angle::from_rad(M_PI)._radians)
     {
-        Serial.println("right");
-        pmotors[I_LAS]._m.set_power_ratio(0.75);
-        pmotors[I_LBS]._m.set_power_ratio(-0.75);
-        pmotors[I_RAS]._m.set_power_ratio(0.75);
-        pmotors[I_RBS]._m.set_power_ratio(-0.75);
+        // top left
+        right_power = 1;
+    }
+    else if (dir.angle() >= Angle::from_rad(M_PI_2 + M_PI)._radians &&
+             dir.angle() <= Angle::from_rad(2 * M_PI)._radians)
+    {
+        // bottom right
+        right_power = -1;
+    }
+    else
+    {
+        if (dir.angle() >= Angle::from_rad(0)._radians &&
+            dir.angle() <= Angle::from_rad(M_PI_2)._radians)
+        {
+            // top right
+            auto angle = dir.angle();
+            // 0 A M_PI_2 -> -100 A 100
+            auto power = ((angle *2)/M_PI_2) -1;
+            right_power = power;
+        }
+        if (dir.angle() >= Angle::from_rad(M_PI)._radians &&
+            dir.angle() <= Angle::from_rad(M_PI_2 + M_PI)._radians)
+        { 
+            // bottom left
+
+            // auto angle = M_PI_2 - (dir.angle() - M_PI);
+            auto angle = (dir.angle() - M_PI);
+            // 0 A M_PI_2 -> 100 A -100
+            // auto power = ((angle *2)/M_PI_2) -1;
+            auto power = ((angle *-2)/M_PI_2) +1;
+            right_power = power;
+        }
     }
 
 
+    const auto SPEED_LEFT = 0.6, SPEED_RIGHT = 0.75;
+    right_power *= dir.norm() * SPEED_LEFT;
+    left_power *= dir.norm() * SPEED_RIGHT;
+
+
+    pmotors[I_LAS]._m.set_power_ratio(left_power);
+    pmotors[I_LBS]._m.set_power_ratio(-left_power);
+    pmotors[I_RAS]._m.set_power_ratio(-right_power);
+    pmotors[I_RBS]._m.set_power_ratio(right_power);
+
+
+
+
+
+    // /// delim
+
+    // uint8_t total_presses = 0;
+    // // if (ctrl.arrow_right.isOnPress())
+    // if (exctrl._raw.arrowUp)
+    //     total_presses += 1;
+    // // if (ctrl.arrow_left.isOnPress())
+    // if (exctrl._raw.arrowLeft)
+    //     total_presses += 1;
+    // // if (ctrl.arrow_down.isOnPress())
+    // if (exctrl._raw.arrowDown)
+    //     total_presses += 1;
+    // // if (ctrl.arrow_right.isOnPress())
+    // if (exctrl._raw.arrowRight)
+    //     total_presses += 1;
+
+    // if (total_presses > 1 || total_presses == 0)
+    // {
+    //     pmotors[I_LAS]._m.set_power_ratio(0);
+    //     pmotors[I_LBS]._m.set_power_ratio(0);
+    //     pmotors[I_RAS]._m.set_power_ratio(0);
+    //     pmotors[I_RBS]._m.set_power_ratio(0);
+    //     return;
+    // }
+
+    // if (exctrl._raw.arrowUp)
+    // // if (ctrl.arrow_up.isOnPress())
+    // {
+    //     Serial.println("up");
+    //     pmotors[I_LAS]._m.set_power_ratio(0.60);
+    //     pmotors[I_LBS]._m.set_power_ratio(-0.60);
+    //     pmotors[I_RAS]._m.set_power_ratio(-0.75);
+    //     pmotors[I_RBS]._m.set_power_ratio(0.75);
+    // }
+    // if (exctrl._raw.arrowLeft)
+    // // if (ctrl.arrow_left.isOnPress())
+    // {
+    //     Serial.println("left");
+    //     pmotors[I_LAS]._m.set_power_ratio(-0.75);
+    //     pmotors[I_LBS]._m.set_power_ratio(0.75);
+    //     pmotors[I_RAS]._m.set_power_ratio(-0.75);
+    //     pmotors[I_RBS]._m.set_power_ratio(0.75);
+    // }
+    // if (exctrl._raw.arrowDown)
+    // // if (ctrl.arrow_down.isOnPress())
+    // {
+    //     Serial.println("down");
+    //     // pmotors[I_LAS].set_target_rpm(200);
+    //     // pmotors[I_LBS].set_target_rpm(-200);
+    //     // pmotors[I_RAS].set_target_rpm(-200);
+    //     // pmotors[I_RBS].set_target_rpm(200);
+    //     pmotors[I_LAS]._m.set_power_ratio(-0.65);
+    //     pmotors[I_LBS]._m.set_power_ratio(0.65);
+    //     pmotors[I_RAS]._m.set_power_ratio(0.75);
+    //     pmotors[I_RBS]._m.set_power_ratio(-0.75);
+    // }
+    // if (exctrl._raw.arrowRight)
+    // // if (ctrl.arrow_right.isOnPress())
+    // {
+    //     Serial.println("right");
+    //     pmotors[I_LAS]._m.set_power_ratio(0.75);
+    //     pmotors[I_LBS]._m.set_power_ratio(-0.75);
+    //     pmotors[I_RAS]._m.set_power_ratio(0.75);
+    //     pmotors[I_RBS]._m.set_power_ratio(-0.75);
+    // }
 }
 
 void controller_launcher_handler()
 {
-    //start laucher spin
-    if(ctrl.buttons.X){
+    // start laucher spin
+    if (ctrl.buttons.X)
+    {
         Serial.println("spinning");
-        pmotors[I_L]._m.set_power_ratio(-0.5);
+        pmotors[I_L]._m.set_power_ratio(-0.45);
     }
 
-    //feed laucher
-    if(ctrl.buttons.B){
+    // feed laucher
+    if (ctrl.buttons.B)
+    {
         Serial.println("feeding");
         servo_lanceur.write(80);
     }
-    if(!ctrl.buttons.B){
+    if (!ctrl.buttons.B)
+    {
         servo_lanceur.write(180);
     }
-
 }
 
 void update_arms()
@@ -341,7 +449,6 @@ void update_arms()
         if (pmotor._name == "Poignet" || pmotor._name == "Bras Right" || pmotor._name == "Lanceur")
         { //|| pmotor._name == "Bras Left"
             pmotor.update();
-            
         }
     }
 
@@ -372,7 +479,7 @@ void setup()
     exctrl.begin();
 
     master_enco_spi_init();
-    SPI.begin();  // if (ctrl._raw.start)
+    SPI.begin(); // if (ctrl._raw.start)
     // {
     //     alduino_reset();
     // }t les PID settings.
@@ -414,6 +521,11 @@ void loop()
 
     unsigned long now = millis();
     poll_timer.update(now);
+    print_timer.update(now);
+    
+    if (print_timer.is_time()) {
+        Serial.print(pmotors[I_L]._e.getLast().rpm);
+    }
 
     // servo_manipulator_1.writeMicroseconds(2000);
     // //servo_manipulator_2.writeMicroseconds(2000);
@@ -423,7 +535,8 @@ void loop()
     if (poll_timer.is_time())
     {
         retrieve_df(df);
-        for (auto& go : goencs){
+        for (auto &go : goencs)
+        {
             go.update();
         }
         // goencs[4].update(); // TODO: should not be necessary. should happen automatically when the pmotors update below -f
@@ -434,7 +547,7 @@ void loop()
     controller_arms_handler();
     controller_launcher_handler();
 #ifdef SWERVE_MODE
-    //controller_swerve_handler();
+    // controller_swerve_handler();
 #else
     controller_tank_handler();
 #endif
