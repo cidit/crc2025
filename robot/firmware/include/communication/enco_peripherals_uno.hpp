@@ -15,7 +15,7 @@ void alduino_reset()
     Serial.println("alduino RESET");
     delay(100);
     digitalWrite(ALDUINO_RESET, LOW);
-    delay(100);
+    delay(500);
     digitalWrite(ALDUINO_RESET, HIGH);
 }
 

@@ -116,10 +116,10 @@ public:
 
     void _update_pmotor_instructions(const oprev_result &oprev) {
         // TODO: come back to the steering tolerance thing
-         const auto wheel_velocity = abs(oprev.travel) > STEERING_TOLERANCE
-                                 ? 0
-                                 : get_linear_velocity();
-        // const auto wheel_velocity = cos(oprev.travel) * _target.velocity * _mtwr;
+        //  const auto wheel_velocity = abs(oprev.travel) > STEERING_TOLERANCE
+        //                          ? 0
+        //                          : get_linear_velocity();
+        const auto wheel_velocity = cos(oprev.travel) * _target.velocity * _mtwr;
 
         /*
         FORWARD KINEMATICS
@@ -134,15 +134,15 @@ public:
         if (!oprev.reverse)
         {
             _set_speeds(
-                -wheel_velocity + (angular_velocity / 2), // in fw, clockwise
-                wheel_velocity + (angular_velocity / 2) // counter clockwise
+                -wheel_velocity - (angular_velocity / 2), // in fw, clockwise
+                wheel_velocity - (angular_velocity / 2) // counter clockwise
             );
         }
         else
         {
             _set_speeds(
-                wheel_velocity + (angular_velocity / 2), // in bckw, counter clockwise
-                -wheel_velocity + (angular_velocity / 2)   // clockwise
+                wheel_velocity - (angular_velocity / 2), // in bckw, counter clockwise
+                -wheel_velocity - (angular_velocity / 2)   // clockwise
             );
         }
     }

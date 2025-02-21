@@ -51,13 +51,14 @@ public:
             _target.heading.velocity);
 
 
-        // the reference frames for each swerve is rotated by 90* compared to the robot's
-        auto target_left_module = target_as_vect.rotate_by(M_PI_2);
-        auto target_right_module = target_as_vect.rotate_by(-M_PI_2);
+        // // the reference frames for each swerve is rotated by 90* compared to the robot's
+        // auto target_left_module = target_as_vect.rotate_by(M_PI_2);
+        // auto target_right_module = target_as_vect.rotate_by(-M_PI);
 
         // ORIGINAL -  if older fix doesnt work, its because of math angle semantics being counter clockwise by default, i think
-        // auto target_left_module = target_as_vect.rotate_by(-M_PI_2);
-        // auto target_right_module = target_as_vect.rotate_by(M_PI_2);
+        auto target_left_module = target_as_vect.rotate_by(-M_PI_2);
+        auto target_right_module = target_as_vect.rotate_by(M_PI_2);
+
 
 
         // determine the strength of the rotation. (if rotation is positive, rotate clockwise)

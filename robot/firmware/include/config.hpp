@@ -15,6 +15,7 @@ void pmotors_config(PrecisionMotor *pmotors)
 		pm._m.set_inverted(true);
 		pm._pid_angle.setK(0.60000, 0.00000, 0.08000);
 		pm._pid_speed.setK(0.60000, 0.00000, 0.07000);
+		// pm._pid_speed.setK(0.060000, 0.00000, 0.00007);
 	};
 	/* PMOTOR #[1] Swerve Right B config */ {
 		auto &pm = pmotors[1];
@@ -22,6 +23,7 @@ void pmotors_config(PrecisionMotor *pmotors)
 		pm._m.set_inverted(true);
 		pm._pid_angle.setK(0.60000, 0.00000, 0.08000);
 		pm._pid_speed.setK(0.60000, 0.00000, 0.07000);
+		// pm._pid_speed.setK(0.060000, 0.00000, 0.00007);
 	};
 	/* PMOTOR #[2] Swerve Left A config */ {
 		auto &pm = pmotors[2];
@@ -29,6 +31,7 @@ void pmotors_config(PrecisionMotor *pmotors)
 		pm._m.set_inverted(true);
 		pm._pid_angle.setK(0.60000, 0.00000, 0.08000);
 		pm._pid_speed.setK(0.60000, 0.00000, 0.07000);
+		// pm._pid_speed.setK(0.060000, 0.00000, 0.00007);
 	};
 	/* PMOTOR #[3] Swerve Left B config */ {
 		auto &pm = pmotors[3];
@@ -36,6 +39,7 @@ void pmotors_config(PrecisionMotor *pmotors)
 		pm._m.set_inverted(true);
 		pm._pid_angle.setK(0.60000, 0.00000, 0.08000);
 		pm._pid_speed.setK(0.60000, 0.00000, 0.07000);
+		// pm._pid_speed.setK(0.060000, 0.00000, 0.00007);
 	};
 	/* PMOTOR #[4] Bras Right config */ {
 		auto &pm = pmotors[4];
@@ -73,11 +77,11 @@ void pmotors_config(PrecisionMotor *pmotors)
  */
 void swerve_config(SwerveDrive &sd)
 {
-	sd._l._e.set_offset(-1.07);
-	sd._l._e.set_inverted(true);
+	sd._l._e.set_offset(-3.84);
+	sd._l._e.set_inverted(false);
 	sd._l._pid.setK(150, 0, 100);
 
-	sd._r._e.set_offset(-0.62 + M_PI);
-	sd._r._e.set_inverted(true);
+	sd._r._e.set_offset(-0.37 + M_PI);
+	sd._r._e.set_inverted(false);
 	sd._r._pid.setK(150, 0, 100);
 }

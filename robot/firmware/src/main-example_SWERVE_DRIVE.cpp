@@ -39,21 +39,21 @@ Timer heartbeat_timer(3 * ONE_SECOND);
 dataframe_t df;
 
 LinEncSpoof spoofs[ENCO_NUM] = {
-    {df[0], poll_timer}, // swerve right b
-    {df[1], poll_timer}, // swerve right a
-    {df[2], poll_timer}, // swerve left a
-    {df[3], poll_timer}, // swerve left b
-    {df[4], poll_timer},
-    {df[5], poll_timer},
-    {df[6], poll_timer},
-    {df[7], poll_timer},
+    {df[0], poll_timer}, // swerve r a
+    {df[1], poll_timer}, // swerv r b
+    {df[2], poll_timer}, // arm left
+    {df[3], poll_timer}, // launcher
+    {df[4], poll_timer}, // wrist
+    {df[5], poll_timer}, // arm right
+    {df[6], poll_timer}, // swerve l a
+    {df[7], poll_timer}, // swerve l b
 };
 
 GobuildaRotaryEncoder goencs[ENCO_NUM] = {
     {spoofs[0], 145.1 * 5, poll_timer},
     {spoofs[1], 145.1 * 5, poll_timer},
-    {spoofs[2], 145.1 * 3.55, poll_timer},
-    {spoofs[3], 145.1 * 3.55, poll_timer},
+    {spoofs[2], 145.1 * 5, poll_timer},
+    {spoofs[3], 145.1 * 5, poll_timer},
     {spoofs[4], 145.1 * 5, poll_timer},
     {spoofs[5], 145.1 * 5, poll_timer},
     {spoofs[6], 145.1 * 5, poll_timer},
@@ -72,31 +72,26 @@ Motor motors[NUM_MOTORS] = {
 };
 
 PrecisionMotor pmotors[NUM_MOTORS] = {
-    {"Swerve Right B", motors[0], goencs[0], MAX_RPM_SWERVE}, // Swerve Right B
-    {"Swerve Right A", motors[1], goencs[1], MAX_RPM_SWERVE}, // Swerve Right A
-    {"Swerve Left A", motors[2], goencs[2], MAX_RPM_SWERVE},  // Swerve Left A
-    {"Swerve Left B", motors[3], goencs[3], MAX_RPM_SWERVE},  // Swerve Left B
-    {"Bras Right", motors[4], goencs[4], MAX_RPM_BRAS},       // Bras Right
-    {"Bras Left", motors[5], goencs[5], MAX_RPM_BRAS},        // Bras Left
-    {"Poignet", motors[6], goencs[6], MAX_RPM_BRAS},          // Poignet
-    {"Lanceur", motors[7], goencs[7], MAX_RPM_LANCE},         // Lanceur
+    {"Swerve Right A", motors[0], goencs[0], MAX_RPM_SWERVE},
+    {"Swerve Right B", motors[1], goencs[1], MAX_RPM_SWERVE},
+    {"Swerve Left A", motors[2], goencs[6], MAX_RPM_SWERVE},
+    {"Swerve Left B", motors[3], goencs[7], MAX_RPM_SWERVE},
+    {"Bras Right", motors[4], goencs[5], MAX_RPM_BRAS},
+    {"Bras Left", motors[5], goencs[2], MAX_RPM_BRAS},
+    {"Poignet", motors[6], goencs[4], MAX_RPM_BRAS},
+    {"Lanceur", motors[7], goencs[3], MAX_RPM_LANCE},
 };
 
 const auto MAX_PULSE_LEN = 4160.0;
-PwmRotaryEncoder pwm_enco_left(CRC_DIG_2, MAX_PULSE_LEN, -1.07, swerve_timer);
-PwmRotaryEncoder pwm_enco_right(CRC_DIG_1, MAX_PULSE_LEN, -2.10, swerve_timer);
+PwmRotaryEncoder pwm_enco_left(CRC_DIG_1, MAX_PULSE_LEN, -1.07, poll_timer);
+PwmRotaryEncoder pwm_enco_right(CRC_DIG_2, MAX_PULSE_LEN, -2.10, poll_timer);
 
-SwerveModule swerve_right(
-    pmotors[1],
-    pmotors[0],
-    pwm_enco_right);
-
-SwerveModule swerve_left(
-    pmotors[2],
-    pmotors[3],
-    pwm_enco_left);
+SwerveModule swerve_right(pmotors[I_RAS], pmotors[I_RBS], pwm_enco_right);
+SwerveModule swerve_left(pmotors[I_LAS], pmotors[I_LBS], pwm_enco_left);
 
 SwerveDrive swerve_drive(swerve_right, swerve_left);
+
+bool started = false;
 
 void execute_commands()
 {
@@ -119,13 +114,15 @@ void setup()
     }
     pmotors_config(pmotors);
 
-    swerve_drive.begin();
     {
         swerve_drive._r._pid.setInterval(swerve_timer._delay);
         swerve_drive._l._pid.setInterval(swerve_timer._delay);
     }
     swerve_config(swerve_drive);
 
+    alduino_reset();
+
+    swerve_drive.begin();
     swerve_drive.enable(true);
     Serial.println("Setup Done");
 }
@@ -140,6 +137,22 @@ void loop()
     CrcLib::Update();
     ctlr.update();
     cmd.refresh();
+
+    if (ctlr._raw.select)
+    // if (exctrl._raw.start)
+    {
+        alduino_reset();
+    }
+
+    if (ctlr._raw.start) {
+        Serial.println("out!");
+        started = true;
+    }
+
+    if (!started) {
+        return;
+    }
+
     execute_commands();
 
     if (poll_timer.is_time())
@@ -152,11 +165,6 @@ void loop()
         SPRINT('\n');
     }
 
-    if (ctlr.start.isPressed())
-    // if (exctrl._raw.start)
-    {
-        alduino_reset();
-    }
     // colors up do
     auto howmuch_to_turn = ctlr.joystick_right.xy.x();
     auto translation = ctlr.joystick_left.xy;
@@ -190,28 +198,6 @@ void loop()
         SPRINT(swerve_drive._r._target.velocity);
         SPRINT("]");
         SEPARATOR;
-
-        // SPRINT(" L:");
-        // SPRINT(" A:");
-        // SPRINT(ctlr.joystick_left.angle);
-        // SPRINT(" N:");
-        // SPRINT(ctlr.joystick_left.xy.norm());
-        // SPRINT(" T:");
-        // SPRINT(ctlr.left_trigger);
-        // SPRINT(" B:");
-        // SPRINT(ctlr.left_bumper.isPressed());
-        // SEPARATOR;
-
-        // SPRINT(" R:");
-        // SPRINT(" A:");
-        // SPRINT(ctlr.joystick_right.angle);
-        // SPRINT(" N:");
-        // SPRINT(ctlr.joystick_right.xy.norm());
-        // SPRINT(" T:");
-        // SPRINT(ctlr.right_trigger);
-        // SPRINT(" B:");
-        // SPRINT(ctlr.right_bumper.isPressed());
-        // SEPARATOR;
 
         SPRINT("HMTT:" + String(howmuch_to_turn));
         SPRINT(" X:" + String(translation.x()));

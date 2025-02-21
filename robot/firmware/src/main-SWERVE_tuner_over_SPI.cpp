@@ -20,12 +20,16 @@ spi master. expects a slave to be uploaded to the arduino.
 #include <drives/swerve_module.hpp>
 #include "math/vectors.hpp"
 #include "config.hpp"
+#include "communication/experimental_controller.hpp"
+
 
 Decodeur cmd(&Serial);
+ExController ctlr;
 bool read_mode = true, controller_mode;
 Timer print_timer(ONE_SECOND / 20);
 Timer poll_timer(ONE_SECOND / 20);
 Timer swerve_timer(ONE_SECOND / 20);
+
 
 dataframe_t df;
 
@@ -52,14 +56,14 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
 };
 
 Motor motors[NUM_MOTORS] = {
-    {CRC_PWM_10}, // Swerve Right A
-    {CRC_PWM_9},  // Swerve Right B
+    {CRC_PWM_4},  // Swerve Right A
+    {CRC_PWM_3},  // Swerve Right B
     {CRC_PWM_11}, // Swerve Left A
     {CRC_PWM_12}, // Swerve Left B
     {CRC_PWM_5},  // Bras Right
-    {CRC_PWM_8},  // Bras Left
+    {CRC_PWM_2},  // Bras Left
     {CRC_PWM_6},  // Poignet
-    {CRC_PWM_7},  // Lanceur
+    {CRC_PWM_1},  // Lanceur
 };
 
 PrecisionMotor pmotors[NUM_MOTORS] = {
@@ -74,24 +78,15 @@ PrecisionMotor pmotors[NUM_MOTORS] = {
 };
 
 const auto MAX_PULSE_LEN = 4160.0;
-PwmRotaryEncoder pwm_enco_left(CRC_DIG_1, MAX_PULSE_LEN, -1.07, swerve_timer);
-PwmRotaryEncoder pwm_enco_right(CRC_DIG_2, MAX_PULSE_LEN, -2.10 + 1.05, swerve_timer);
+PwmRotaryEncoder pwm_enco_left(CRC_DIG_1, MAX_PULSE_LEN, -1.07, poll_timer);
+PwmRotaryEncoder pwm_enco_right(CRC_DIG_2, MAX_PULSE_LEN, -2.10, poll_timer);
 
-SwerveModule swerve_right(
-    pmotors[1],
-    pmotors[0],
-    pwm_enco_right);
+SwerveModule swerve_right(pmotors[I_RAS], pmotors[I_RBS], pwm_enco_right);
+SwerveModule swerve_left(pmotors[I_LAS], pmotors[I_LBS], pwm_enco_left);
 
-SwerveModule swerve_left(
-    pmotors[2],
-    pmotors[3],
-    pwm_enco_left);
-
-// only used to apply the configuration to the swerve modules
 SwerveDrive sd(swerve_right, swerve_left);
 
-// should always be between 0 and NUM_MOTORS
-size_t currently_selected_swerve = 0; // 0=right, 1=left, 2=controller(both, cant tune)
+size_t currently_selected_swerve = 0; // 0=left, 1=right, 2=controller(both, cant tune)
 
 // PID_RT &get_current_pid_to_tune(PrecisionMotor pmotor)
 // {
@@ -102,7 +97,7 @@ size_t currently_selected_swerve = 0; // 0=right, 1=left, 2=controller(both, can
 
 SwerveModule &get_swerve(size_t swerve_num)
 {
-    return swerve_num == 0 ? swerve_right : swerve_left;
+    return swerve_num == 0 ? swerve_left :swerve_right ;
 }
 
 void execute_commands()
@@ -202,6 +197,7 @@ void setup()
     CrcLib::Initialize();
     master_enco_spi_init();
     SPI.begin();
+    ctlr.begin();
 
     // fixing the same interval for the motors as configuring them.
     for (auto &pmotor : pmotors)
@@ -225,10 +221,13 @@ void setup()
     }
     swerve_config(sd);
 
+    alduino_reset();
     auto &swerve = get_swerve(currently_selected_swerve);
     swerve.enable(true);
 
     Serial.println("Setup Done");
+
+
 }
 
 void loop()
@@ -239,7 +238,23 @@ void loop()
     swerve_timer.update(now);
     CrcLib::Update();
     cmd.refresh();
+    ctlr.update();
     execute_commands();
+
+        if (ctlr._raw.select)
+    // if (exctrl._raw.start)
+    {
+        alduino_reset();
+    }
+    static bool started = false;
+    if (ctlr._raw.start) {
+        Serial.println("out!");
+        started = true;
+    }
+
+    if (!started) {
+        return;
+    }
 
     if (poll_timer.is_time())
     {
@@ -247,7 +262,7 @@ void loop()
     }
 
     swerve_right.update();
-    // swerve_left.update();
+    swerve_left.update();
 
     if (read_mode && print_timer.is_time())
     {
@@ -255,7 +270,7 @@ void loop()
 
         print_battery();
 
-        SPRINT(currently_selected_swerve == 0 ? "[R]" : "[L]");
+        SPRINT(currently_selected_swerve == 1 ? "[R]" : "[L]");
         SEPARATOR;
 
         SPRINT(String(swerve._e.getLast().rads));
