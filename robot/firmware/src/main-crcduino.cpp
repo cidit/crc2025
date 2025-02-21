@@ -52,7 +52,7 @@
 #define LOW_STOP_BRAS 0.0
 #define HIGH_STOP_BRAS 3.14
 #define VIT_POIGNET_MS M_PI / 1000.0 * 3
-#define LOW_STOP_POIGNET -14 // À REVOIR LES LIMITES DU POIGNETS
+#define LOW_STOP_POIGNET -16 // À REVOIR LES LIMITES DU POIGNETS
 #define HIGH_STOP_POIGNET 0
 
 //--------------------
@@ -136,6 +136,7 @@ float angle_bras = 0;
 float angle_poignet = 0;
 
 bool start_received = false;
+bool launcherOn = false;
 
 //--------------------
 
@@ -425,9 +426,13 @@ void controller_launcher_handler()
     // start laucher spin
     if (ctrl.buttons.X)
     {
-        Serial.println("spinning");
-        pmotors[I_L]._m.set_power_ratio(-0.45);
+        launcherOn = !launcherOn;
     }
+    
+    if(launcherOn)
+        pmotors[I_L]._m.set_power_ratio(-0.45);
+    else
+        pmotors[I_L]._m.set_power_ratio(0);
 
     // feed laucher
     if (ctrl.buttons.B)
