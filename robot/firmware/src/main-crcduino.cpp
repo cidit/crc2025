@@ -26,7 +26,7 @@
 
 //----- Defines ------
 
-//#define SWERVE_MODE
+#define SWERVE_MODE
 
 #define TICKS_RATIO_BRAS 1425.1 * 2
 #define TICKS_RATIO_SWERVE 145.1 * 2.5
@@ -159,7 +159,7 @@ void controller_misc_handler()
 /// ---------- SWERVE DRIVE ----------
 void controller_swerve_handler()
 {
-
+    Serial.println("ctrl swerve");
     auto howmuch_to_turn = exctrl.joystick_right.xy.x();
     auto translation = exctrl.joystick_left.xy;
 
@@ -445,6 +445,6 @@ void loop()
     update_arms();
     update_launcher();
     #ifdef SWERVE_MODE
-        // swerve_drive.update();
+        swerve_drive.update();
     #endif
 }

@@ -17,7 +17,7 @@ spi master. expects a slave to be uploaded to the arduino.
 #include <CrcLib.h>
 #include <sensors/lin_enco_spoof.hpp>
 #include <sensors/gobuilda_rotary_enc.hpp>
-#include "communication/enco_peripherals.hpp"
+#include "communication/enco_peripherals_uno.hpp"
 #include "util/constants.hpp"
 #include "util/timer.hpp"
 #include "util/print_crc_extras.hpp"
@@ -29,7 +29,7 @@ spi master. expects a slave to be uploaded to the arduino.
 #include "communication/experimental_controller.hpp"
 
 Decodeur cmd(&Serial);
-Controller ctlr;
+ExController ctlr;
 bool read_mode = true;
 Timer print_timer(ONE_SECOND / 20);
 Timer poll_timer(ONE_SECOND / 20);
@@ -61,14 +61,14 @@ GobuildaRotaryEncoder goencs[ENCO_NUM] = {
 };
 
 Motor motors[NUM_MOTORS] = {
-    {CRC_PWM_4}, // Swerve Right B
-    {CRC_PWM_3}, // Swerve Right A
-    {CRC_PWM_1}, // Swerve Left A
-    {CRC_PWM_7}, // Swerve Left B
-    {CRC_PWM_5}, // Bras Right
-    {CRC_PWM_6}, // Bras Left
-    {CRC_PWM_2}, // Poignet
-    {CRC_PWM_8}, // À Déterminé - Lanceur
+    {CRC_PWM_4},  // Swerve Right A
+    {CRC_PWM_3},  // Swerve Right B
+    {CRC_PWM_11}, // Swerve Left A
+    {CRC_PWM_12}, // Swerve Left B
+    {CRC_PWM_5},  // Bras Right
+    {CRC_PWM_2},  // Bras Left
+    {CRC_PWM_6},  // Poignet
+    {CRC_PWM_1},  // Lanceur
 };
 
 PrecisionMotor pmotors[NUM_MOTORS] = {
@@ -152,6 +152,12 @@ void loop()
         SPRINT('\n');
     }
 
+    if (ctlr.start.isPressed())
+    // if (exctrl._raw.start)
+    {
+        alduino_reset();
+    }
+    // colors up do
     auto howmuch_to_turn = ctlr.joystick_right.xy.x();
     auto translation = ctlr.joystick_left.xy;
 
