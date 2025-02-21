@@ -259,8 +259,8 @@ void controller_tank_handler()
         Serial.println("up");
         pmotors[I_LAS]._m.set_power_ratio(0.75);
         pmotors[I_LBS]._m.set_power_ratio(-0.75);
-        pmotors[I_RAS]._m.set_power_ratio(-1.0);
-        pmotors[I_RBS]._m.set_power_ratio(1.0);
+        pmotors[I_RAS]._m.set_power_ratio(-0.85);
+        pmotors[I_RBS]._m.set_power_ratio(0.85);
     }
     if (exctrl._raw.arrowLeft)
     // if (ctrl.arrow_left.isOnPress())
@@ -279,10 +279,10 @@ void controller_tank_handler()
         // pmotors[I_LBS].set_target_rpm(-200);
         // pmotors[I_RAS].set_target_rpm(-200);
         // pmotors[I_RBS].set_target_rpm(200);
-        pmotors[I_LAS]._m.set_power_ratio(-0.85);
-        pmotors[I_LBS]._m.set_power_ratio(0.85);
-        pmotors[I_RAS]._m.set_power_ratio(0.95);
-        pmotors[I_RBS]._m.set_power_ratio(-0.95);
+        pmotors[I_LAS]._m.set_power_ratio(-0.75);
+        pmotors[I_LBS]._m.set_power_ratio(0.75);
+        pmotors[I_RAS]._m.set_power_ratio(0.85);
+        pmotors[I_RBS]._m.set_power_ratio(-0.85);
     }
     if (exctrl._raw.arrowRight)
     // if (ctrl.arrow_right.isOnPress())
