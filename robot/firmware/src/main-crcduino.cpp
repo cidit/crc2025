@@ -26,7 +26,7 @@
 
 //----- Defines ------
 
-#define SWERVE_MODE
+//#define SWERVE_MODE
 
 #define TICKS_RATIO_BRAS 1425.1 * 2
 #define TICKS_RATIO_SWERVE 145.1 * 2.5
@@ -172,12 +172,79 @@ void controller_swerve_handler()
 
 
 /// ---------- TANK DRIVE ----------
+void set_left( double i){
+    const auto SPEED_RIGHT = 0.75;
+    auto left_power = i * SPEED_RIGHT;
+
+    pmotors[I_LAS]._m.set_power_ratio(left_power);
+    pmotors[I_LBS]._m.set_power_ratio(-left_power);
+}
+
+void set_right(double i){
+    //Ajustement du power selon la norme et une correction selon le motor
+    const auto SPEED_LEFT = 0.6;
+    auto right_power = i* SPEED_LEFT;
+    
+    pmotors[I_RAS]._m.set_power_ratio(-right_power);
+    pmotors[I_RBS]._m.set_power_ratio(right_power);
+}
+
 void controller_tank_handler()
 {
+    // auto vect = exctrl.joystick_left.xy;
 
-    auto dir = exctrl.joystick_left.xy;
+    // if( vect.y() == 0){
+    //     set_left(vect.x());
+    //     set_right(-vect.x());
+    //     return;
+    // }
+    // if(vect.x()==0){
+    //     set_left(vect.y());
+    //     set_right(vect.y());
+    //     return;
+    // }
+    // if(vect.y()> 0 && vect.x()>0){
+    //     set_left(vect.norm());
+    //     set_right(vect.y());
+    //     return;
+    // }
+    // if(vect.y()> 0 && vect.x()<0){
+    //     set_left(vect.y());
+    //     set_right(vect.norm());
+    //     return;
+    // }
+    // if(vect.y()< 0 && vect.x()>0){
+    //     set_left(-vect.norm());
+    //     set_right(vect.y());
+    //     return;
+    // }
+    // if(vect.y()< 0 && vect.x()<0){
+    //     set_left(vect.y());
+    //     set_right(-vect.norm());
+    //     return;
+    // }
 
-    if (dir.norm() < EPSILON)
+
+    // CrcLib::MoveTank(-exctrl._raw.joystick1Y, -exctrl._raw.joystick2Y, CRC_PWM_11, CRC_PWM_12);
+    // CrcLib::MoveTank(-exctrl._raw.joystick1Y, -exctrl._raw.joystick2Y, CRC_PWM_4, CRC_PWM_3);
+    
+
+
+    uint8_t total_presses = 0;
+    // if (ctrl.arrow_right.isOnPress())
+    if (exctrl._raw.arrowUp)
+        total_presses += 1;
+    // if (ctrl.arrow_left.isOnPress())
+    if (exctrl._raw.arrowLeft)
+        total_presses += 1;
+    // if (ctrl.arrow_down.isOnPress())
+    if (exctrl._raw.arrowDown)
+        total_presses += 1;
+    // if (ctrl.arrow_right.isOnPress())
+    if (exctrl._raw.arrowRight)
+        total_presses += 1;
+
+    if (total_presses > 1 || total_presses == 0)
     {
         pmotors[I_LAS]._m.set_power_ratio(0);
         pmotors[I_LBS]._m.set_power_ratio(0);
@@ -186,53 +253,46 @@ void controller_tank_handler()
         return;
     }
 
-    double sinus = sinf(dir.angle()); //y
-    //double left_pow  = dir.norm() * sinf(dir.angle());
-
-
-    double right_power, left_power;
-
-    // LEFTSIDE
-    if (dir.angle() >= Angle::from_rad(0)._radians &&
-        dir.angle() <= Angle::from_rad(M_PI_2)._radians)
+    if (exctrl._raw.arrowUp)
+    // if (ctrl.arrow_up.isOnPress())
     {
-        // top right
-        left_power = 1;
-        right_power = map(sinus*10, 0, 10, -10, 10)/10.0;
+        Serial.println("up");
+        pmotors[I_LAS]._m.set_power_ratio(0.75);
+        pmotors[I_LBS]._m.set_power_ratio(-0.75);
+        pmotors[I_RAS]._m.set_power_ratio(-1.0);
+        pmotors[I_RBS]._m.set_power_ratio(1.0);
     }
-    else if (dir.angle() >= Angle::from_rad(M_PI_2)._radians &&
-        dir.angle() <= Angle::from_rad(M_PI)._radians)
+    if (exctrl._raw.arrowLeft)
+    // if (ctrl.arrow_left.isOnPress())
     {
-        // top left
-        right_power = 1;
-        left_power = map(sinus*10, 0, 10, -10, 10)/10.0;
-
+        Serial.println("left");
+        pmotors[I_LAS]._m.set_power_ratio(-0.75);
+        pmotors[I_LBS]._m.set_power_ratio(0.75);
+        pmotors[I_RAS]._m.set_power_ratio(-0.75);
+        pmotors[I_RBS]._m.set_power_ratio(0.75);
     }
-    else if (dir.angle() >= Angle::from_rad(M_PI)._radians &&
-             dir.angle() <= Angle::from_rad(M_PI_2 + M_PI)._radians)
+    if (exctrl._raw.arrowDown)
+    // if (ctrl.arrow_down.isOnPress())
     {
-        // bottom left
-        left_power = map(sinus*10, -10, 0, -10, 10)/10.0;
-        right_power = -1;
+        Serial.println("down");
+        // pmotors[I_LAS].set_target_rpm(200);
+        // pmotors[I_LBS].set_target_rpm(-200);
+        // pmotors[I_RAS].set_target_rpm(-200);
+        // pmotors[I_RBS].set_target_rpm(200);
+        pmotors[I_LAS]._m.set_power_ratio(-0.85);
+        pmotors[I_LBS]._m.set_power_ratio(0.85);
+        pmotors[I_RAS]._m.set_power_ratio(0.95);
+        pmotors[I_RBS]._m.set_power_ratio(-0.95);
     }
-    else if (dir.angle() >= Angle::from_rad(M_PI_2 + M_PI)._radians &&
-        dir.angle() <= Angle::from_rad(2 * M_PI)._radians)
+    if (exctrl._raw.arrowRight)
+    // if (ctrl.arrow_right.isOnPress())
     {
-        // bottom right
-        left_power = -1.0;
-        right_power = map(sinus*10, -10, 0, -10, 10)/10.0;
+        Serial.println("right");
+        pmotors[I_LAS]._m.set_power_ratio(0.75);
+        pmotors[I_LBS]._m.set_power_ratio(-0.75);
+        pmotors[I_RAS]._m.set_power_ratio(0.75);
+        pmotors[I_RBS]._m.set_power_ratio(-0.75);
     }
-
-    //Ajustement du power selon la norme et une correction selon le motor
-    const auto SPEED_LEFT = 0.6, SPEED_RIGHT = 0.75;
-    right_power *= dir.norm() * SPEED_LEFT;
-    left_power *= dir.norm() * SPEED_RIGHT;
-
-    //Send power to motors
-    pmotors[I_LAS]._m.set_power_ratio(left_power);
-    pmotors[I_LBS]._m.set_power_ratio(-left_power);
-    pmotors[I_RAS]._m.set_power_ratio(-right_power);
-    pmotors[I_RBS]._m.set_power_ratio(right_power);
 }
 
 
@@ -339,7 +399,7 @@ void controller_launcher_handler()
     }
     
     if(launcherOn)
-        pmotors[I_L]._m.set_power_ratio(-0.45);
+        pmotors[I_L]._m.set_power_ratio(-0.65);
     else
         pmotors[I_L]._m.set_power_ratio(0);
 
@@ -448,3 +508,65 @@ void loop()
         swerve_drive.update();
     #endif
 }
+
+
+
+
+
+
+// auto dir = exctrl.joystick_left.xy;
+
+    // if (dir.norm() < EPSILON)
+    // {
+    //     pmotors[I_LAS]._m.set_power_ratio(0);
+    //     pmotors[I_LBS]._m.set_power_ratio(0);
+    //     pmotors[I_RAS]._m.set_power_ratio(0);
+    //     pmotors[I_RBS]._m.set_power_ratio(0);
+    //     return;
+    // }
+
+    // double sinus = dir.y();
+
+    // double right_power, left_power;
+
+    // // LEFTSIDE
+    // if (dir.angle() >= Angle::from_rad(0)._radians &&
+    //     dir.angle() <= Angle::from_rad(M_PI_2)._radians)
+    // {
+    //     // top right
+    //     left_power = 1;
+    //     right_power = map(sinus*100, 0, 100, -100, 100)/100.0;
+    // }
+    // else if (dir.angle() >= Angle::from_rad(M_PI_2)._radians &&
+    //     dir.angle() <= Angle::from_rad(M_PI)._radians)
+    // {
+    //     // top left
+    //     right_power = 1;
+    //     left_power = map(sinus*100, 0, 100, -100, 100)/100.0;
+
+    // }
+    // else if (dir.angle() >= Angle::from_rad(M_PI)._radians &&
+    //          dir.angle() <= Angle::from_rad(M_PI_2 + M_PI)._radians)
+    // {
+    //     // bottom left
+    //     left_power = map(sinus*100, -100, 0, -100, 100)/100.0;
+    //     right_power = -1;
+    // }
+    // else if (dir.angle() >= Angle::from_rad(M_PI_2 + M_PI)._radians &&
+    //     dir.angle() <= Angle::from_rad(2 * M_PI)._radians)
+    // {
+    //     // bottom right
+    //     left_power = -1.0;
+    //     right_power = map(sinus*100, -100, 0, -100, 100)/100.0;
+    // }
+
+    // //Ajustement du power selon la norme et une correction selon le motor
+    // const auto SPEED_LEFT = 0.6, SPEED_RIGHT = 0.75;
+    // right_power *= dir.norm() * SPEED_LEFT;
+    // left_power *= dir.norm() * SPEED_RIGHT;
+
+    // //Send power to motors
+    // pmotors[I_LAS]._m.set_power_ratio(left_power);
+    // pmotors[I_LBS]._m.set_power_ratio(-left_power);
+    // pmotors[I_RAS]._m.set_power_ratio(-right_power);
+    // pmotors[I_RBS]._m.set_power_ratio(right_power);
