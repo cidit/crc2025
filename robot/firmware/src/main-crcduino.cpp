@@ -259,6 +259,10 @@ void controller_tank_handler()
         return;
     }
 
+    double sinus = dir.norm() * sinf(dir.angle()); //y
+    //double left_pow  = dir.norm() * sinf(dir.angle());
+
+
     double right_power, left_power;
 
     // LEFTSIDE
@@ -267,80 +271,32 @@ void controller_tank_handler()
     {
         // top right
         left_power = 1;
+        right_power = map(sinus*10, 0, 10, -10, 10)/10.0;
+    }
+    else if (dir.angle() >= Angle::from_rad(M_PI_2)._radians &&
+        dir.angle() <= Angle::from_rad(M_PI)._radians)
+    {
+        // top left
+        right_power = 1;
+        left_power = map(sinus*10, 0, 10, -10, 10)/10.0;
+
     }
     else if (dir.angle() >= Angle::from_rad(M_PI)._radians &&
              dir.angle() <= Angle::from_rad(M_PI_2 + M_PI)._radians)
     {
         // bottom left
-        left_power = -1;
-    }
-    else
-    {
-        if (dir.angle() >= Angle::from_rad(M_PI_2)._radians &&
-            dir.angle() <= Angle::from_rad(M_PI)._radians)
-        {
-            // top left
-
-            // auto angle = M_PI_2 - (dir.angle() - M_PI_2);
-            auto angle =(dir.angle() - M_PI_2);
-            // 0 A M_PI_2 -> 100 A -100
-            // auto power = ((angle *2)/M_PI_2) -1;
-            auto power = ((angle *-2)/M_PI_2) +1;
-            left_power = power;
-
-        }
-        if (dir.angle() >= Angle::from_rad(M_PI_2 + M_PI)._radians &&
-            dir.angle() <= Angle::from_rad(2 * M_PI)._radians)
-        {
-            // bottom right
-            auto angle = dir.angle() - (M_PI_2 + M_PI);
-            // 0 A M_PI_2 -> -100 A 100
-            auto power = ((angle *2)/M_PI_2) -1;
-            left_power = power;
-        }
-    }
-
-    // RIGHTSIDE
-
-    if (dir.angle() >= Angle::from_rad(M_PI_2)._radians &&
-        dir.angle() <= Angle::from_rad(M_PI)._radians)
-    {
-        // top left
-        right_power = 1;
-    }
-    else if (dir.angle() >= Angle::from_rad(M_PI_2 + M_PI)._radians &&
-             dir.angle() <= Angle::from_rad(2 * M_PI)._radians)
-    {
-        // bottom right
+        left_power = map(sinus*10, -10, 0, -10, 10)/10.0;
         right_power = -1;
     }
-    else
+    else if (dir.angle() >= Angle::from_rad(M_PI_2 + M_PI)._radians &&
+        dir.angle() <= Angle::from_rad(2 * M_PI)._radians)
     {
-        if (dir.angle() >= Angle::from_rad(0)._radians &&
-            dir.angle() <= Angle::from_rad(M_PI_2)._radians)
-        {
-            // top right
-            auto angle = dir.angle();
-            // 0 A M_PI_2 -> -100 A 100
-            auto power = ((angle *2)/M_PI_2) -1;
-            right_power = power;
-        }
-        if (dir.angle() >= Angle::from_rad(M_PI)._radians &&
-            dir.angle() <= Angle::from_rad(M_PI_2 + M_PI)._radians)
-        { 
-            // bottom left
-
-            // auto angle = M_PI_2 - (dir.angle() - M_PI);
-            auto angle = (dir.angle() - M_PI);
-            // 0 A M_PI_2 -> 100 A -100
-            // auto power = ((angle *2)/M_PI_2) -1;
-            auto power = ((angle *-2)/M_PI_2) +1;
-            right_power = power;
-        }
+        // bottom right
+        left_power = -1.0;
+        right_power = map(sinus*10, -10, 0, -10, 10)/10.0;
     }
 
-
-    const auto SPEED_LEFT = 0.6, SPEED_RIGHT = 0.75;
+    const auto SPEED_LEFT = 0.75, SPEED_RIGHT = 0.75;
     right_power *= dir.norm() * SPEED_LEFT;
     left_power *= dir.norm() * SPEED_RIGHT;
 
@@ -349,76 +305,6 @@ void controller_tank_handler()
     pmotors[I_LBS]._m.set_power_ratio(-left_power);
     pmotors[I_RAS]._m.set_power_ratio(-right_power);
     pmotors[I_RBS]._m.set_power_ratio(right_power);
-
-
-
-
-
-    // /// delim
-
-    // uint8_t total_presses = 0;
-    // // if (ctrl.arrow_right.isOnPress())
-    // if (exctrl._raw.arrowUp)
-    //     total_presses += 1;
-    // // if (ctrl.arrow_left.isOnPress())
-    // if (exctrl._raw.arrowLeft)
-    //     total_presses += 1;
-    // // if (ctrl.arrow_down.isOnPress())
-    // if (exctrl._raw.arrowDown)
-    //     total_presses += 1;
-    // // if (ctrl.arrow_right.isOnPress())
-    // if (exctrl._raw.arrowRight)
-    //     total_presses += 1;
-
-    // if (total_presses > 1 || total_presses == 0)
-    // {
-    //     pmotors[I_LAS]._m.set_power_ratio(0);
-    //     pmotors[I_LBS]._m.set_power_ratio(0);
-    //     pmotors[I_RAS]._m.set_power_ratio(0);
-    //     pmotors[I_RBS]._m.set_power_ratio(0);
-    //     return;
-    // }
-
-    // if (exctrl._raw.arrowUp)
-    // // if (ctrl.arrow_up.isOnPress())
-    // {
-    //     Serial.println("up");
-    //     pmotors[I_LAS]._m.set_power_ratio(0.60);
-    //     pmotors[I_LBS]._m.set_power_ratio(-0.60);
-    //     pmotors[I_RAS]._m.set_power_ratio(-0.75);
-    //     pmotors[I_RBS]._m.set_power_ratio(0.75);
-    // }
-    // if (exctrl._raw.arrowLeft)
-    // // if (ctrl.arrow_left.isOnPress())
-    // {
-    //     Serial.println("left");
-    //     pmotors[I_LAS]._m.set_power_ratio(-0.75);
-    //     pmotors[I_LBS]._m.set_power_ratio(0.75);
-    //     pmotors[I_RAS]._m.set_power_ratio(-0.75);
-    //     pmotors[I_RBS]._m.set_power_ratio(0.75);
-    // }
-    // if (exctrl._raw.arrowDown)
-    // // if (ctrl.arrow_down.isOnPress())
-    // {
-    //     Serial.println("down");
-    //     // pmotors[I_LAS].set_target_rpm(200);
-    //     // pmotors[I_LBS].set_target_rpm(-200);
-    //     // pmotors[I_RAS].set_target_rpm(-200);
-    //     // pmotors[I_RBS].set_target_rpm(200);
-    //     pmotors[I_LAS]._m.set_power_ratio(-0.65);
-    //     pmotors[I_LBS]._m.set_power_ratio(0.65);
-    //     pmotors[I_RAS]._m.set_power_ratio(0.75);
-    //     pmotors[I_RBS]._m.set_power_ratio(-0.75);
-    // }
-    // if (exctrl._raw.arrowRight)
-    // // if (ctrl.arrow_right.isOnPress())
-    // {
-    //     Serial.println("right");
-    //     pmotors[I_LAS]._m.set_power_ratio(0.75);
-    //     pmotors[I_LBS]._m.set_power_ratio(-0.75);
-    //     pmotors[I_RAS]._m.set_power_ratio(0.75);
-    //     pmotors[I_RBS]._m.set_power_ratio(-0.75);
-    // }
 }
 
 void controller_launcher_handler()
@@ -469,10 +355,10 @@ void update_launcher()
 
 void update_tank()
 {
-    pmotors[I_LAS].update();
-    pmotors[I_LBS].update();
-    pmotors[I_RAS].update();
-    pmotors[I_RBS].update();
+    // pmotors[I_LAS].update();
+    // pmotors[I_LBS].update();
+    // pmotors[I_RAS].update();
+    // pmotors[I_RBS].update();
 }
 
 void setup()
