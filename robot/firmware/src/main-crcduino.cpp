@@ -26,7 +26,7 @@
 
 //----- Defines ------
 
-// #define SWERVE_MODE
+//#define SWERVE_MODE
 
 #define TICKS_RATIO_BRAS 1425.1 * 2
 #define TICKS_RATIO_SWERVE 145.1 * 2.5
@@ -140,8 +140,7 @@ bool launcherOn = false;
 
 //--------------------
 
-//----- Main Prog ----
-
+/// --------- Controller Autre ---------
 void controller_misc_handler()
 {
     if (exctrl.start.isPressed())
@@ -156,6 +155,88 @@ void controller_misc_handler()
     // hatr -> activate thrower
 }
 
+
+/// ---------- SWERVE DRIVE ----------
+void controller_swerve_handler()
+{
+
+    auto howmuch_to_turn = exctrl.joystick_right.xy.x();
+    auto translation = exctrl.joystick_left.xy;
+
+    swerve_drive.set_target({.heading = {
+                                 .direction = translation.angle(),
+                                 .velocity = translation.norm() * 100,
+                             },
+                             .rotation = howmuch_to_turn * 100});
+}
+
+
+/// ---------- TANK DRIVE ----------
+void controller_tank_handler()
+{
+
+    auto dir = exctrl.joystick_left.xy;
+
+    if (dir.norm() < EPSILON)
+    {
+        pmotors[I_LAS]._m.set_power_ratio(0);
+        pmotors[I_LBS]._m.set_power_ratio(0);
+        pmotors[I_RAS]._m.set_power_ratio(0);
+        pmotors[I_RBS]._m.set_power_ratio(0);
+        return;
+    }
+
+    double sinus = sinf(dir.angle()); //y
+    //double left_pow  = dir.norm() * sinf(dir.angle());
+
+
+    double right_power, left_power;
+
+    // LEFTSIDE
+    if (dir.angle() >= Angle::from_rad(0)._radians &&
+        dir.angle() <= Angle::from_rad(M_PI_2)._radians)
+    {
+        // top right
+        left_power = 1;
+        right_power = map(sinus*10, 0, 10, -10, 10)/10.0;
+    }
+    else if (dir.angle() >= Angle::from_rad(M_PI_2)._radians &&
+        dir.angle() <= Angle::from_rad(M_PI)._radians)
+    {
+        // top left
+        right_power = 1;
+        left_power = map(sinus*10, 0, 10, -10, 10)/10.0;
+
+    }
+    else if (dir.angle() >= Angle::from_rad(M_PI)._radians &&
+             dir.angle() <= Angle::from_rad(M_PI_2 + M_PI)._radians)
+    {
+        // bottom left
+        left_power = map(sinus*10, -10, 0, -10, 10)/10.0;
+        right_power = -1;
+    }
+    else if (dir.angle() >= Angle::from_rad(M_PI_2 + M_PI)._radians &&
+        dir.angle() <= Angle::from_rad(2 * M_PI)._radians)
+    {
+        // bottom right
+        left_power = -1.0;
+        right_power = map(sinus*10, -10, 0, -10, 10)/10.0;
+    }
+
+    //Ajustement du power selon la norme et une correction selon le motor
+    const auto SPEED_LEFT = 0.6, SPEED_RIGHT = 0.75;
+    right_power *= dir.norm() * SPEED_LEFT;
+    left_power *= dir.norm() * SPEED_RIGHT;
+
+    //Send power to motors
+    pmotors[I_LAS]._m.set_power_ratio(left_power);
+    pmotors[I_LBS]._m.set_power_ratio(-left_power);
+    pmotors[I_RAS]._m.set_power_ratio(-right_power);
+    pmotors[I_RBS]._m.set_power_ratio(right_power);
+}
+
+
+/// ---------- ARM ---------
 void controller_arms_handler()
 {
     auto now = millis();
@@ -232,81 +313,23 @@ void controller_arms_handler()
     }
 }
 
-// void controller_swerve_handler()
-// {
-
-//     auto howmuch_to_turn = ectrl.joystick_right.xy.x();
-//     auto translation = ctrl.joystick_left.xy;
-
-//     swerve_drive.set_target({.heading = {
-//                                  .direction = translation.angle(),
-//                                  .velocity = translation.norm() * 100,
-//                              },
-//                              .rotation = howmuch_to_turn * 100});
-// }
-
-void controller_tank_handler()
+void update_arms()
 {
-
-    auto dir = exctrl.joystick_left.xy;
-
-    if (dir.norm() < EPSILON)
+    for (auto &pmotor : pmotors)
     {
-        pmotors[I_LAS]._m.set_power_ratio(0);
-        pmotors[I_LBS]._m.set_power_ratio(0);
-        pmotors[I_RAS]._m.set_power_ratio(0);
-        pmotors[I_RBS]._m.set_power_ratio(0);
-        return;
+        // Il ne faut pas updater le moteur gauche du bras (I_LB), il ne faut pas utiliser 2 PID
+        if (pmotor._name == "Poignet" || pmotor._name == "Bras Right" || pmotor._name == "Lanceur")
+        { //|| pmotor._name == "Bras Left"
+            pmotor.update();
+        }
     }
 
-    double sinus = dir.norm() * sinf(dir.angle()); //y
-    //double left_pow  = dir.norm() * sinf(dir.angle());
-
-
-    double right_power, left_power;
-
-    // LEFTSIDE
-    if (dir.angle() >= Angle::from_rad(0)._radians &&
-        dir.angle() <= Angle::from_rad(M_PI_2)._radians)
-    {
-        // top right
-        left_power = 1;
-        right_power = map(sinus*10, 0, 10, -10, 10)/10.0;
-    }
-    else if (dir.angle() >= Angle::from_rad(M_PI_2)._radians &&
-        dir.angle() <= Angle::from_rad(M_PI)._radians)
-    {
-        // top left
-        right_power = 1;
-        left_power = map(sinus*10, 0, 10, -10, 10)/10.0;
-
-    }
-    else if (dir.angle() >= Angle::from_rad(M_PI)._radians &&
-             dir.angle() <= Angle::from_rad(M_PI_2 + M_PI)._radians)
-    {
-        // bottom left
-        left_power = map(sinus*10, -10, 0, -10, 10)/10.0;
-        right_power = -1;
-    }
-    else if (dir.angle() >= Angle::from_rad(M_PI_2 + M_PI)._radians &&
-        dir.angle() <= Angle::from_rad(2 * M_PI)._radians)
-    {
-        // bottom right
-        left_power = -1.0;
-        right_power = map(sinus*10, -10, 0, -10, 10)/10.0;
-    }
-
-    const auto SPEED_LEFT = 0.75, SPEED_RIGHT = 0.75;
-    right_power *= dir.norm() * SPEED_LEFT;
-    left_power *= dir.norm() * SPEED_RIGHT;
-
-
-    pmotors[I_LAS]._m.set_power_ratio(left_power);
-    pmotors[I_LBS]._m.set_power_ratio(-left_power);
-    pmotors[I_RAS]._m.set_power_ratio(-right_power);
-    pmotors[I_RBS]._m.set_power_ratio(right_power);
+    // Update le moteur dont on utilise pas le PID // KEEP ARMS IN SYNC
+    pmotors[I_LB]._m.set_power_ratio(pmotors[I_RB]._pid_angle.getOutput());
 }
 
+
+/// --------- LAUNCHER ---------
 void controller_launcher_handler()
 {
     // start laucher spin
@@ -332,57 +355,35 @@ void controller_launcher_handler()
     }
 }
 
-void update_arms()
-{
-    for (auto &pmotor : pmotors)
-    {
-        // Il ne faut pas updater le moteur gauche du bras (I_LB), il ne faut pas utiliser 2 PID
-        if (pmotor._name == "Poignet" || pmotor._name == "Bras Right" || pmotor._name == "Lanceur")
-        { //|| pmotor._name == "Bras Left"
-            pmotor.update();
-        }
-    }
-
-    // Update le moteur dont on utilise pas le PID // KEEP ARMS IN SYNC
-    pmotors[I_LB]._m.set_power_ratio(pmotors[I_RB]._pid_angle.getOutput());
-}
-
 void update_launcher()
 {
-    // TODO: do this
     pmotors[I_L].update();
 }
 
-void update_tank()
-{
-    // pmotors[I_LAS].update();
-    // pmotors[I_LBS].update();
-    // pmotors[I_RAS].update();
-    // pmotors[I_RBS].update();
-}
 
+/// ---------- Main Program ---------
 void setup()
 {
-    // --- INITIALISATION SECTION ---
+    /// ########## Initialisation ###########
     Serial.begin(115200);
     CrcLib::Initialize();
     ctrl.begin();
     exctrl.begin();
 
     master_enco_spi_init();
-    SPI.begin(); // if (ctrl._raw.start)
-    // {
-    //     alduino_reset();
-    // }t les PID settings.
+    SPI.begin();
+
+    /// ########## Servo ###########
     servo_manipulator_1.attach(CRC_PWM_7, 1000, 2000);
     servo_manipulator_2.attach(CRC_PWM_9, 1000, 2000);
     servo_manipulator_3.attach(CRC_PWM_10, 1000, 2000);
     servo_lanceur.attach(CRC_PWM_8); // TODO: pas 360
 
+    /// ########## ALDuino ###########
     alduino_reset();
     // swerve_drive.ben();
 
-    // --- CONFIG SECTION ---
+    /// ########## PMotors Configs ###########
     for (auto &pmotor : pmotors)
     {
         pmotor._pid_angle.setInterval(poll_timer._delay);
@@ -391,6 +392,8 @@ void setup()
         pmotor.enable(true); // TODO REMEMBER TO BEGIN AND ENABLE THE ARMS, WRIST AND LAUNCHER SEPARATELY
     }
     pmotors_config(pmotors);
+
+    /// ########## Swerve Config ###########
     {
         swerve_drive._r._pid.setInterval(poll_timer._delay);
         swerve_drive._l._pid.setInterval(poll_timer._delay);
@@ -398,14 +401,12 @@ void setup()
     // swerve_config(swerve_drive);
     // swerve_drive.enable(true);
 
-    // TODO: enable arms n launcher
-
     Serial.println("End of setup");
 }
 
 void loop()
 {
-    // ########## UPDATE ###########
+    // ########## Generic Updates ###########
     CrcLib::Update();
     ctrl.update();
     exctrl.update();
@@ -414,42 +415,36 @@ void loop()
     poll_timer.update(now);
     print_timer.update(now);
     
+    /// ########## Printing ###########
     if (print_timer.is_time()) {
-        Serial.print(pmotors[I_L]._e.getLast().rpm);
+        //Serial.print(pmotors[I_L]._e.getLast().rpm);
+        Serial.println("X"+String(exctrl.joystick_left.angle));
     }
 
-    // servo_manipulator_1.writeMicroseconds(2000);
-    // //servo_manipulator_2.writeMicroseconds(2000);
-    // //servo_manipulator_3.writeMicroseconds(2000);
-    // return ;
-
+    /// ########## SPI ###########
     if (poll_timer.is_time())
     {
         retrieve_df(df);
-        for (auto &go : goencs)
+        for (auto &go : goencs) //Nécessaire meme si on pense pas, ca chie si on enleve
         {
             go.update();
         }
-        // goencs[4].update(); // TODO: should not be necessary. should happen automatically when the pmotors update below -f
-        // goencs[5].update();
     }
 
+    /// ########## Controller Input ###########
     controller_misc_handler();
     controller_arms_handler();
     controller_launcher_handler();
-#ifdef SWERVE_MODE
-    // controller_swerve_handler();
-#else
-    controller_tank_handler();
-#endif
+    #ifdef SWERVE_MODE
+        // controller_swerve_handler();
+    #else
+        controller_tank_handler();
+    #endif
 
-    /// UPDATE DEVICES
-
+    /// ########## Devices Update ###########
     update_arms();
     update_launcher();
-#ifdef SWERVE_MODE
-    // swerve_drive.update();
-#else
-    update_tank();
-#endif
+    #ifdef SWERVE_MODE
+        // swerve_drive.update();
+    #endif
 }
